@@ -1,0 +1,24 @@
+{
+  "run_url": "https://github.com/arjunsrikanthh/carpooling-issue-solutions/actions/runs/40229847046",
+  "conclusion": "failure",
+  "passed_jobs": 8,
+  "failed_job": "individual (43)",
+  "failed_test": "MobilitySegmentBookingTest::test_private_approach_time_and_overdue_accepted_obligations_are_not_omitted",
+  "expected": "DRIVER_ROUTE_OVERLAP",
+  "actual": "DRIVER_ACTIVE_TRIP",
+  "backend_passed": 120,
+  "backend_failed": 1,
+  "backend_assertions": 1082,
+  "cause": "Asia/Kolkata configuration incorrectly packaged in later issue39; issue43 independent run inherited the original application timezone.",
+  "correction": "Move the exact configuration hunk from39 to43; combined reconstructed source bytes identical across1607tracked paths; no assertions removed/changed.",
+  "local_retest": {
+    "scope": "43 plus prerequisites",
+    "exit_code": 0,
+    "tests": 121,
+    "assertions": 1083,
+    "frontend": 27,
+    "booking_races": 12,
+    "cancellation_races": 6,
+    "rollback_reapply": "pass"
+  }
+}

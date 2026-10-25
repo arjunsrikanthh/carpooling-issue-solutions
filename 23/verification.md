@@ -1,6 +1,6 @@
 # Issue #23 verification
 
-Engineering status: **local integration verified; independent private Actions execution pending**.
+Engineering status: **synthetic engineering verified locally and in actual private Actions**.
 
 Pinned official baseline: `0478ae0ba2549f8fba3bd44b590e91e067a46e0d`.
 Application order: `37, 12, 21, 23, 24, 43, 39, 44`. Fresh reconstruction used only these source patches and centrally regenerated integrity metadata.
@@ -15,6 +15,8 @@ Actual result: exit 0; **121 backend tests / 1,083 assertions; 27 frontend tests
 
 See [suite evidence](../reports/suite-summary.json), [backend JUnit](../reports/backend.junit.xml), [booking races](../reports/booking-races.json), [cancellation races](../reports/cancellation-races.json), and [rollback](../reports/migration-rollback.log). Counts overlap between issue coverage and must not be added across packages.
 
-Run this package with prerequisites independently using `sh scripts/verify-issue.sh 23 /path/to/new-output`. Its actual private CI outcome will be recorded in [VERIFICATION.md](../VERIFICATION.md).
+Run this package with prerequisites independently using `sh scripts/verify-issue.sh 23 /path/to/new-output`. Its actual private CI outcome is **PASS**, 19 backend tests / 367 assertions and 27 frontend tests, zero failures/errors/skips, [job](https://github.com/arjunsrikanthh/carpooling-issue-solutions/actions/runs/40231726242/job/121284692351). Prerequisites are included. [JUnit](../reports/ci/23/backend.junit.xml).
 
 Acceptance of a genuine teammate PR and any required human review remains outside this proposed engineering verification.
+
+Overall issue acceptance and remaining manual/external criteria are classified in [the final handoff](../FINAL_REPORT.md) and [criterion table](../reports/acceptance-criteria.md). This engineering verification does not claim official issue closure.

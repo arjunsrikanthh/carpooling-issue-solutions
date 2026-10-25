@@ -1,0 +1,67 @@
+{
+  "local": {
+    "Carpooling": {
+      "same_status": true,
+      "same_head": true,
+      "same_branch": true,
+      "same_worktrees": true
+    },
+    "MobilityPlatform": {
+      "same_status": true,
+      "same_head": true,
+      "same_branch": true,
+      "same_worktrees": true
+    }
+  },
+  "remote": {
+    "carpooling": {
+      "settings_unchanged": true,
+      "branches_unchanged": true,
+      "pull_requests_unchanged": true
+    },
+    "carpooling-workspace": {
+      "settings_unchanged": true,
+      "branches_unchanged": true,
+      "pull_requests_unchanged": true
+    }
+  },
+  "method": "Read-only Git/API snapshots; no official mutation was performed. Exact selected-state comparisons, not an audit of unrelated external actors.",
+  "issues": {
+    "issue-12": {
+      "unchanged": true,
+      "state": "open"
+    },
+    "issue-21": {
+      "unchanged": true,
+      "state": "open"
+    },
+    "issue-22": {
+      "unchanged": true,
+      "state": "closed"
+    },
+    "issue-23": {
+      "unchanged": true,
+      "state": "open"
+    },
+    "issue-24": {
+      "unchanged": true,
+      "state": "open"
+    },
+    "issue-37": {
+      "unchanged": true,
+      "state": "open"
+    },
+    "issue-39": {
+      "unchanged": true,
+      "state": "open"
+    },
+    "issue-43": {
+      "unchanged": true,
+      "state": "open"
+    },
+    "issue-44": {
+      "unchanged": true,
+      "state": "open"
+    }
+  }
+}

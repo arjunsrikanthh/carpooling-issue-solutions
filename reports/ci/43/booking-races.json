@@ -1,0 +1,351 @@
+{
+    "probe": "booking-concurrency-probe",
+    "started_at": "2026-10-25T20:46:19+00:00",
+    "method": "real HTTP requests, pcntl fork, and durable MySQL observations",
+    "workers": "4",
+    "trials": [
+        {
+            "trial": 1,
+            "trip_id": 2,
+            "capacity": 1,
+            "accepted_rows": 1,
+            "pending_rows": 1,
+            "terms_rows": 2,
+            "overlapping_http_calls": true,
+            "responses": [
+                {
+                    "booking_id": 2,
+                    "status": 422,
+                    "code": "NOT_SEAT_AVAILABLE",
+                    "started": 1792961181.142167,
+                    "finished": 1792961181.286562
+                },
+                {
+                    "booking_id": 3,
+                    "status": 200,
+                    "code": null,
+                    "started": 1792961181.142197,
+                    "finished": 1792961181.216208
+                }
+            ],
+            "loser_retry_status": 422,
+            "loser_retry_code": "NOT_SEAT_AVAILABLE",
+            "passed": true
+        },
+        {
+            "trial": 2,
+            "trip_id": 3,
+            "capacity": 1,
+            "accepted_rows": 1,
+            "pending_rows": 1,
+            "terms_rows": 2,
+            "overlapping_http_calls": true,
+            "responses": [
+                {
+                    "booking_id": 4,
+                    "status": 200,
+                    "code": null,
+                    "started": 1792961181.887772,
+                    "finished": 1792961181.963389
+                },
+                {
+                    "booking_id": 5,
+                    "status": 409,
+                    "code": "COMMUTE_BUSY_RETRY",
+                    "started": 1792961181.887792,
+                    "finished": 1792961181.925063
+                }
+            ],
+            "loser_retry_status": 422,
+            "loser_retry_code": "NOT_SEAT_AVAILABLE",
+            "passed": true
+        },
+        {
+            "trial": 3,
+            "trip_id": 4,
+            "capacity": 1,
+            "accepted_rows": 1,
+            "pending_rows": 1,
+            "terms_rows": 2,
+            "overlapping_http_calls": true,
+            "responses": [
+                {
+                    "booking_id": 6,
+                    "status": 200,
+                    "code": null,
+                    "started": 1792961182.570078,
+                    "finished": 1792961182.630957
+                },
+                {
+                    "booking_id": 7,
+                    "status": 422,
+                    "code": "NOT_SEAT_AVAILABLE",
+                    "started": 1792961182.570076,
+                    "finished": 1792961182.694097
+                }
+            ],
+            "loser_retry_status": 422,
+            "loser_retry_code": "NOT_SEAT_AVAILABLE",
+            "passed": true
+        },
+        {
+            "trial": 4,
+            "trip_id": 5,
+            "capacity": 1,
+            "accepted_rows": 1,
+            "pending_rows": 1,
+            "terms_rows": 2,
+            "overlapping_http_calls": true,
+            "responses": [
+                {
+                    "booking_id": 8,
+                    "status": 409,
+                    "code": "COMMUTE_BUSY_RETRY",
+                    "started": 1792961183.320707,
+                    "finished": 1792961183.360689
+                },
+                {
+                    "booking_id": 9,
+                    "status": 200,
+                    "code": null,
+                    "started": 1792961183.320706,
+                    "finished": 1792961183.405145
+                }
+            ],
+            "loser_retry_status": 422,
+            "loser_retry_code": "NOT_SEAT_AVAILABLE",
+            "passed": true
+        },
+        {
+            "trial": 5,
+            "trip_id": 6,
+            "capacity": 1,
+            "accepted_rows": 1,
+            "pending_rows": 1,
+            "terms_rows": 2,
+            "overlapping_http_calls": true,
+            "responses": [
+                {
+                    "booking_id": 10,
+                    "status": 409,
+                    "code": "COMMUTE_BUSY_RETRY",
+                    "started": 1792961183.995434,
+                    "finished": 1792961184.036173
+                },
+                {
+                    "booking_id": 11,
+                    "status": 200,
+                    "code": null,
+                    "started": 1792961183.995501,
+                    "finished": 1792961184.084032
+                }
+            ],
+            "loser_retry_status": 422,
+            "loser_retry_code": "NOT_SEAT_AVAILABLE",
+            "passed": true
+        },
+        {
+            "trial": 6,
+            "trip_id": 7,
+            "capacity": 1,
+            "accepted_rows": 1,
+            "pending_rows": 1,
+            "terms_rows": 2,
+            "overlapping_http_calls": true,
+            "responses": [
+                {
+                    "booking_id": 12,
+                    "status": 200,
+                    "code": null,
+                    "started": 1792961184.692672,
+                    "finished": 1792961184.777667
+                },
+                {
+                    "booking_id": 13,
+                    "status": 409,
+                    "code": "COMMUTE_BUSY_RETRY",
+                    "started": 1792961184.692672,
+                    "finished": 1792961184.729992
+                }
+            ],
+            "loser_retry_status": 422,
+            "loser_retry_code": "NOT_SEAT_AVAILABLE",
+            "passed": true
+        },
+        {
+            "trial": 7,
+            "trip_id": 8,
+            "capacity": 1,
+            "accepted_rows": 1,
+            "pending_rows": 1,
+            "terms_rows": 2,
+            "overlapping_http_calls": true,
+            "responses": [
+                {
+                    "booking_id": 14,
+                    "status": 409,
+                    "code": "COMMUTE_BUSY_RETRY",
+                    "started": 1792961185.380986,
+                    "finished": 1792961185.422842
+                },
+                {
+                    "booking_id": 15,
+                    "status": 200,
+                    "code": null,
+                    "started": 1792961185.380986,
+                    "finished": 1792961185.471534
+                }
+            ],
+            "loser_retry_status": 422,
+            "loser_retry_code": "NOT_SEAT_AVAILABLE",
+            "passed": true
+        },
+        {
+            "trial": 8,
+            "trip_id": 9,
+            "capacity": 1,
+            "accepted_rows": 1,
+            "pending_rows": 1,
+            "terms_rows": 2,
+            "overlapping_http_calls": true,
+            "responses": [
+                {
+                    "booking_id": 16,
+                    "status": 409,
+                    "code": "COMMUTE_BUSY_RETRY",
+                    "started": 1792961186.069897,
+                    "finished": 1792961186.112279
+                },
+                {
+                    "booking_id": 17,
+                    "status": 200,
+                    "code": null,
+                    "started": 1792961186.069897,
+                    "finished": 1792961186.161725
+                }
+            ],
+            "loser_retry_status": 422,
+            "loser_retry_code": "NOT_SEAT_AVAILABLE",
+            "passed": true
+        },
+        {
+            "trial": 9,
+            "trip_id": 10,
+            "capacity": 1,
+            "accepted_rows": 1,
+            "pending_rows": 1,
+            "terms_rows": 2,
+            "overlapping_http_calls": true,
+            "responses": [
+                {
+                    "booking_id": 18,
+                    "status": 200,
+                    "code": null,
+                    "started": 1792961186.773277,
+                    "finished": 1792961186.864255
+                },
+                {
+                    "booking_id": 19,
+                    "status": 409,
+                    "code": "COMMUTE_BUSY_RETRY",
+                    "started": 1792961186.77301,
+                    "finished": 1792961186.811411
+                }
+            ],
+            "loser_retry_status": 422,
+            "loser_retry_code": "NOT_SEAT_AVAILABLE",
+            "passed": true
+        },
+        {
+            "trial": 10,
+            "trip_id": 11,
+            "capacity": 1,
+            "accepted_rows": 1,
+            "pending_rows": 1,
+            "terms_rows": 2,
+            "overlapping_http_calls": true,
+            "responses": [
+                {
+                    "booking_id": 20,
+                    "status": 200,
+                    "code": null,
+                    "started": 1792961187.491262,
+                    "finished": 1792961187.566845
+                },
+                {
+                    "booking_id": 21,
+                    "status": 422,
+                    "code": "NOT_SEAT_AVAILABLE",
+                    "started": 1792961187.491261,
+                    "finished": 1792961187.645996
+                }
+            ],
+            "loser_retry_status": 422,
+            "loser_retry_code": "NOT_SEAT_AVAILABLE",
+            "passed": true
+        },
+        {
+            "trial": 11,
+            "trip_id": 12,
+            "capacity": 1,
+            "accepted_rows": 1,
+            "pending_rows": 1,
+            "terms_rows": 2,
+            "overlapping_http_calls": true,
+            "responses": [
+                {
+                    "booking_id": 22,
+                    "status": 200,
+                    "code": null,
+                    "started": 1792961188.276683,
+                    "finished": 1792961188.374409
+                },
+                {
+                    "booking_id": 23,
+                    "status": 409,
+                    "code": "COMMUTE_BUSY_RETRY",
+                    "started": 1792961188.276241,
+                    "finished": 1792961188.318348
+                }
+            ],
+            "loser_retry_status": 422,
+            "loser_retry_code": "NOT_SEAT_AVAILABLE",
+            "passed": true
+        },
+        {
+            "trial": 12,
+            "trip_id": 13,
+            "capacity": 1,
+            "accepted_rows": 1,
+            "pending_rows": 1,
+            "terms_rows": 2,
+            "overlapping_http_calls": true,
+            "responses": [
+                {
+                    "booking_id": 24,
+                    "status": 409,
+                    "code": "COMMUTE_BUSY_RETRY",
+                    "started": 1792961188.983826,
+                    "finished": 1792961189.022915
+                },
+                {
+                    "booking_id": 25,
+                    "status": 200,
+                    "code": null,
+                    "started": 1792961188.983809,
+                    "finished": 1792961189.087925
+                }
+            ],
+            "loser_retry_status": 422,
+            "loser_retry_code": "NOT_SEAT_AVAILABLE",
+            "passed": true
+        }
+    ],
+    "coverage": "12 sampled overlapping HTTP acceptance races; not a universal concurrency proof",
+    "gaps": [
+        "Synthetic demo actors and fixture routing are used; identity, payment, and provider-backed routing are out of scope."
+    ],
+    "completed": true,
+    "finished_at": "2026-10-25T20:46:29+00:00",
+    "all_checks_passed": true
+}

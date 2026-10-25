@@ -1,0 +1,6 @@
+{
+  "tracked_paths_compared": 1607,
+  "differing_files": [],
+  "change": "Move APP_TIMEZONE prerequisite from issue39 patch to issue43 patch. Combined reconstructed application including manifests is byte-identical to prior fresh-integrated proof.",
+  "assertions_changed": false
+}

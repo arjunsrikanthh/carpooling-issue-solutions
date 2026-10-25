@@ -8,14 +8,16 @@
         12,
         21
       ],
-      "state": "in_progress"
+      "state": "engineering_complete",
+      "acceptance": "see FINAL_REPORT.md for partial manual and academic criteria"
     },
     {
       "owner": "booking",
       "issues": [
         23
       ],
-      "state": "in_progress"
+      "state": "engineering_complete",
+      "acceptance": "see FINAL_REPORT.md for partial manual and academic criteria"
     },
     {
       "owner": "integrity",
@@ -23,14 +25,16 @@
         24,
         37
       ],
-      "state": "in_progress"
+      "state": "engineering_complete",
+      "acceptance": "see FINAL_REPORT.md for partial manual and academic criteria"
     },
     {
       "owner": "search_tests",
       "issues": [
         43
       ],
-      "state": "in_progress"
+      "state": "engineering_complete",
+      "acceptance": "see FINAL_REPORT.md for partial manual and academic criteria"
     },
     {
       "owner": "ci_docs",
@@ -38,17 +42,22 @@
         39,
         44
       ],
-      "state": "in_progress"
+      "state": "engineering_complete",
+      "acceptance": "see FINAL_REPORT.md for partial manual and academic criteria"
     }
   ],
-  "phase": "runtime_repair",
+  "phase": "engineering_delivery_complete",
   "private_repository": "https://github.com/arjunsrikanthh/carpooling-issue-solutions",
-  "published": false,
+  "published": true,
   "remaining": [
-    "repair43runtime",
-    "integratedandfreshverification",
-    "publishpackages",
-    "actualActionsgreen",
-    "protectedstateauditandfinalreport"
-  ]
+    "human_teammate_review_and_authorized_contribution_PRs",
+    "non_demo_hosting_and_real_approval",
+    "visible_UI_demo_and_real_video_submission",
+    "faculty_document_reconciliation_and_DBMS_course_gates"
+  ],
+  "actions": {
+    "url": "https://github.com/arjunsrikanthh/carpooling-issue-solutions/actions/runs/40231726242",
+    "conclusion": "success",
+    "jobs": 9
+  }
 }

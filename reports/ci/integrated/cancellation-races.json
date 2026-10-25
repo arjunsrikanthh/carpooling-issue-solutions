@@ -1,0 +1,151 @@
+{
+    "probe": "cancellation-concurrency-probe",
+    "trials": [
+        {
+            "trial": 1,
+            "booking_id": 26,
+            "responses": [
+                {
+                    "status": 200,
+                    "code": null,
+                    "started": 1792960941.426335,
+                    "finished": 1792960941.497554
+                },
+                {
+                    "status": 409,
+                    "code": "COMMUTE_BUSY_RETRY",
+                    "started": 1792960941.42634,
+                    "finished": 1792960941.466466
+                }
+            ],
+            "retry_statuses": [
+                200
+            ],
+            "refund_entries": 1,
+            "overlapping_http_calls": true,
+            "passed": true
+        },
+        {
+            "trial": 2,
+            "booking_id": 27,
+            "responses": [
+                {
+                    "status": 200,
+                    "code": null,
+                    "started": 1792960942.252436,
+                    "finished": 1792960942.326405
+                },
+                {
+                    "status": 409,
+                    "code": "COMMUTE_BUSY_RETRY",
+                    "started": 1792960942.252199,
+                    "finished": 1792960942.295518
+                }
+            ],
+            "retry_statuses": [
+                200
+            ],
+            "refund_entries": 1,
+            "overlapping_http_calls": true,
+            "passed": true
+        },
+        {
+            "trial": 3,
+            "booking_id": 28,
+            "responses": [
+                {
+                    "status": 200,
+                    "code": null,
+                    "started": 1792960943.111753,
+                    "finished": 1792960943.186241
+                },
+                {
+                    "status": 409,
+                    "code": "COMMUTE_BUSY_RETRY",
+                    "started": 1792960943.111889,
+                    "finished": 1792960943.163784
+                }
+            ],
+            "retry_statuses": [
+                200
+            ],
+            "refund_entries": 1,
+            "overlapping_http_calls": true,
+            "passed": true
+        },
+        {
+            "trial": 4,
+            "booking_id": 29,
+            "responses": [
+                {
+                    "status": 409,
+                    "code": "COMMUTE_BUSY_RETRY",
+                    "started": 1792960943.930802,
+                    "finished": 1792960943.970888
+                },
+                {
+                    "status": 200,
+                    "code": null,
+                    "started": 1792960943.930935,
+                    "finished": 1792960944.000714
+                }
+            ],
+            "retry_statuses": [
+                200
+            ],
+            "refund_entries": 1,
+            "overlapping_http_calls": true,
+            "passed": true
+        },
+        {
+            "trial": 5,
+            "booking_id": 30,
+            "responses": [
+                {
+                    "status": 200,
+                    "code": null,
+                    "started": 1792960944.752084,
+                    "finished": 1792960944.826073
+                },
+                {
+                    "status": 409,
+                    "code": "COMMUTE_BUSY_RETRY",
+                    "started": 1792960944.75219,
+                    "finished": 1792960944.79404
+                }
+            ],
+            "retry_statuses": [
+                200
+            ],
+            "refund_entries": 1,
+            "overlapping_http_calls": true,
+            "passed": true
+        },
+        {
+            "trial": 6,
+            "booking_id": 31,
+            "responses": [
+                {
+                    "status": 409,
+                    "code": "COMMUTE_BUSY_RETRY",
+                    "started": 1792960945.576779,
+                    "finished": 1792960945.617916
+                },
+                {
+                    "status": 200,
+                    "code": null,
+                    "started": 1792960945.576986,
+                    "finished": 1792960945.646303
+                }
+            ],
+            "retry_statuses": [
+                200
+            ],
+            "refund_entries": 1,
+            "overlapping_http_calls": true,
+            "passed": true
+        }
+    ],
+    "completed": true,
+    "all_checks_passed": true
+}

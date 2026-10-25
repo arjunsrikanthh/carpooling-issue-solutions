@@ -1,0 +1,6 @@
+{
+  "tracked_files": 125,
+  "known_credential_pattern_matches": [],
+  "forbidden_direct_artifacts": [],
+  "scope": "Bounded tracked-file review and selected credential signatures; no real databases/media, original course attachments or raw Gmail dumps included. Synthetic test/config credential literals are not production credentials. Not a guarantee against every secret format."
+}
