@@ -1,0 +1,1882 @@
+[
+  {
+    "path": "Mobility/Admission/DriverReservationPolicy.php",
+    "official": "d593f2e45815579d5c859f63cc4aac0bb103f510d1105ea94fec988816ce625d",
+    "workspace": "d593f2e45815579d5c859f63cc4aac0bb103f510d1105ea94fec988816ce625d",
+    "local": "d593f2e45815579d5c859f63cc4aac0bb103f510d1105ea94fec988816ce625d",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/CashReceiptController.php",
+    "official": "a08499f0db7aa0f1876a3b658328caeeafec179dfb8416609601fdf101a2b1af",
+    "workspace": "a08499f0db7aa0f1876a3b658328caeeafec179dfb8416609601fdf101a2b1af",
+    "local": "a08499f0db7aa0f1876a3b658328caeeafec179dfb8416609601fdf101a2b1af",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/CashReceiptException.php",
+    "official": "1f3651001b5a850c0c85ce9bc0211d7ca33b60e6b11decbe166fee2048f053b9",
+    "workspace": "1f3651001b5a850c0c85ce9bc0211d7ca33b60e6b11decbe166fee2048f053b9",
+    "local": "1f3651001b5a850c0c85ce9bc0211d7ca33b60e6b11decbe166fee2048f053b9",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/CashReceiptService.php",
+    "official": "ede7295ad536e770e21877aba1fc6322dbd8f2a3543cf236bec1f9164c3551a4",
+    "workspace": "ede7295ad536e770e21877aba1fc6322dbd8f2a3543cf236bec1f9164c3551a4",
+    "local": "ede7295ad536e770e21877aba1fc6322dbd8f2a3543cf236bec1f9164c3551a4",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Communications/CommunicationBoundary.php",
+    "official": "df6930c992aba0a304274ff5ac1bc53790c24944d5222df6c43efe534857701d",
+    "workspace": "df6930c992aba0a304274ff5ac1bc53790c24944d5222df6c43efe534857701d",
+    "local": "df6930c992aba0a304274ff5ac1bc53790c24944d5222df6c43efe534857701d",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Communications/CommunicationException.php",
+    "official": "61a8a5c753e6305d81ea2f9cf81b807abbfe22d9bd8d3faab8317675a17c819b",
+    "workspace": "61a8a5c753e6305d81ea2f9cf81b807abbfe22d9bd8d3faab8317675a17c819b",
+    "local": "61a8a5c753e6305d81ea2f9cf81b807abbfe22d9bd8d3faab8317675a17c819b",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Communications/PairBlockPolicy.php",
+    "official": "37b357fa6af0c6da158a6d8be30418ec47d2b34e027c83b89405674202229b11",
+    "workspace": "37b357fa6af0c6da158a6d8be30418ec47d2b34e027c83b89405674202229b11",
+    "local": "37b357fa6af0c6da158a6d8be30418ec47d2b34e027c83b89405674202229b11",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Communications/TripCommunicationController.php",
+    "official": "0d57d1c0bd2d6e9d63260a8397b3d35727434aad47ebd02eaa729ea6df866334",
+    "workspace": "0d57d1c0bd2d6e9d63260a8397b3d35727434aad47ebd02eaa729ea6df866334",
+    "local": "0d57d1c0bd2d6e9d63260a8397b3d35727434aad47ebd02eaa729ea6df866334",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Communications/TripCommunicationService.php",
+    "official": "63446b9ebbda0a9e085d73feab8f9d248da83e8877f6aad341783494a7c38dd6",
+    "workspace": "63446b9ebbda0a9e085d73feab8f9d248da83e8877f6aad341783494a7c38dd6",
+    "local": "63446b9ebbda0a9e085d73feab8f9d248da83e8877f6aad341783494a7c38dd6",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Commute/CommuteController.php",
+    "official": "9e3c94be4ce8a79b69b5a339d3500832bc0d22fb5b9efa1393e29a8f099f39b8",
+    "workspace": "9e3c94be4ce8a79b69b5a339d3500832bc0d22fb5b9efa1393e29a8f099f39b8",
+    "local": "fb45e241a91c1056794f834f3e4d9afb85bb42dc5c09b1dc0fe3ce4cf7d5ae6a",
+    "workspace_equal": true,
+    "local_equal": false
+  },
+  {
+    "path": "Mobility/Commute/CommuteMatchingService.php",
+    "official": "3605d371d81ebf78ebbae5e15a0e71404d654407ace32b07fd31b8bb7e63ff0d",
+    "workspace": "807865dfa91064510e86901768f16c56b1fc27139af1b4ff8c69a3ebf4d0baa3",
+    "local": "187566fb0059d4cb1803afa4793464f2922264c610b232af84fe1fa1d0d946bb",
+    "workspace_equal": false,
+    "local_equal": false
+  },
+  {
+    "path": "Mobility/Commute/CommuteService.php",
+    "official": "99b9023a1899d7f68449195d14a712b96e42550432d6f46e7cbddbeb73bb6eaf",
+    "workspace": "99b9023a1899d7f68449195d14a712b96e42550432d6f46e7cbddbeb73bb6eaf",
+    "local": "6b8212cd294538bb4cd274465d6f2925ee589bfa207c8a92142c323466cdaded",
+    "workspace_equal": true,
+    "local_equal": false
+  },
+  {
+    "path": "Mobility/Dispatch/DispatchBookingContext.php",
+    "official": "9bdbdeafe9b79c845b13457910a4bab5bb75dcf04451c413b36fc4819dcec42c",
+    "workspace": "9bdbdeafe9b79c845b13457910a4bab5bb75dcf04451c413b36fc4819dcec42c",
+    "local": "9bdbdeafe9b79c845b13457910a4bab5bb75dcf04451c413b36fc4819dcec42c",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Dispatch/DispatchBoundary.php",
+    "official": "16303f5a5b781bdf3a49a9fdf9989d35b828ca1537e4b7e4ca7befdd1dc0211a",
+    "workspace": "16303f5a5b781bdf3a49a9fdf9989d35b828ca1537e4b7e4ca7befdd1dc0211a",
+    "local": "16303f5a5b781bdf3a49a9fdf9989d35b828ca1537e4b7e4ca7befdd1dc0211a",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Dispatch/DispatchCanonicalFactory.php",
+    "official": "dc95e720467561f78880a7c83185237183a356c085144cbe0f2eecf85e86f728",
+    "workspace": "dc95e720467561f78880a7c83185237183a356c085144cbe0f2eecf85e86f728",
+    "local": "dc95e720467561f78880a7c83185237183a356c085144cbe0f2eecf85e86f728",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Dispatch/DispatchController.php",
+    "official": "c8eddc8e5cd1277215309ddc91afe44c203cf619e496f72fee814bdc81622f1f",
+    "workspace": "c8eddc8e5cd1277215309ddc91afe44c203cf619e496f72fee814bdc81622f1f",
+    "local": "c8eddc8e5cd1277215309ddc91afe44c203cf619e496f72fee814bdc81622f1f",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Dispatch/DispatchCreationContext.php",
+    "official": "7a713d2fd3cad12dac440b1080acf8469fc753ed925b0373076d3863b9872073",
+    "workspace": "7a713d2fd3cad12dac440b1080acf8469fc753ed925b0373076d3863b9872073",
+    "local": "7a713d2fd3cad12dac440b1080acf8469fc753ed925b0373076d3863b9872073",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Dispatch/DispatchEligibility.php",
+    "official": "20df20aaa4a37055a6e0514267b7ee160d9ac596789fabbf92e21ee38f43497c",
+    "workspace": "20df20aaa4a37055a6e0514267b7ee160d9ac596789fabbf92e21ee38f43497c",
+    "local": "20df20aaa4a37055a6e0514267b7ee160d9ac596789fabbf92e21ee38f43497c",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Dispatch/DispatchException.php",
+    "official": "14325a2a1d2bcac483f5539555a94b31f49e732661ad9c361548e57c93cfcd13",
+    "workspace": "14325a2a1d2bcac483f5539555a94b31f49e732661ad9c361548e57c93cfcd13",
+    "local": "14325a2a1d2bcac483f5539555a94b31f49e732661ad9c361548e57c93cfcd13",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Dispatch/DispatchInputs.php",
+    "official": "1ebb2a7015a0d33f2b3d0bf41a1e0bb40d25d46df8f18598c6a3706c0e1d0fb5",
+    "workspace": "1ebb2a7015a0d33f2b3d0bf41a1e0bb40d25d46df8f18598c6a3706c0e1d0fb5",
+    "local": "1ebb2a7015a0d33f2b3d0bf41a1e0bb40d25d46df8f18598c6a3706c0e1d0fb5",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Dispatch/DispatchService.php",
+    "official": "03ac1e7b9d1cf5fa7de691e94200718c8c7a05c70bbdb5330099a9d8aebfeb18",
+    "workspace": "03ac1e7b9d1cf5fa7de691e94200718c8c7a05c70bbdb5330099a9d8aebfeb18",
+    "local": "03ac1e7b9d1cf5fa7de691e94200718c8c7a05c70bbdb5330099a9d8aebfeb18",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Dispatch/DispatchTerms.php",
+    "official": "cf7eeea835072ac83282d37e4b2215b139b2b76a67032208ea74f7548d734977",
+    "workspace": "cf7eeea835072ac83282d37e4b2215b139b2b76a67032208ea74f7548d734977",
+    "local": "cf7eeea835072ac83282d37e4b2215b139b2b76a67032208ea74f7548d734977",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Dispatch/DispatchTripPolicy.php",
+    "official": "60aa11fbd90d4a9958a200814da47670d06bc46f62fdc83a1a5793d4e3753a9f",
+    "workspace": "60aa11fbd90d4a9958a200814da47670d06bc46f62fdc83a1a5793d4e3753a9f",
+    "local": "60aa11fbd90d4a9958a200814da47670d06bc46f62fdc83a1a5793d4e3753a9f",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Dispatch/DispatchWorkCommand.php",
+    "official": "1da6631d739f853e8fc6884718b0f61be53572922141132b2bedbf5ad0c4c74e",
+    "workspace": "1da6631d739f853e8fc6884718b0f61be53572922141132b2bedbf5ad0c4c74e",
+    "local": "1da6631d739f853e8fc6884718b0f61be53572922141132b2bedbf5ad0c4c74e",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Dispatch/DispatchWorker.php",
+    "official": "81be8f86e6b8adff3e40b3f221c5d573aadf009212201bf97247d1c7994104b0",
+    "workspace": "81be8f86e6b8adff3e40b3f221c5d573aadf009212201bf97247d1c7994104b0",
+    "local": "81be8f86e6b8adff3e40b3f221c5d573aadf009212201bf97247d1c7994104b0",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Dispatch/DispatchWorkerHeartbeat.php",
+    "official": "71023d36736c576d3f927aa21a6881a49cb6aaa21ebbd517dd66ed5d0c1f0a69",
+    "workspace": "71023d36736c576d3f927aa21a6881a49cb6aaa21ebbd517dd66ed5d0c1f0a69",
+    "local": "71023d36736c576d3f927aa21a6881a49cb6aaa21ebbd517dd66ed5d0c1f0a69",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/DropoffController.php",
+    "official": "6f3cedb340854c2695faba5c71050632c5e5e6969b31569825b78554c3ec004f",
+    "workspace": "6f3cedb340854c2695faba5c71050632c5e5e6969b31569825b78554c3ec004f",
+    "local": "6f3cedb340854c2695faba5c71050632c5e5e6969b31569825b78554c3ec004f",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Identity/CollegeEmailAuth.php",
+    "official": "6c9a12cbe3078a7321299e596e22261eee716a5643051f8b32b7779c2fe03b77",
+    "workspace": "6c9a12cbe3078a7321299e596e22261eee716a5643051f8b32b7779c2fe03b77",
+    "local": "6c9a12cbe3078a7321299e596e22261eee716a5643051f8b32b7779c2fe03b77",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Identity/CollegeEmailAuthController.php",
+    "official": "e30cf7b120c3864320dbefe1a59028cd01a1b51ea9c3af169b45c695dfec4d4c",
+    "workspace": "e30cf7b120c3864320dbefe1a59028cd01a1b51ea9c3af169b45c695dfec4d4c",
+    "local": "e30cf7b120c3864320dbefe1a59028cd01a1b51ea9c3af169b45c695dfec4d4c",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Journeys/CanonicalRouteIntervalProjector.php",
+    "official": "0b06bbafc91fd5d7b7a73b517483f849a9869b98a50f01acf861c717c002fd45",
+    "workspace": "0b06bbafc91fd5d7b7a73b517483f849a9869b98a50f01acf861c717c002fd45",
+    "local": "0b06bbafc91fd5d7b7a73b517483f849a9869b98a50f01acf861c717c002fd45",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Journeys/DemoFarePolicy.php",
+    "official": "4682ceaa606595486c0e5bb06d398c4cbcf97f5e13d90562f07a09553602aa82",
+    "workspace": "4682ceaa606595486c0e5bb06d398c4cbcf97f5e13d90562f07a09553602aa82",
+    "local": "4682ceaa606595486c0e5bb06d398c4cbcf97f5e13d90562f07a09553602aa82",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Journeys/EndpointRetentionCommand.php",
+    "official": "1a95812f993dd4c572a7d332fd7c05c8ea5b041197f7aa1556db72698089f2f5",
+    "workspace": "1a95812f993dd4c572a7d332fd7c05c8ea5b041197f7aa1556db72698089f2f5",
+    "local": "1a95812f993dd4c572a7d332fd7c05c8ea5b041197f7aa1556db72698089f2f5",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Journeys/JourneyPlanner.php",
+    "official": "daefba279eeb41a444be8e157031ef9baf9583d3ab31d25019e0e4b9541c7f13",
+    "workspace": "daefba279eeb41a444be8e157031ef9baf9583d3ab31d25019e0e4b9541c7f13",
+    "local": "daefba279eeb41a444be8e157031ef9baf9583d3ab31d25019e0e4b9541c7f13",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Journeys/PrivateEndpointController.php",
+    "official": "99507abf2c35aa0688d147cfab163aa7c32e6a57ea2b3be5765cfa12c76e21c3",
+    "workspace": "99507abf2c35aa0688d147cfab163aa7c32e6a57ea2b3be5765cfa12c76e21c3",
+    "local": "99507abf2c35aa0688d147cfab163aa7c32e6a57ea2b3be5765cfa12c76e21c3",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Journeys/PrivateEndpointResolver.php",
+    "official": "b2bc0be4a157f6d9f2167140ecbd6b9cb3ebcbbfe7e9ed72950d9b510957fa12",
+    "workspace": "b2bc0be4a157f6d9f2167140ecbd6b9cb3ebcbbfe7e9ed72950d9b510957fa12",
+    "local": "b2bc0be4a157f6d9f2167140ecbd6b9cb3ebcbbfe7e9ed72950d9b510957fa12",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Journeys/PrivateIntervalInventory.php",
+    "official": "5c59f7d1045696f3199423f5cb2c95fe18f566a6cab5b08651789ea6f65ae06f",
+    "workspace": "5c59f7d1045696f3199423f5cb2c95fe18f566a6cab5b08651789ea6f65ae06f",
+    "local": "5c59f7d1045696f3199423f5cb2c95fe18f566a6cab5b08651789ea6f65ae06f",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Journeys/PrivateJourneyQuoteController.php",
+    "official": "a3cb5293e90511aaf1d2237ae99e43d0245a39ef8663ba655328dd436b9b0182",
+    "workspace": "a3cb5293e90511aaf1d2237ae99e43d0245a39ef8663ba655328dd436b9b0182",
+    "local": "a3cb5293e90511aaf1d2237ae99e43d0245a39ef8663ba655328dd436b9b0182",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Journeys/PrivateJourneyQuoteService.php",
+    "official": "cdb1ece43101d35557505b1e4277ba3cf95f1e2b7ab57a8fe4f3c5c58c84bc5c",
+    "workspace": "cdb1ece43101d35557505b1e4277ba3cf95f1e2b7ab57a8fe4f3c5c58c84bc5c",
+    "local": "cdb1ece43101d35557505b1e4277ba3cf95f1e2b7ab57a8fe4f3c5c58c84bc5c",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Journeys/PrivateJourneyTerms.php",
+    "official": "6a0e9988fcd5a6decd1380a2f5723ad84f84640a692f9c88bd30f2c46d61d471",
+    "workspace": "6a0e9988fcd5a6decd1380a2f5723ad84f84640a692f9c88bd30f2c46d61d471",
+    "local": "6a0e9988fcd5a6decd1380a2f5723ad84f84640a692f9c88bd30f2c46d61d471",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Journeys/PrivateScheduledAdmissionContext.php",
+    "official": "f48ca049ad2d439f3d26f8bfb0f461cbdae8efff181e2f4d32547abeb0bd4ada",
+    "workspace": "f48ca049ad2d439f3d26f8bfb0f461cbdae8efff181e2f4d32547abeb0bd4ada",
+    "local": "f48ca049ad2d439f3d26f8bfb0f461cbdae8efff181e2f4d32547abeb0bd4ada",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Journeys/PrivateScheduledAdmissionController.php",
+    "official": "428b9703ed15e4d01ddd9701e3cedefe9a52a69d6028eeae08936d71b54ba8e2",
+    "workspace": "428b9703ed15e4d01ddd9701e3cedefe9a52a69d6028eeae08936d71b54ba8e2",
+    "local": "428b9703ed15e4d01ddd9701e3cedefe9a52a69d6028eeae08936d71b54ba8e2",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Journeys/PrivateScheduledAdmissionService.php",
+    "official": "56e017357a572c799a5e0f44d3e7669c8ce47f29f32f2e86a31e24fbc30b071c",
+    "workspace": "56e017357a572c799a5e0f44d3e7669c8ce47f29f32f2e86a31e24fbc30b071c",
+    "local": "56e017357a572c799a5e0f44d3e7669c8ce47f29f32f2e86a31e24fbc30b071c",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Journeys/PrivateScheduledBoundary.php",
+    "official": "29f31047c882cb59a449929a95d9dacdf8f47b1b4c34a229c576a9b2a1cb6346",
+    "workspace": "29f31047c882cb59a449929a95d9dacdf8f47b1b4c34a229c576a9b2a1cb6346",
+    "local": "29f31047c882cb59a449929a95d9dacdf8f47b1b4c34a229c576a9b2a1cb6346",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Matching/RouteSegmentMatcher.php",
+    "official": "a6eb81cb1299b0d7374bd72cefc7ba575b1cc5dddc5167c34b67700ee3fbe61e",
+    "workspace": "d4ae1085ec03ca49c0bcca2bed49813826081a1cbf088351a41a95380413b59d",
+    "local": "d4ae1085ec03ca49c0bcca2bed49813826081a1cbf088351a41a95380413b59d",
+    "workspace_equal": false,
+    "local_equal": false
+  },
+  {
+    "path": "Mobility/Matching/TripMatchReference.php",
+    "official": "67f4a9ac80f3fa6d8173c7316c25fb15371e2bf5a26393cd0c83960632352de2",
+    "workspace": "67f4a9ac80f3fa6d8173c7316c25fb15371e2bf5a26393cd0c83960632352de2",
+    "local": "67f4a9ac80f3fa6d8173c7316c25fb15371e2bf5a26393cd0c83960632352de2",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/MobilityController.php",
+    "official": "8136068ebef5899bcd2ea3ddd454e19a368c2b664c738ec17aef78a21ff48a27",
+    "workspace": "8136068ebef5899bcd2ea3ddd454e19a368c2b664c738ec17aef78a21ff48a27",
+    "local": "8136068ebef5899bcd2ea3ddd454e19a368c2b664c738ec17aef78a21ff48a27",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/MobilityServiceProvider.php",
+    "official": "1208d32036a730037b951012ce25ca7b73e221cdbe8c2c20f8250938f5257a92",
+    "workspace": "1208d32036a730037b951012ce25ca7b73e221cdbe8c2c20f8250938f5257a92",
+    "local": "1208d32036a730037b951012ce25ca7b73e221cdbe8c2c20f8250938f5257a92",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/OperatorCashQueueController.php",
+    "official": "a98d00e4045d58ce1282180e1eccaaa817488e1ec02f1ee8c62e3e1d63ecfb4e",
+    "workspace": "a98d00e4045d58ce1282180e1eccaaa817488e1ec02f1ee8c62e3e1d63ecfb4e",
+    "local": "a98d00e4045d58ce1282180e1eccaaa817488e1ec02f1ee8c62e3e1d63ecfb4e",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/PaymentViewController.php",
+    "official": "27952c92d577fdceda9702a9dcebafa5374e15f8d0decd8be1134215924e398d",
+    "workspace": "27952c92d577fdceda9702a9dcebafa5374e15f8d0decd8be1134215924e398d",
+    "local": "27952c92d577fdceda9702a9dcebafa5374e15f8d0decd8be1134215924e398d",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Payments/PaymentException.php",
+    "official": "94f923a770332b383f7af34016a781942e1acf81f4ca3351521f54eeac12c4d3",
+    "workspace": "94f923a770332b383f7af34016a781942e1acf81f4ca3351521f54eeac12c4d3",
+    "local": "94f923a770332b383f7af34016a781942e1acf81f4ca3351521f54eeac12c4d3",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Payments/PaymentService.php",
+    "official": "bc277dcafdca04f0a6fa4e7f022da2d7ff70e554997d66c63046345db464e369",
+    "workspace": "bc277dcafdca04f0a6fa4e7f022da2d7ff70e554997d66c63046345db464e369",
+    "local": "bc277dcafdca04f0a6fa4e7f022da2d7ff70e554997d66c63046345db464e369",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Payments/README.md",
+    "official": "cc849bbb48c58f375012fd8653c284559539b4572584f39a55bf9de94d79a0b9",
+    "workspace": "cc849bbb48c58f375012fd8653c284559539b4572584f39a55bf9de94d79a0b9",
+    "local": "cc849bbb48c58f375012fd8653c284559539b4572584f39a55bf9de94d79a0b9",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Pickup/OsrmPathProvider.php",
+    "official": "40768521e5cbdcb495e6aa3711dfc1dd91d1b529801a159c859e1b77b458ca88",
+    "workspace": "40768521e5cbdcb495e6aa3711dfc1dd91d1b529801a159c859e1b77b458ca88",
+    "local": "40768521e5cbdcb495e6aa3711dfc1dd91d1b529801a159c859e1b77b458ca88",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Pickup/PathProvider.php",
+    "official": "3b792c6a3e9903afce45664edd14ccdb6d41b036e2675d9f8b816d095f5ae128",
+    "workspace": "3b792c6a3e9903afce45664edd14ccdb6d41b036e2675d9f8b816d095f5ae128",
+    "local": "3b792c6a3e9903afce45664edd14ccdb6d41b036e2675d9f8b816d095f5ae128",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Pickup/PickupController.php",
+    "official": "1d7941ca3b51f0961da2f9d65afefeb9185bf3904eceb7d630c0c9ac0ade4439",
+    "workspace": "1d7941ca3b51f0961da2f9d65afefeb9185bf3904eceb7d630c0c9ac0ade4439",
+    "local": "1d7941ca3b51f0961da2f9d65afefeb9185bf3904eceb7d630c0c9ac0ade4439",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Pickup/PickupException.php",
+    "official": "2548b493f586f35224e8751dc7e0c3288b762fe41b300b8e2ece8a11d2f63a93",
+    "workspace": "2548b493f586f35224e8751dc7e0c3288b762fe41b300b8e2ece8a11d2f63a93",
+    "local": "2548b493f586f35224e8751dc7e0c3288b762fe41b300b8e2ece8a11d2f63a93",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Pickup/PickupPolicy.php",
+    "official": "fa89d148467678e2f025f38ede32c19457c2efbbcad0dba18ab1b7c0c196f2fd",
+    "workspace": "fa89d148467678e2f025f38ede32c19457c2efbbcad0dba18ab1b7c0c196f2fd",
+    "local": "fa89d148467678e2f025f38ede32c19457c2efbbcad0dba18ab1b7c0c196f2fd",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Pickup/PickupPreviewPlanner.php",
+    "official": "3d4e537ca9c6a6644e3e97541e5b9df9fe0b66374b4a0537983f7a32f4c4d8ec",
+    "workspace": "3d4e537ca9c6a6644e3e97541e5b9df9fe0b66374b4a0537983f7a32f4c4d8ec",
+    "local": "3d4e537ca9c6a6644e3e97541e5b9df9fe0b66374b4a0537983f7a32f4c4d8ec",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Pickup/PickupPreviewService.php",
+    "official": "3a8897d70989808dd9330833fe16e7ce4ce8e083f6977e7283e99a6515454844",
+    "workspace": "3a8897d70989808dd9330833fe16e7ce4ce8e083f6977e7283e99a6515454844",
+    "local": "3a8897d70989808dd9330833fe16e7ce4ce8e083f6977e7283e99a6515454844",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Pickup/PickupSelectionController.php",
+    "official": "6e144686fd698f34caf2b9c0e42c54dbcb748715cb284ba35d9da1ca5b4f59d9",
+    "workspace": "6e144686fd698f34caf2b9c0e42c54dbcb748715cb284ba35d9da1ca5b4f59d9",
+    "local": "6e144686fd698f34caf2b9c0e42c54dbcb748715cb284ba35d9da1ca5b4f59d9",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Pickup/PickupSelectionService.php",
+    "official": "8a9448671caf1ab00782a349b1ca774a8391586a646d24879b9b21c012047747",
+    "workspace": "8a9448671caf1ab00782a349b1ca774a8391586a646d24879b9b21c012047747",
+    "local": "8a9448671caf1ab00782a349b1ca774a8391586a646d24879b9b21c012047747",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Pickup/PublishedPickupPlan.php",
+    "official": "48e0359567f7b50e8f29b9b4e49cd47e430bef8bd66b87d905840beea03fa392",
+    "workspace": "48e0359567f7b50e8f29b9b4e49cd47e430bef8bd66b87d905840beea03fa392",
+    "local": "48e0359567f7b50e8f29b9b4e49cd47e430bef8bd66b87d905840beea03fa392",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Pilot/PilotDemoRoutes.php",
+    "official": "56b5fc0711eb446fecf6907e07db073278797f243716da3df01ff393f4644fe8",
+    "workspace": "56b5fc0711eb446fecf6907e07db073278797f243716da3df01ff393f4644fe8",
+    "local": "56b5fc0711eb446fecf6907e07db073278797f243716da3df01ff393f4644fe8",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Pilot/PilotOfferController.php",
+    "official": "0404c533f4a050152e26166d8e7764c8af4ebfa6892d3fa0a301feba420f57cc",
+    "workspace": "0404c533f4a050152e26166d8e7764c8af4ebfa6892d3fa0a301feba420f57cc",
+    "local": "0404c533f4a050152e26166d8e7764c8af4ebfa6892d3fa0a301feba420f57cc",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Providers/RazorpayCaptureVerifier.php",
+    "official": "e3e5b6a51845b8e91a06efe65321d4fdeb0a3acd325f7382d1a79e5d114f4c6b",
+    "workspace": "e3e5b6a51845b8e91a06efe65321d4fdeb0a3acd325f7382d1a79e5d114f4c6b",
+    "local": "e3e5b6a51845b8e91a06efe65321d4fdeb0a3acd325f7382d1a79e5d114f4c6b",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Recurrence/DerivedQuoteFactory.php",
+    "official": "fddefbb5881ef997a32e3695fd33b4b1bc3b53fb136ce7afa49fa919953a0bc4",
+    "workspace": "fddefbb5881ef997a32e3695fd33b4b1bc3b53fb136ce7afa49fa919953a0bc4",
+    "local": "fddefbb5881ef997a32e3695fd33b4b1bc3b53fb136ce7afa49fa919953a0bc4",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Recurrence/ProgramAdmissionGuard.php",
+    "official": "2502e117efa38fd08b0b2c4878aafb5251a60ba7439eaa6c79a55dc6edd2e912",
+    "workspace": "2502e117efa38fd08b0b2c4878aafb5251a60ba7439eaa6c79a55dc6edd2e912",
+    "local": "2502e117efa38fd08b0b2c4878aafb5251a60ba7439eaa6c79a55dc6edd2e912",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Recurrence/ProgramCalendar.php",
+    "official": "6a141068e299ba08381b7404fdd5944cbda0121469e8f4f5d0519dee734cb536",
+    "workspace": "6a141068e299ba08381b7404fdd5944cbda0121469e8f4f5d0519dee734cb536",
+    "local": "6a141068e299ba08381b7404fdd5944cbda0121469e8f4f5d0519dee734cb536",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Recurrence/ProgramControlController.php",
+    "official": "10fcd5a68b0392b778932ba26793d162b0d3c1f7d96c9d296fa409556eb8c7a8",
+    "workspace": "10fcd5a68b0392b778932ba26793d162b0d3c1f7d96c9d296fa409556eb8c7a8",
+    "local": "10fcd5a68b0392b778932ba26793d162b0d3c1f7d96c9d296fa409556eb8c7a8",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Recurrence/ProgramControlService.php",
+    "official": "c3963f652c302326fd472a0c89f3e9e650fc8271870e62a66191cd54a27efad6",
+    "workspace": "c3963f652c302326fd472a0c89f3e9e650fc8271870e62a66191cd54a27efad6",
+    "local": "c3963f652c302326fd472a0c89f3e9e650fc8271870e62a66191cd54a27efad6",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Recurrence/ProgramController.php",
+    "official": "dff26f3988bb4a38d758f7dd470552ccd25f4ff532ea5e493ec43df068e4045f",
+    "workspace": "dff26f3988bb4a38d758f7dd470552ccd25f4ff532ea5e493ec43df068e4045f",
+    "local": "dff26f3988bb4a38d758f7dd470552ccd25f4ff532ea5e493ec43df068e4045f",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Recurrence/ProgramException.php",
+    "official": "11a74baff3065944758bb4733874f74825cc1a273a1ec02ddeeea57e0ad510ab",
+    "workspace": "11a74baff3065944758bb4733874f74825cc1a273a1ec02ddeeea57e0ad510ab",
+    "local": "11a74baff3065944758bb4733874f74825cc1a273a1ec02ddeeea57e0ad510ab",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Recurrence/ProgramGenerationCommand.php",
+    "official": "df9c02767d3cbed0b85cea6d0f7f1eb45c4f6901538fabe93ade02a88dd833bc",
+    "workspace": "df9c02767d3cbed0b85cea6d0f7f1eb45c4f6901538fabe93ade02a88dd833bc",
+    "local": "df9c02767d3cbed0b85cea6d0f7f1eb45c4f6901538fabe93ade02a88dd833bc",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Recurrence/ProgramHostPolicy.php",
+    "official": "c34f1bfcec42c4f788e1039604414c50b9aa3fc4356a2c9d106176e753e1280b",
+    "workspace": "c34f1bfcec42c4f788e1039604414c50b9aa3fc4356a2c9d106176e753e1280b",
+    "local": "c34f1bfcec42c4f788e1039604414c50b9aa3fc4356a2c9d106176e753e1280b",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Recurrence/ProgramInputs.php",
+    "official": "b466f7561ad9d9e48c8c02c36a3b8abff84faf3584008f493c76f0745651b8cb",
+    "workspace": "b466f7561ad9d9e48c8c02c36a3b8abff84faf3584008f493c76f0745651b8cb",
+    "local": "b466f7561ad9d9e48c8c02c36a3b8abff84faf3584008f493c76f0745651b8cb",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Recurrence/ProgramReader.php",
+    "official": "7bef2fc7d9968b7bc1bd335948b82ae23862f0c7ff67c2bfe49941bce90caa1f",
+    "workspace": "7bef2fc7d9968b7bc1bd335948b82ae23862f0c7ff67c2bfe49941bce90caa1f",
+    "local": "7bef2fc7d9968b7bc1bd335948b82ae23862f0c7ff67c2bfe49941bce90caa1f",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Recurrence/ProgramService.php",
+    "official": "3d22d66c73cccefde909a1ffa63be25e9ce9de84a6b001a54a726507c4d474c7",
+    "workspace": "3d22d66c73cccefde909a1ffa63be25e9ce9de84a6b001a54a726507c4d474c7",
+    "local": "3d22d66c73cccefde909a1ffa63be25e9ce9de84a6b001a54a726507c4d474c7",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Recurrence/ProgramVisibility.php",
+    "official": "446ba35b6378e6b799ad68fe2e2fd5f3531ddc092d51f30afeb7122621682094",
+    "workspace": "446ba35b6378e6b799ad68fe2e2fd5f3531ddc092d51f30afeb7122621682094",
+    "local": "446ba35b6378e6b799ad68fe2e2fd5f3531ddc092d51f30afeb7122621682094",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Recurrence/WeeklyScheduleController.php",
+    "official": "e3597a9b33dbbefab403910d2691c3c5fa82318dd3653146352e810a9a8c8f78",
+    "workspace": "e3597a9b33dbbefab403910d2691c3c5fa82318dd3653146352e810a9a8c8f78",
+    "local": "e3597a9b33dbbefab403910d2691c3c5fa82318dd3653146352e810a9a8c8f78",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Recurrence/WeeklySchedulePreview.php",
+    "official": "9374fd762852a5e74a8e7af3eb6954d21e7c4d33f07a9535241320c8ff94d593",
+    "workspace": "9374fd762852a5e74a8e7af3eb6954d21e7c4d33f07a9535241320c8ff94d593",
+    "local": "9374fd762852a5e74a8e7af3eb6954d21e7c4d33f07a9535241320c8ff94d593",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Routing/OfferController.php",
+    "official": "95356f80e3bc633f9fdb68b72dc2497d6480261a8b5e24bbde834657748efe9f",
+    "workspace": "95356f80e3bc633f9fdb68b72dc2497d6480261a8b5e24bbde834657748efe9f",
+    "local": "95356f80e3bc633f9fdb68b72dc2497d6480261a8b5e24bbde834657748efe9f",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Routing/OfferDiscoveryController.php",
+    "official": "b724d8873398cbee0aae8477b85c55d458e35b4b8eb43f3a68c92e837a8f5ba0",
+    "workspace": "b724d8873398cbee0aae8477b85c55d458e35b4b8eb43f3a68c92e837a8f5ba0",
+    "local": "b724d8873398cbee0aae8477b85c55d458e35b4b8eb43f3a68c92e837a8f5ba0",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Routing/OfferException.php",
+    "official": "abe15d94edf39dbdac4254b8a143790224fa31babeaeb6fb6119ac6061063973",
+    "workspace": "abe15d94edf39dbdac4254b8a143790224fa31babeaeb6fb6119ac6061063973",
+    "local": "abe15d94edf39dbdac4254b8a143790224fa31babeaeb6fb6119ac6061063973",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Routing/OfferService.php",
+    "official": "edbdbd7bb5aa9258903238b557c1e681cdabe1b21c346964db179f50afbcf3e8",
+    "workspace": "edbdbd7bb5aa9258903238b557c1e681cdabe1b21c346964db179f50afbcf3e8",
+    "local": "edbdbd7bb5aa9258903238b557c1e681cdabe1b21c346964db179f50afbcf3e8",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Routing/OsrmRouteProvider.php",
+    "official": "03634edcfb89a4b25b77422ac91f4ce26d73e12a36034107f5da6cc24252a779",
+    "workspace": "03634edcfb89a4b25b77422ac91f4ce26d73e12a36034107f5da6cc24252a779",
+    "local": "03634edcfb89a4b25b77422ac91f4ce26d73e12a36034107f5da6cc24252a779",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Routing/PickupPointCatalog.php",
+    "official": "8b7a6551a2244ff5ce8551bfcfd35744799a126ae1e9f3765e836dc00efcc960",
+    "workspace": "8b7a6551a2244ff5ce8551bfcfd35744799a126ae1e9f3765e836dc00efcc960",
+    "local": "8b7a6551a2244ff5ce8551bfcfd35744799a126ae1e9f3765e836dc00efcc960",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Routing/QuotedOfferGuard.php",
+    "official": "ea074dc111abc916fabd6488114ae2cadb5439cc384e25831f29c90bb54f2c71",
+    "workspace": "ea074dc111abc916fabd6488114ae2cadb5439cc384e25831f29c90bb54f2c71",
+    "local": "ea074dc111abc916fabd6488114ae2cadb5439cc384e25831f29c90bb54f2c71",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Routing/RouteDataVersion.php",
+    "official": "8c6cbcad9bb1a79f8d76997714a0209eb5dba3475091dfb6e522f512e431a403",
+    "workspace": "8c6cbcad9bb1a79f8d76997714a0209eb5dba3475091dfb6e522f512e431a403",
+    "local": "8c6cbcad9bb1a79f8d76997714a0209eb5dba3475091dfb6e522f512e431a403",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Routing/RouteProvider.php",
+    "official": "38e3946ff269e336dd58df2b5aa3123b756e49f488999885ba5a75607ffde5e5",
+    "workspace": "38e3946ff269e336dd58df2b5aa3123b756e49f488999885ba5a75607ffde5e5",
+    "local": "38e3946ff269e336dd58df2b5aa3123b756e49f488999885ba5a75607ffde5e5",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Routing/RouteQuoteController.php",
+    "official": "8d41236ceb1bbcf77f6366661bd5fc22de4bea72ed6c9cfa0747b38f8cb0533f",
+    "workspace": "8d41236ceb1bbcf77f6366661bd5fc22de4bea72ed6c9cfa0747b38f8cb0533f",
+    "local": "8d41236ceb1bbcf77f6366661bd5fc22de4bea72ed6c9cfa0747b38f8cb0533f",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Routing/RouteQuoteService.php",
+    "official": "7691d8511871a0a9ff0f27b4c1b6c56642f810d6eab12ace0635feabd8690c9c",
+    "workspace": "7691d8511871a0a9ff0f27b4c1b6c56642f810d6eab12ace0635feabd8690c9c",
+    "local": "7691d8511871a0a9ff0f27b4c1b6c56642f810d6eab12ace0635feabd8690c9c",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Routing/RoutingException.php",
+    "official": "cb311d88775341934904699ecb5721a25151679da32730c432a2cd996db5c0e6",
+    "workspace": "cb311d88775341934904699ecb5721a25151679da32730c432a2cd996db5c0e6",
+    "local": "cb311d88775341934904699ecb5721a25151679da32730c432a2cd996db5c0e6",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Routing/TrustedRouteContext.php",
+    "official": "9825c55e17a6923fbbdffd4b76c8d5f1314458fb890ac2b9827731301038771b",
+    "workspace": "9825c55e17a6923fbbdffd4b76c8d5f1314458fb890ac2b9827731301038771b",
+    "local": "9825c55e17a6923fbbdffd4b76c8d5f1314458fb890ac2b9827731301038771b",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Segments/BookingIntervalContext.php",
+    "official": "a7da3eeea4a02e6f4fb36d2041e6986c6fcc9137c0dea0d42bc3b7a7d24f8365",
+    "workspace": "a7da3eeea4a02e6f4fb36d2041e6986c6fcc9137c0dea0d42bc3b7a7d24f8365",
+    "local": "a7da3eeea4a02e6f4fb36d2041e6986c6fcc9137c0dea0d42bc3b7a7d24f8365",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Segments/CanonicalBookingObserver.php",
+    "official": "d08cd4ec867fd16486016ee1600d25cfd32650433e81326b9a7f440d01c7db41",
+    "workspace": "d08cd4ec867fd16486016ee1600d25cfd32650433e81326b9a7f440d01c7db41",
+    "local": "d08cd4ec867fd16486016ee1600d25cfd32650433e81326b9a7f440d01c7db41",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Segments/MatchController.php",
+    "official": "83fdc3e37c4f02cec88b4568d254c15ed6ec1ffdcf40d1a455d1dc8ba066b9e9",
+    "workspace": "be5a7f102f6ec5fa79652c9216ff77d8971ae2c6bde49adf33dcb61ccd80a339",
+    "local": "be5a7f102f6ec5fa79652c9216ff77d8971ae2c6bde49adf33dcb61ccd80a339",
+    "workspace_equal": false,
+    "local_equal": false
+  },
+  {
+    "path": "Mobility/Segments/PublishedTripGuard.php",
+    "official": "046eaed6d72331517d3e3babafceec343487578c811222643281fc28e4850725",
+    "workspace": "046eaed6d72331517d3e3babafceec343487578c811222643281fc28e4850725",
+    "local": "046eaed6d72331517d3e3babafceec343487578c811222643281fc28e4850725",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Segments/RouteTerms.php",
+    "official": "9d4499b9667802e9530d3a4ab77f79fa3ce908d08e57b85c47b1c03c8bf486ee",
+    "workspace": "9d4499b9667802e9530d3a4ab77f79fa3ce908d08e57b85c47b1c03c8bf486ee",
+    "local": "9d4499b9667802e9530d3a4ab77f79fa3ce908d08e57b85c47b1c03c8bf486ee",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Segments/SegmentBookingService.php",
+    "official": "617474b7d10fc9cd8df3b51b4283821741eb9a61f1444f6b1a1c428b09e945cf",
+    "workspace": "617474b7d10fc9cd8df3b51b4283821741eb9a61f1444f6b1a1c428b09e945cf",
+    "local": "617474b7d10fc9cd8df3b51b4283821741eb9a61f1444f6b1a1c428b09e945cf",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Segments/SegmentException.php",
+    "official": "9ebf6a296d584d572e280b781c1e6d73cd8664b7426e8b4f9115bafbe77b5d09",
+    "workspace": "9ebf6a296d584d572e280b781c1e6d73cd8664b7426e8b4f9115bafbe77b5d09",
+    "local": "9ebf6a296d584d572e280b781c1e6d73cd8664b7426e8b4f9115bafbe77b5d09",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Segments/SegmentInventory.php",
+    "official": "382bec10a4a4e3d13b038ba2f3371e23a08c5de3d7473afc0bc8a655e62140fa",
+    "workspace": "382bec10a4a4e3d13b038ba2f3371e23a08c5de3d7473afc0bc8a655e62140fa",
+    "local": "382bec10a4a4e3d13b038ba2f3371e23a08c5de3d7473afc0bc8a655e62140fa",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Support/TripReportController.php",
+    "official": "8057ca6627e818e9bd1548df4be5c748afcf013c0280236db02f1f14c07da074",
+    "workspace": "8057ca6627e818e9bd1548df4be5c748afcf013c0280236db02f1f14c07da074",
+    "local": "8057ca6627e818e9bd1548df4be5c748afcf013c0280236db02f1f14c07da074",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Support/TripReportService.php",
+    "official": "dc4b450af10b0318591dd93af0cb801371de6f54031c8be90829d10ac9c6fe60",
+    "workspace": "dc4b450af10b0318591dd93af0cb801371de6f54031c8be90829d10ac9c6fe60",
+    "local": "dc4b450af10b0318591dd93af0cb801371de6f54031c8be90829d10ac9c6fe60",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Support/TripReportThrottle.php",
+    "official": "98ecb5cecfc0132c426a8a0f29f8bc8fca2dcf8268638d314a3f08cdf19f6501",
+    "workspace": "98ecb5cecfc0132c426a8a0f29f8bc8fca2dcf8268638d314a3f08cdf19f6501",
+    "local": "98ecb5cecfc0132c426a8a0f29f8bc8fca2dcf8268638d314a3f08cdf19f6501",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Tracking/TrackingBoundary.php",
+    "official": "1881c297814c5d41981201534756f43a157be4c5856af31223ddf62f39dcfcb6",
+    "workspace": "1881c297814c5d41981201534756f43a157be4c5856af31223ddf62f39dcfcb6",
+    "local": "1881c297814c5d41981201534756f43a157be4c5856af31223ddf62f39dcfcb6",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Tracking/TrackingController.php",
+    "official": "5662f164a1803ef4f272e8a81d9618ad7cb3e83b125be9323006f2a6cc154e61",
+    "workspace": "5662f164a1803ef4f272e8a81d9618ad7cb3e83b125be9323006f2a6cc154e61",
+    "local": "5662f164a1803ef4f272e8a81d9618ad7cb3e83b125be9323006f2a6cc154e61",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Tracking/TrackingException.php",
+    "official": "146eab530b2ac9fae0f423d9f22b1ca34c3c0e3c5237829f1b013c49ef9b7c79",
+    "workspace": "146eab530b2ac9fae0f423d9f22b1ca34c3c0e3c5237829f1b013c49ef9b7c79",
+    "local": "146eab530b2ac9fae0f423d9f22b1ca34c3c0e3c5237829f1b013c49ef9b7c79",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Tracking/TrackingService.php",
+    "official": "6ac691805c41cb926c0cc981a0798d3fe691f3caec78f81a037d8e16aa08146c",
+    "workspace": "6ac691805c41cb926c0cc981a0798d3fe691f3caec78f81a037d8e16aa08146c",
+    "local": "6ac691805c41cb926c0cc981a0798d3fe691f3caec78f81a037d8e16aa08146c",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Trust/CohortController.php",
+    "official": "41ab69062da7262c8947d12c2e2e180ca5ab3ffdab6ba5c4c6ef604b43e65efe",
+    "workspace": "41ab69062da7262c8947d12c2e2e180ca5ab3ffdab6ba5c4c6ef604b43e65efe",
+    "local": "41ab69062da7262c8947d12c2e2e180ca5ab3ffdab6ba5c4c6ef604b43e65efe",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Trust/CohortGuard.php",
+    "official": "e76ca5063423410df6df0580569892ccdada16afa662c2f0c468483c1f67408a",
+    "workspace": "e76ca5063423410df6df0580569892ccdada16afa662c2f0c468483c1f67408a",
+    "local": "e76ca5063423410df6df0580569892ccdada16afa662c2f0c468483c1f67408a",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Trust/CohortPolicy.php",
+    "official": "4ef1f1bce344d3d78f1d174c115f7a2dff18eadb8d51b3a9b551e6b354ec38fa",
+    "workspace": "4ef1f1bce344d3d78f1d174c115f7a2dff18eadb8d51b3a9b551e6b354ec38fa",
+    "local": "4ef1f1bce344d3d78f1d174c115f7a2dff18eadb8d51b3a9b551e6b354ec38fa",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Trust/DriverOnboardingController.php",
+    "official": "cb559f297cbee7dbf38ba47ddbe35350ffb0965f6eeffe49a643aa2346f6d567",
+    "workspace": "cb559f297cbee7dbf38ba47ddbe35350ffb0965f6eeffe49a643aa2346f6d567",
+    "local": "cb559f297cbee7dbf38ba47ddbe35350ffb0965f6eeffe49a643aa2346f6d567",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "Mobility/Trust/DriverOnboardingPolicy.php",
+    "official": "20274eb5130b5f9f0aa12ceff1e22c791569119e4904fd9d13f07d750f2bb135",
+    "workspace": "20274eb5130b5f9f0aa12ceff1e22c791569119e4904fd9d13f07d750f2bb135",
+    "local": "20274eb5130b5f9f0aa12ceff1e22c791569119e4904fd9d13f07d750f2bb135",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "README.md",
+    "official": "13c8115eb65d97602e1176e90c0c27747035d11f5f3de1c43ddc5adbf150af82",
+    "workspace": "13c8115eb65d97602e1176e90c0c27747035d11f5f3de1c43ddc5adbf150af82",
+    "local": "13c8115eb65d97602e1176e90c0c27747035d11f5f3de1c43ddc5adbf150af82",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "config/college.php",
+    "official": "06e78ae68fe242574c240a3edaeabf8cd4bb6f4f2804a53c4e03bf3ad6a3c050",
+    "workspace": "06e78ae68fe242574c240a3edaeabf8cd4bb6f4f2804a53c4e03bf3ad6a3c050",
+    "local": "06e78ae68fe242574c240a3edaeabf8cd4bb6f4f2804a53c4e03bf3ad6a3c050",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "config/routing.php",
+    "official": "bec0116b1cc520396ba0d18233cfb4fda0acb3c4092ec94aeaa5c096b7474745",
+    "workspace": "bec0116b1cc520396ba0d18233cfb4fda0acb3c4092ec94aeaa5c096b7474745",
+    "local": "bec0116b1cc520396ba0d18233cfb4fda0acb3c4092ec94aeaa5c096b7474745",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_17_000000_create_mobility_lifecycle_tables.php",
+    "official": "ebb2c8aeaca369f7238fb1d1a0780a6f4fdcfe1b96f979991f2ab48698426862",
+    "workspace": "ebb2c8aeaca369f7238fb1d1a0780a6f4fdcfe1b96f979991f2ab48698426862",
+    "local": "ebb2c8aeaca369f7238fb1d1a0780a6f4fdcfe1b96f979991f2ab48698426862",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_17_000100_create_mobility_dropoff_confirmations.php",
+    "official": "6c3ed628ac981663ab1fe1cb7d27b753ee1a876413c0023c4cfdb022b998f094",
+    "workspace": "6c3ed628ac981663ab1fe1cb7d27b753ee1a876413c0023c4cfdb022b998f094",
+    "local": "6c3ed628ac981663ab1fe1cb7d27b753ee1a876413c0023c4cfdb022b998f094",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_17_000200_create_mobility_financial_tables.php",
+    "official": "a3dcd4611d7e6edd61e48fc645f4bed7548e869cd38c19b4b5f44b14be76aa77",
+    "workspace": "a3dcd4611d7e6edd61e48fc645f4bed7548e869cd38c19b4b5f44b14be76aa77",
+    "local": "a3dcd4611d7e6edd61e48fc645f4bed7548e869cd38c19b4b5f44b14be76aa77",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_17_000300_create_mobility_cash_receipts.php",
+    "official": "9df89e4f2e8c416fc0c78384d32e707b277c549865cc97a2a9406049d38b1c0c",
+    "workspace": "9df89e4f2e8c416fc0c78384d32e707b277c549865cc97a2a9406049d38b1c0c",
+    "local": "9df89e4f2e8c416fc0c78384d32e707b277c549865cc97a2a9406049d38b1c0c",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_20_000000_create_mobility_cohort_tables.php",
+    "official": "2f87b96465b9c3599a409fd5215bc2199426ad6b9948d9ac6b544372a6a97ab0",
+    "workspace": "2f87b96465b9c3599a409fd5215bc2199426ad6b9948d9ac6b544372a6a97ab0",
+    "local": "2f87b96465b9c3599a409fd5215bc2199426ad6b9948d9ac6b544372a6a97ab0",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_20_000100_add_cohort_audit_uniqueness.php",
+    "official": "d88b0de6038d2248c1b0be586ae264b0d61709c0b4298df33f2f3e9c9f991902",
+    "workspace": "d88b0de6038d2248c1b0be586ae264b0d61709c0b4298df33f2f3e9c9f991902",
+    "local": "d88b0de6038d2248c1b0be586ae264b0d61709c0b4298df33f2f3e9c9f991902",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_20_000200_create_mobility_routing_tables.php",
+    "official": "627b5e9c750f54140368a943ee5dd2c5bb36acca3c49e546a5cd836f7f923bf7",
+    "workspace": "627b5e9c750f54140368a943ee5dd2c5bb36acca3c49e546a5cd836f7f923bf7",
+    "local": "627b5e9c750f54140368a943ee5dd2c5bb36acca3c49e546a5cd836f7f923bf7",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_20_000300_create_mobility_pool_publications.php",
+    "official": "ab2701ac54af383e23b11730618e271ed6cdd1907d0d4ddd0e5b07ffba403af6",
+    "workspace": "ab2701ac54af383e23b11730618e271ed6cdd1907d0d4ddd0e5b07ffba403af6",
+    "local": "ab2701ac54af383e23b11730618e271ed6cdd1907d0d4ddd0e5b07ffba403af6",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_20_000400_create_mobility_recurring_tables.php",
+    "official": "e947e7df2e549d328388a818add4b1b4e5a686652af0c0a1be0f524c9a770ef1",
+    "workspace": "e947e7df2e549d328388a818add4b1b4e5a686652af0c0a1be0f524c9a770ef1",
+    "local": "e947e7df2e549d328388a818add4b1b4e5a686652af0c0a1be0f524c9a770ef1",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_20_000500_create_mobility_segment_tables.php",
+    "official": "6f3f135a78bfc77c62174e2f37c7146445c1f2516dd61f4a143f8974e1b02e6d",
+    "workspace": "6f3f135a78bfc77c62174e2f37c7146445c1f2516dd61f4a143f8974e1b02e6d",
+    "local": "6f3f135a78bfc77c62174e2f37c7146445c1f2516dd61f4a143f8974e1b02e6d",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_20_000600_create_mobility_dispatch_tables.php",
+    "official": "a60bf5aa054ba09da1621f814580fcb8b50c421c9222df3fb5b090251fd1f048",
+    "workspace": "a60bf5aa054ba09da1621f814580fcb8b50c421c9222df3fb5b090251fd1f048",
+    "local": "a60bf5aa054ba09da1621f814580fcb8b50c421c9222df3fb5b090251fd1f048",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_20_000700_allow_dispatch_reoffer_after_revocation.php",
+    "official": "14788a185319092fa5a5a61fac1ec51bc17fbfcf34c37e2fea9c464dc92b6bd6",
+    "workspace": "14788a185319092fa5a5a61fac1ec51bc17fbfcf34c37e2fea9c464dc92b6bd6",
+    "local": "14788a185319092fa5a5a61fac1ec51bc17fbfcf34c37e2fea9c464dc92b6bd6",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_20_000700_create_mobility_trip_report_requests.php",
+    "official": "b6aecb83255f26d2b38d4c00454141de9ad7e05607726db6f35f266378684502",
+    "workspace": "b6aecb83255f26d2b38d4c00454141de9ad7e05607726db6f35f266378684502",
+    "local": "b6aecb83255f26d2b38d4c00454141de9ad7e05607726db6f35f266378684502",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_20_000800_create_mobility_pickup_previews.php",
+    "official": "659bf1d977b64fa460cf19096bac14be17b54d2de48aa7cd16b59e4c7a525726",
+    "workspace": "659bf1d977b64fa460cf19096bac14be17b54d2de48aa7cd16b59e4c7a525726",
+    "local": "659bf1d977b64fa460cf19096bac14be17b54d2de48aa7cd16b59e4c7a525726",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_20_000810_create_mobility_pickup_agreements.php",
+    "official": "116a45845dd6707301f6867737c215c947bec340b41493275b97f42fb6137aca",
+    "workspace": "116a45845dd6707301f6867737c215c947bec340b41493275b97f42fb6137aca",
+    "local": "116a45845dd6707301f6867737c215c947bec340b41493275b97f42fb6137aca",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_21_000100_create_mobility_driver_onboarding.php",
+    "official": "845862f2aca69f9654b0abf54e18fbf52705de14753891d481164a01de570733",
+    "workspace": "845862f2aca69f9654b0abf54e18fbf52705de14753891d481164a01de570733",
+    "local": "845862f2aca69f9654b0abf54e18fbf52705de14753891d481164a01de570733",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_21_000200_extend_private_trip_tracking.php",
+    "official": "989ed4ad21a1ebbd898d32cd407c92411e3322d813e50689a48e84aad4248e6e",
+    "workspace": "989ed4ad21a1ebbd898d32cd407c92411e3322d813e50689a48e84aad4248e6e",
+    "local": "989ed4ad21a1ebbd898d32cd407c92411e3322d813e50689a48e84aad4248e6e",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_21_000300_create_private_journey_endpoints.php",
+    "official": "22507e1d8d1fd272fc189e3fd40d20e3d1fb531eb9a86ba2b16ed64797b1eba0",
+    "workspace": "22507e1d8d1fd272fc189e3fd40d20e3d1fb531eb9a86ba2b16ed64797b1eba0",
+    "local": "22507e1d8d1fd272fc189e3fd40d20e3d1fb531eb9a86ba2b16ed64797b1eba0",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_21_000400_add_tracking_sample_precision.php",
+    "official": "9d4e1bfb020c20777aca27da4ec78c20f60b519614ecc273e23d8dd2078c5401",
+    "workspace": "9d4e1bfb020c20777aca27da4ec78c20f60b519614ecc273e23d8dd2078c5401",
+    "local": "9d4e1bfb020c20777aca27da4ec78c20f60b519614ecc273e23d8dd2078c5401",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_21_000500_create_private_journey_quotes.php",
+    "official": "62a30032764dedca0f7424bf66ceb29c595df63715c80d89b1f8aa16d2b166b3",
+    "workspace": "62a30032764dedca0f7424bf66ceb29c595df63715c80d89b1f8aa16d2b166b3",
+    "local": "62a30032764dedca0f7424bf66ceb29c595df63715c80d89b1f8aa16d2b166b3",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_21_000600_extend_dispatch_for_private_admission.php",
+    "official": "31c2331a4d6a4fb80b87df67bbb17c7635f2cd211e20600c2b9b7fca2a28dd81",
+    "workspace": "31c2331a4d6a4fb80b87df67bbb17c7635f2cd211e20600c2b9b7fca2a28dd81",
+    "local": "31c2331a4d6a4fb80b87df67bbb17c7635f2cd211e20600c2b9b7fca2a28dd81",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_21_000700_create_trip_communications.php",
+    "official": "88a09cbbc9aacc57c9c6b670c3b12dc1c99154d426bd259c4ea7b1d44e052749",
+    "workspace": "88a09cbbc9aacc57c9c6b670c3b12dc1c99154d426bd259c4ea7b1d44e052749",
+    "local": "88a09cbbc9aacc57c9c6b670c3b12dc1c99154d426bd259c4ea7b1d44e052749",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_22_000100_create_private_scheduled_admissions.php",
+    "official": "362ab38511834686d31c5e0165bbe408f6ded140b6eee7e78172002cdb6f9eae",
+    "workspace": "362ab38511834686d31c5e0165bbe408f6ded140b6eee7e78172002cdb6f9eae",
+    "local": "362ab38511834686d31c5e0165bbe408f6ded140b6eee7e78172002cdb6f9eae",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_22_000110_snapshot_private_scheduled_terms.php",
+    "official": "c9c06d18bc7dedd3b5161fe55ddc72a30f5af23d9ff165186fb015096f0e9077",
+    "workspace": "c9c06d18bc7dedd3b5161fe55ddc72a30f5af23d9ff165186fb015096f0e9077",
+    "local": "c9c06d18bc7dedd3b5161fe55ddc72a30f5af23d9ff165186fb015096f0e9077",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_22_000120_add_private_scheduled_intervals.php",
+    "official": "066f756e8f8586900ab67750c9a438ccd95842094ba8c504408547aa038ab139",
+    "workspace": "066f756e8f8586900ab67750c9a438ccd95842094ba8c504408547aa038ab139",
+    "local": "066f756e8f8586900ab67750c9a438ccd95842094ba8c504408547aa038ab139",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_22_000130_bind_pickup_plans_to_publications.php",
+    "official": "e4ae3474f07f531234353bfce2c771e2a644746a09902884a28b92edc6f07bc7",
+    "workspace": "e4ae3474f07f531234353bfce2c771e2a644746a09902884a28b92edc6f07bc7",
+    "local": "e4ae3474f07f531234353bfce2c771e2a644746a09902884a28b92edc6f07bc7",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_22_000140_create_college_email_auth_tables.php",
+    "official": "1825887efb9329d41a16e569bc3ed09b75759530a5d8badc927b25ac2c81e02d",
+    "workspace": "1825887efb9329d41a16e569bc3ed09b75759530a5d8badc927b25ac2c81e02d",
+    "local": "1825887efb9329d41a16e569bc3ed09b75759530a5d8badc927b25ac2c81e02d",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_22_000150_create_commute_product_tables.php",
+    "official": "ffe93a1ecbfa52209e7756457227750178a9e00514a015f7d9a07ffc94cb5011",
+    "workspace": "ffe93a1ecbfa52209e7756457227750178a9e00514a015f7d9a07ffc94cb5011",
+    "local": "ffe93a1ecbfa52209e7756457227750178a9e00514a015f7d9a07ffc94cb5011",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_22_000160_create_college_otp_rate_windows.php",
+    "official": "4b2d2c15d22a4d98c3c0955525d40d9bd1399666360b1d7c299092c75be6aa84",
+    "workspace": "4b2d2c15d22a4d98c3c0955525d40d9bd1399666360b1d7c299092c75be6aa84",
+    "local": "4b2d2c15d22a4d98c3c0955525d40d9bd1399666360b1d7c299092c75be6aa84",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "migrations/2026_10_22_000170_add_commute_matching.php",
+    "official": "db4d598ea8e0fc949ac1d0e41b8e205d408de2b27f15acce846f227130c362d9",
+    "workspace": "db4d598ea8e0fc949ac1d0e41b8e205d408de2b27f15acce846f227130c362d9",
+    "local": "db4d598ea8e0fc949ac1d0e41b8e205d408de2b27f15acce846f227130c362d9",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "probes/driver-reservations.php",
+    "official": "03d9d0a9c1eac8dca550197f032d3e4c51393f28f71c68eb3b91820c5cb47f4c",
+    "workspace": "03d9d0a9c1eac8dca550197f032d3e4c51393f28f71c68eb3b91820c5cb47f4c",
+    "local": "03d9d0a9c1eac8dca550197f032d3e4c51393f28f71c68eb3b91820c5cb47f4c",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "probes/pickup-agreements.php",
+    "official": "9acc166abaec96371e4bb29a33b9ae95b407f8a3039ebd4b99569a02bc78a789",
+    "workspace": "9acc166abaec96371e4bb29a33b9ae95b407f8a3039ebd4b99569a02bc78a789",
+    "local": "9acc166abaec96371e4bb29a33b9ae95b407f8a3039ebd4b99569a02bc78a789",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "probes/private-journey-admission.php",
+    "official": "1e4d6bbebd680bf13b48e04dc3b054eae998eb2d6b7512b52c17523b11254b19",
+    "workspace": "1e4d6bbebd680bf13b48e04dc3b054eae998eb2d6b7512b52c17523b11254b19",
+    "local": "1e4d6bbebd680bf13b48e04dc3b054eae998eb2d6b7512b52c17523b11254b19",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "probes/private-scheduled-admission.php",
+    "official": "91dd47876daed8c4da15c8cd1518cd18d7906fbb477a8738117fba839f5adf3b",
+    "workspace": "91dd47876daed8c4da15c8cd1518cd18d7906fbb477a8738117fba839f5adf3b",
+    "local": "91dd47876daed8c4da15c8cd1518cd18d7906fbb477a8738117fba839f5adf3b",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "routes/college-auth.php",
+    "official": "2241cd4853a995fb2b0c33e0ec14f09ea94b4bf6e7bb7019179a6b4af6970472",
+    "workspace": "2241cd4853a995fb2b0c33e0ec14f09ea94b4bf6e7bb7019179a6b4af6970472",
+    "local": "2241cd4853a995fb2b0c33e0ec14f09ea94b4bf6e7bb7019179a6b4af6970472",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "routes/communications.php",
+    "official": "ba8bf535e05e92c01be1ebcdb37477aad908114d81cc296f6ac70b34741e9c92",
+    "workspace": "ba8bf535e05e92c01be1ebcdb37477aad908114d81cc296f6ac70b34741e9c92",
+    "local": "ba8bf535e05e92c01be1ebcdb37477aad908114d81cc296f6ac70b34741e9c92",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "routes/commute.php",
+    "official": "98844f614403e3a30d8f7bdab9589b4fbc0df0e23a74f12c7604b68b717ca04e",
+    "workspace": "98844f614403e3a30d8f7bdab9589b4fbc0df0e23a74f12c7604b68b717ca04e",
+    "local": "98844f614403e3a30d8f7bdab9589b4fbc0df0e23a74f12c7604b68b717ca04e",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "routes/driver-onboarding.php",
+    "official": "1bff681e1974405aa270f80a361dfa5cc04a65342e0e8bbc949ca5523e311140",
+    "workspace": "1bff681e1974405aa270f80a361dfa5cc04a65342e0e8bbc949ca5523e311140",
+    "local": "1bff681e1974405aa270f80a361dfa5cc04a65342e0e8bbc949ca5523e311140",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "routes/mobility.php",
+    "official": "d48edbfdc5da92f5b70c5396abcd4c5da805af6e32250f424bb4297858769943",
+    "workspace": "d48edbfdc5da92f5b70c5396abcd4c5da805af6e32250f424bb4297858769943",
+    "local": "d48edbfdc5da92f5b70c5396abcd4c5da805af6e32250f424bb4297858769943",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "routes/private-journeys.php",
+    "official": "c9bb73a79c61808ec626100f4415567fdcb792282bf9fd655533f15b8baa6712",
+    "workspace": "c9bb73a79c61808ec626100f4415567fdcb792282bf9fd655533f15b8baa6712",
+    "local": "c9bb73a79c61808ec626100f4415567fdcb792282bf9fd655533f15b8baa6712",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "routes/private-quotes.php",
+    "official": "cc2f88590f1a12efa17b690bc2dcb30eacece6a3a38129402bb4c51cb6265676",
+    "workspace": "cc2f88590f1a12efa17b690bc2dcb30eacece6a3a38129402bb4c51cb6265676",
+    "local": "cc2f88590f1a12efa17b690bc2dcb30eacece6a3a38129402bb4c51cb6265676",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "routes/private-scheduled.php",
+    "official": "3b57d11ccac054fa26511581972e74506e986a31d50fcd6a6ff1d4f07478d631",
+    "workspace": "3b57d11ccac054fa26511581972e74506e986a31d50fcd6a6ff1d4f07478d631",
+    "local": "3b57d11ccac054fa26511581972e74506e986a31d50fcd6a6ff1d4f07478d631",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "routes/tracking.php",
+    "official": "5f964296d1049d1664c267cb66a331a2549d8ca7670a48cec86321ee6ac19a74",
+    "workspace": "5f964296d1049d1664c267cb66a331a2549d8ca7670a48cec86321ee6ac19a74",
+    "local": "5f964296d1049d1664c267cb66a331a2549d8ca7670a48cec86321ee6ac19a74",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/DriverOnboardingHttpTest.php",
+    "official": "bf4516024f1d0d40cf40f80ba2a174da9dfb0685af39b71e8191b0b7bd912a0e",
+    "workspace": "bf4516024f1d0d40cf40f80ba2a174da9dfb0685af39b71e8191b0b7bd912a0e",
+    "local": "bf4516024f1d0d40cf40f80ba2a174da9dfb0685af39b71e8191b0b7bd912a0e",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityCanonicalRouteIntervalProjectorTest.php",
+    "official": "3ff156349ffcae4790f6c45c20acc90ffe9f2d6fa115f251c1fc3e525d1fdee1",
+    "workspace": "3ff156349ffcae4790f6c45c20acc90ffe9f2d6fa115f251c1fc3e525d1fdee1",
+    "local": "3ff156349ffcae4790f6c45c20acc90ffe9f2d6fa115f251c1fc3e525d1fdee1",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityCanonicalRouteLegSliceTest.php",
+    "official": "46735b9148c08dea9a840305721d814ccf8c535bcb20f325b966f709611743a8",
+    "workspace": "46735b9148c08dea9a840305721d814ccf8c535bcb20f325b966f709611743a8",
+    "local": "46735b9148c08dea9a840305721d814ccf8c535bcb20f325b966f709611743a8",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityCaptureVerificationTest.php",
+    "official": "c3ba4c7474974c965e51ecc59330081665f42579957e5341a7c8271197ae7a21",
+    "workspace": "c3ba4c7474974c965e51ecc59330081665f42579957e5341a7c8271197ae7a21",
+    "local": "c3ba4c7474974c965e51ecc59330081665f42579957e5341a7c8271197ae7a21",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityCashHttpTest.php",
+    "official": "a50f578760f6b73ebdae360f0662866988ed3b95a74c84f4b544cf109ff694e9",
+    "workspace": "a50f578760f6b73ebdae360f0662866988ed3b95a74c84f4b544cf109ff694e9",
+    "local": "a50f578760f6b73ebdae360f0662866988ed3b95a74c84f4b544cf109ff694e9",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityCashReceiptTest.php",
+    "official": "2e818fd21bc7db544fe0b3b8eb8616fcf9ed4c9df6748bc5e479bc83325b2ca7",
+    "workspace": "2e818fd21bc7db544fe0b3b8eb8616fcf9ed4c9df6748bc5e479bc83325b2ca7",
+    "local": "2e818fd21bc7db544fe0b3b8eb8616fcf9ed4c9df6748bc5e479bc83325b2ca7",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityCohortAdmissionTest.php",
+    "official": "1e753809355d52bb42f0a7e08b93ad00e28149be87c3549400342a198a0b56c0",
+    "workspace": "1e753809355d52bb42f0a7e08b93ad00e28149be87c3549400342a198a0b56c0",
+    "local": "1e753809355d52bb42f0a7e08b93ad00e28149be87c3549400342a198a0b56c0",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityCohortGuardTest.php",
+    "official": "f5856e114f72bb7cf31b9f1491be3831ab678e449cef7dae0256b4d99b4dfddd",
+    "workspace": "f5856e114f72bb7cf31b9f1491be3831ab678e449cef7dae0256b4d99b4dfddd",
+    "local": "f5856e114f72bb7cf31b9f1491be3831ab678e449cef7dae0256b4d99b4dfddd",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityCohortHttpTest.php",
+    "official": "fdbd058b3bc48cc33a74e0c28483f25474796db8edc76320be5b719ab2a35fbc",
+    "workspace": "fdbd058b3bc48cc33a74e0c28483f25474796db8edc76320be5b719ab2a35fbc",
+    "local": "fdbd058b3bc48cc33a74e0c28483f25474796db8edc76320be5b719ab2a35fbc",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityCohortSecurityTest.php",
+    "official": "cfeaa0001ec1e174cc84e84ba752aaedfa0880d92aa7bb23b4a29242b6920660",
+    "workspace": "cfeaa0001ec1e174cc84e84ba752aaedfa0880d92aa7bb23b4a29242b6920660",
+    "local": "cfeaa0001ec1e174cc84e84ba752aaedfa0880d92aa7bb23b4a29242b6920660",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityCommuteProductTest.php",
+    "official": "a4dd1341b78df41d242c4f6cf2a714f7e69488cb1707c3889f92d265b4e2f56b",
+    "workspace": "96ab1c53e0b97f6c051ba0f58145d7e8bb62de972fef6becf9a05ba9559c124c",
+    "local": "96ab1c53e0b97f6c051ba0f58145d7e8bb62de972fef6becf9a05ba9559c124c",
+    "workspace_equal": false,
+    "local_equal": false
+  },
+  {
+    "path": "tests/MobilityDispatchFactoryTest.php",
+    "official": "229b0bf09d0ca0ab70109666daef2a27489f974901634b5d229c38526500e9e6",
+    "workspace": "229b0bf09d0ca0ab70109666daef2a27489f974901634b5d229c38526500e9e6",
+    "local": "229b0bf09d0ca0ab70109666daef2a27489f974901634b5d229c38526500e9e6",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityDispatchFailureTest.php",
+    "official": "452cf886c0a9721d82c6dfea4ba2eab98a1be56a748f23ebfa1d89396a42f701",
+    "workspace": "452cf886c0a9721d82c6dfea4ba2eab98a1be56a748f23ebfa1d89396a42f701",
+    "local": "452cf886c0a9721d82c6dfea4ba2eab98a1be56a748f23ebfa1d89396a42f701",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityDispatchServiceTest.php",
+    "official": "92387178449a696c2889c9d21bbf61a03645f5dc26e44cefdb5d25d5f2666b3b",
+    "workspace": "92387178449a696c2889c9d21bbf61a03645f5dc26e44cefdb5d25d5f2666b3b",
+    "local": "92387178449a696c2889c9d21bbf61a03645f5dc26e44cefdb5d25d5f2666b3b",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityDispatchWorkerCommandTest.php",
+    "official": "ac602136eba0bae4df7439ead50eab14b8a7f7e3c1ff9f97dbab68abb8c83ef7",
+    "workspace": "ac602136eba0bae4df7439ead50eab14b8a7f7e3c1ff9f97dbab68abb8c83ef7",
+    "local": "ac602136eba0bae4df7439ead50eab14b8a7f7e3c1ff9f97dbab68abb8c83ef7",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityDriverProfileBridgeTest.php",
+    "official": "4433abb75040f733dc6b1dd4110ec785043d66927d4466301fa89f938b32bf44",
+    "workspace": "4433abb75040f733dc6b1dd4110ec785043d66927d4466301fa89f938b32bf44",
+    "local": "4433abb75040f733dc6b1dd4110ec785043d66927d4466301fa89f938b32bf44",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityDropoffTest.php",
+    "official": "44304c8a3bf73fb5155311c9517c3d98b6e67ce69ecb57d0b8cc3fe67122da1d",
+    "workspace": "44304c8a3bf73fb5155311c9517c3d98b6e67ce69ecb57d0b8cc3fe67122da1d",
+    "local": "44304c8a3bf73fb5155311c9517c3d98b6e67ce69ecb57d0b8cc3fe67122da1d",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityFinancialInvariantsTest.php",
+    "official": "afda9e6042e2a36e3bf8d6d1ce72a92921d20be9d1bc55bf24eb5ae32da8869c",
+    "workspace": "afda9e6042e2a36e3bf8d6d1ce72a92921d20be9d1bc55bf24eb5ae32da8869c",
+    "local": "afda9e6042e2a36e3bf8d6d1ce72a92921d20be9d1bc55bf24eb5ae32da8869c",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityJourneyPlannerTest.php",
+    "official": "a4ac2c2c0c839c23759d46d3933cf053e0790b8380e83061d2f213e630b8a7ee",
+    "workspace": "a4ac2c2c0c839c23759d46d3933cf053e0790b8380e83061d2f213e630b8a7ee",
+    "local": "a4ac2c2c0c839c23759d46d3933cf053e0790b8380e83061d2f213e630b8a7ee",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityLegacyPaymentGuardTest.php",
+    "official": "c65a9615a8932cc0203c4df957550d240b8d81ddac9ea64df516b552d1a23b29",
+    "workspace": "c65a9615a8932cc0203c4df957550d240b8d81ddac9ea64df516b552d1a23b29",
+    "local": "c65a9615a8932cc0203c4df957550d240b8d81ddac9ea64df516b552d1a23b29",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityLifecycleTest.php",
+    "official": "0681ded2d3ea17ccde97b183d1f5635da40b73c13d15f8bb02aca754d4072ddd",
+    "workspace": "0681ded2d3ea17ccde97b183d1f5635da40b73c13d15f8bb02aca754d4072ddd",
+    "local": "0681ded2d3ea17ccde97b183d1f5635da40b73c13d15f8bb02aca754d4072ddd",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityMultiStopQuotesTest.php",
+    "official": "7b753f7581fddcb677db46e5b83c12eef10caa83b79fd8de34315c7162408149",
+    "workspace": "7b753f7581fddcb677db46e5b83c12eef10caa83b79fd8de34315c7162408149",
+    "local": "7b753f7581fddcb677db46e5b83c12eef10caa83b79fd8de34315c7162408149",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityOfferDiscoveryTest.php",
+    "official": "6e1ecb20ed4ceb96024ab4e86220ac0f82eb85481e50d7b227b5009631eec6a6",
+    "workspace": "6e1ecb20ed4ceb96024ab4e86220ac0f82eb85481e50d7b227b5009631eec6a6",
+    "local": "6e1ecb20ed4ceb96024ab4e86220ac0f82eb85481e50d7b227b5009631eec6a6",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityOperatorCashQueueHttpTest.php",
+    "official": "bbfcf67a09d59dc96413137ceb5cbe3f350252aa5dc59160764b6669bb5f1946",
+    "workspace": "bbfcf67a09d59dc96413137ceb5cbe3f350252aa5dc59160764b6669bb5f1946",
+    "local": "bbfcf67a09d59dc96413137ceb5cbe3f350252aa5dc59160764b6669bb5f1946",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityPaymentViewsTest.php",
+    "official": "72fd0af21783b665f65d86dee0c44bd814ae8cc8780ba6251917094af80ab6bc",
+    "workspace": "72fd0af21783b665f65d86dee0c44bd814ae8cc8780ba6251917094af80ab6bc",
+    "local": "72fd0af21783b665f65d86dee0c44bd814ae8cc8780ba6251917094af80ab6bc",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityPaymentsTest.php",
+    "official": "810f5d753208cafa5116d824ea05308e0c23e5e37c29290c77b71c06a78a06db",
+    "workspace": "810f5d753208cafa5116d824ea05308e0c23e5e37c29290c77b71c06a78a06db",
+    "local": "810f5d753208cafa5116d824ea05308e0c23e5e37c29290c77b71c06a78a06db",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityPickupAgreementTest.php",
+    "official": "06dea575c5dea1ac34c168903f8af9bf2cebe3bab426fe36dcc61e5fc56a68c4",
+    "workspace": "06dea575c5dea1ac34c168903f8af9bf2cebe3bab426fe36dcc61e5fc56a68c4",
+    "local": "06dea575c5dea1ac34c168903f8af9bf2cebe3bab426fe36dcc61e5fc56a68c4",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityPickupPathProviderTest.php",
+    "official": "4da074b56ab57cc144899fa082a9575bd16cfea6e2d37a0d716eb3624bff2297",
+    "workspace": "4da074b56ab57cc144899fa082a9575bd16cfea6e2d37a0d716eb3624bff2297",
+    "local": "4da074b56ab57cc144899fa082a9575bd16cfea6e2d37a0d716eb3624bff2297",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityPickupPreviewApiTest.php",
+    "official": "4441b0ecf4068f13cc8c5a2dcb95fdfba205e6a2547d0631c03cf69bfb5920b9",
+    "workspace": "4441b0ecf4068f13cc8c5a2dcb95fdfba205e6a2547d0631c03cf69bfb5920b9",
+    "local": "4441b0ecf4068f13cc8c5a2dcb95fdfba205e6a2547d0631c03cf69bfb5920b9",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityPickupPreviewPlannerTest.php",
+    "official": "604e30042e8df3fd6c756b91f5b367015abb2f84437dc21d955ee09d36bcfaa9",
+    "workspace": "604e30042e8df3fd6c756b91f5b367015abb2f84437dc21d955ee09d36bcfaa9",
+    "local": "604e30042e8df3fd6c756b91f5b367015abb2f84437dc21d955ee09d36bcfaa9",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityPickupPreviewRealRoadTest.php",
+    "official": "91246d9f4a05892fd05cb23c9a9272726955edd8788c9e591e53ff3a0a513f93",
+    "workspace": "91246d9f4a05892fd05cb23c9a9272726955edd8788c9e591e53ff3a0a513f93",
+    "local": "91246d9f4a05892fd05cb23c9a9272726955edd8788c9e591e53ff3a0a513f93",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityPilotOfferHttpTest.php",
+    "official": "d358a649c17cd95585599ed705b4cf53e41c7728d5a934a3d6b73f07c47a7f72",
+    "workspace": "d358a649c17cd95585599ed705b4cf53e41c7728d5a934a3d6b73f07c47a7f72",
+    "local": "d358a649c17cd95585599ed705b4cf53e41c7728d5a934a3d6b73f07c47a7f72",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityPilotPageTest.php",
+    "official": "8b218c9cd555ea722e1e4709965319291afb751dc6d0b2e593766d1f016bbe85",
+    "workspace": "8b218c9cd555ea722e1e4709965319291afb751dc6d0b2e593766d1f016bbe85",
+    "local": "8b218c9cd555ea722e1e4709965319291afb751dc6d0b2e593766d1f016bbe85",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityPoolOfferHttpTest.php",
+    "official": "dd8ef740aeff4ab45d20acbcc91c0dfef7dafc43b2e19573adc5431caa5a7735",
+    "workspace": "dd8ef740aeff4ab45d20acbcc91c0dfef7dafc43b2e19573adc5431caa5a7735",
+    "local": "dd8ef740aeff4ab45d20acbcc91c0dfef7dafc43b2e19573adc5431caa5a7735",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityPrivateCanonicalContextTest.php",
+    "official": "26fc7d612a112893446507997f3bae24cce2d86f7e8e5911fe995187cfdc9e30",
+    "workspace": "26fc7d612a112893446507997f3bae24cce2d86f7e8e5911fe995187cfdc9e30",
+    "local": "26fc7d612a112893446507997f3bae24cce2d86f7e8e5911fe995187cfdc9e30",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityPrivateDispatchSafetyTest.php",
+    "official": "d7a8939dd9d48c1e15ba47238e9d0a3fa96b84ca182a01b2fafcd8963aaeee9c",
+    "workspace": "d7a8939dd9d48c1e15ba47238e9d0a3fa96b84ca182a01b2fafcd8963aaeee9c",
+    "local": "d7a8939dd9d48c1e15ba47238e9d0a3fa96b84ca182a01b2fafcd8963aaeee9c",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityPrivateEndpointsTest.php",
+    "official": "7a172707aa6937a2a0cd82a541f688e523a4bbfd880d52b924dd5f10164ccac4",
+    "workspace": "7a172707aa6937a2a0cd82a541f688e523a4bbfd880d52b924dd5f10164ccac4",
+    "local": "7a172707aa6937a2a0cd82a541f688e523a4bbfd880d52b924dd5f10164ccac4",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityPrivateIntervalInventoryTest.php",
+    "official": "0bf9978f13857fbb8ae05b75f9d9993d4b3eb4b32fce6eafd6a2df3bb7abfafd",
+    "workspace": "0bf9978f13857fbb8ae05b75f9d9993d4b3eb4b32fce6eafd6a2df3bb7abfafd",
+    "local": "0bf9978f13857fbb8ae05b75f9d9993d4b3eb4b32fce6eafd6a2df3bb7abfafd",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityPrivateJourneyQuoteTest.php",
+    "official": "cb256545c12224b663313c25da02abba8f8348166053140fdaa624946bc655d9",
+    "workspace": "cb256545c12224b663313c25da02abba8f8348166053140fdaa624946bc655d9",
+    "local": "cb256545c12224b663313c25da02abba8f8348166053140fdaa624946bc655d9",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityPrivateScheduledIntervalsTest.php",
+    "official": "93188b16a2b6ae7a34304b16598ecd946a958af1ce8d425cc0216f8b3f38eae2",
+    "workspace": "93188b16a2b6ae7a34304b16598ecd946a958af1ce8d425cc0216f8b3f38eae2",
+    "local": "93188b16a2b6ae7a34304b16598ecd946a958af1ce8d425cc0216f8b3f38eae2",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityRealRoadJourneyTest.php",
+    "official": "f10c5707ed751bee173a110420d7581be239d837fe6fe46a14eaaf3182e8575a",
+    "workspace": "f10c5707ed751bee173a110420d7581be239d837fe6fe46a14eaaf3182e8575a",
+    "local": "f10c5707ed751bee173a110420d7581be239d837fe6fe46a14eaaf3182e8575a",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityRecurringAdmissionTest.php",
+    "official": "de3265a38e20b42456473fcc12b5b6af12950bd4add8cbec0e01b1c0bd7d6f69",
+    "workspace": "de3265a38e20b42456473fcc12b5b6af12950bd4add8cbec0e01b1c0bd7d6f69",
+    "local": "de3265a38e20b42456473fcc12b5b6af12950bd4add8cbec0e01b1c0bd7d6f69",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityRecurringControlTest.php",
+    "official": "8a146ea9cdacab756e42f51128e2b8de1f64a245b9d3b6d81c6196bc05630cad",
+    "workspace": "8a146ea9cdacab756e42f51128e2b8de1f64a245b9d3b6d81c6196bc05630cad",
+    "local": "8a146ea9cdacab756e42f51128e2b8de1f64a245b9d3b6d81c6196bc05630cad",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityRecurringGenerationTest.php",
+    "official": "cd533992e18990c440ce954a77af90963f4bfada193b593c3da4ce5662ea9597",
+    "workspace": "cd533992e18990c440ce954a77af90963f4bfada193b593c3da4ce5662ea9597",
+    "local": "cd533992e18990c440ce954a77af90963f4bfada193b593c3da4ce5662ea9597",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityRecurringProgramsHttpTest.php",
+    "official": "3753f0f204958441a9ff1b3da39c0aa652e6dd5f9ee9f390b88cda4ca6823c9d",
+    "workspace": "3753f0f204958441a9ff1b3da39c0aa652e6dd5f9ee9f390b88cda4ca6823c9d",
+    "local": "3753f0f204958441a9ff1b3da39c0aa652e6dd5f9ee9f390b88cda4ca6823c9d",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityRecurringRecoveryHttpTest.php",
+    "official": "95214b2df6b13b256fc9518440e5c87b0656bba28bfafa8db483b319985a6455",
+    "workspace": "95214b2df6b13b256fc9518440e5c87b0656bba28bfafa8db483b319985a6455",
+    "local": "95214b2df6b13b256fc9518440e5c87b0656bba28bfafa8db483b319985a6455",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityRoutingProviderTest.php",
+    "official": "8c360859a16cdafc4f2eeea6541e624195ec650412c9c46c895f3fe498914e56",
+    "workspace": "8c360859a16cdafc4f2eeea6541e624195ec650412c9c46c895f3fe498914e56",
+    "local": "8c360859a16cdafc4f2eeea6541e624195ec650412c9c46c895f3fe498914e56",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityRoutingQuoteTest.php",
+    "official": "c16b758f394308ed5accd08502598ace3b9a8c66c60e80ce4c0c0e7702d24ab1",
+    "workspace": "c16b758f394308ed5accd08502598ace3b9a8c66c60e80ce4c0c0e7702d24ab1",
+    "local": "c16b758f394308ed5accd08502598ace3b9a8c66c60e80ce4c0c0e7702d24ab1",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilitySegmentBookingTest.php",
+    "official": "39cccbd12074e9e414416a1444545bbd47eafc1387d5e5f70ef8d8592c1ea479",
+    "workspace": "ff4731816cc8d6dc5f85ba6788bd8cd1e5c956852d4a7d827592ce30160f75f2",
+    "local": "ff4731816cc8d6dc5f85ba6788bd8cd1e5c956852d4a7d827592ce30160f75f2",
+    "workspace_equal": false,
+    "local_equal": false
+  },
+  {
+    "path": "tests/MobilitySupportPrivacyHttpTest.php",
+    "official": "84914a21a8d8017af159a4f31710cdf90bf2244296fbbe0d49b433230ccecbc1",
+    "workspace": "84914a21a8d8017af159a4f31710cdf90bf2244296fbbe0d49b433230ccecbc1",
+    "local": "84914a21a8d8017af159a4f31710cdf90bf2244296fbbe0d49b433230ccecbc1",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityTrackingHttpTest.php",
+    "official": "fc75050e8c3aec1e3e29f184e42855e8ef71cf64561843c945350f975a41bebe",
+    "workspace": "fc75050e8c3aec1e3e29f184e42855e8ef71cf64561843c945350f975a41bebe",
+    "local": "fc75050e8c3aec1e3e29f184e42855e8ef71cf64561843c945350f975a41bebe",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityTripCommunicationHttpTest.php",
+    "official": "884b3fc8966d3f39bbde84149480c6b4e69e77e4b855be0ee1aaf85b560c750b",
+    "workspace": "884b3fc8966d3f39bbde84149480c6b4e69e77e4b855be0ee1aaf85b560c750b",
+    "local": "884b3fc8966d3f39bbde84149480c6b4e69e77e4b855be0ee1aaf85b560c750b",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/MobilityTripReportHttpTest.php",
+    "official": "d80414dc9df33fba5ae7d7b58a7fb8ba3c1b6aa7defa32db91a6244de21385eb",
+    "workspace": "d80414dc9df33fba5ae7d7b58a7fb8ba3c1b6aa7defa32db91a6244de21385eb",
+    "local": "d80414dc9df33fba5ae7d7b58a7fb8ba3c1b6aa7defa32db91a6244de21385eb",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/RouteSegmentMatcherStandalone.php",
+    "official": "ff1828f575f607b810b748236193f744d010e22b381066c5208851bfeeeded52",
+    "workspace": "44d6c6562b8bc170e13e926d3241c1bd8bfe5c473cfc43ca9a988bb50f0cf14a",
+    "local": "44d6c6562b8bc170e13e926d3241c1bd8bfe5c473cfc43ca9a988bb50f0cf14a",
+    "workspace_equal": false,
+    "local_equal": false
+  },
+  {
+    "path": "tests/WeeklySchedulePreviewHttpTest.php",
+    "official": "9043d5d70534de6e9042634b0a4c9bf93202a594d008817a6e3b3a4b223e5dde",
+    "workspace": "9043d5d70534de6e9042634b0a4c9bf93202a594d008817a6e3b3a4b223e5dde",
+    "local": "9043d5d70534de6e9042634b0a4c9bf93202a594d008817a6e3b3a4b223e5dde",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tests/WeeklySchedulePreviewStandalone.php",
+    "official": "1ebfe23a2252ab7272ffcfb9be8ab75f848535e78e42e5076250572b448d8593",
+    "workspace": "1ebfe23a2252ab7272ffcfb9be8ab75f848535e78e42e5076250572b448d8593",
+    "local": "1ebfe23a2252ab7272ffcfb9be8ab75f848535e78e42e5076250572b448d8593",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tools/probe-local-road-provider.php",
+    "official": "4cb593e13eb4343971440432050df8b92fc8696ed471bd65b340b782575ceddc",
+    "workspace": "4cb593e13eb4343971440432050df8b92fc8696ed471bd65b340b782575ceddc",
+    "local": "4cb593e13eb4343971440432050df8b92fc8696ed471bd65b340b782575ceddc",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tools/seed-local-pilot.php",
+    "official": "363ea40439127007b7adc8159148bf42cacea6e5dd6169e5ac44661de6570879",
+    "workspace": "363ea40439127007b7adc8159148bf42cacea6e5dd6169e5ac44661de6570879",
+    "local": "363ea40439127007b7adc8159148bf42cacea6e5dd6169e5ac44661de6570879",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "tools/seed-local-routing.php",
+    "official": "d5deea9f0cf4188c92356e1aec46c997eb5db765ab97bcb509798ba14c353f7a",
+    "workspace": "d5deea9f0cf4188c92356e1aec46c997eb5db765ab97bcb509798ba14c353f7a",
+    "local": "d5deea9f0cf4188c92356e1aec46c997eb5db765ab97bcb509798ba14c353f7a",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "web/app.css",
+    "official": "cb0eeabd70a291a9be76526203143e65e9e350a841e0877f69ae199006712ad5",
+    "workspace": "cb0eeabd70a291a9be76526203143e65e9e350a841e0877f69ae199006712ad5",
+    "local": "cb0eeabd70a291a9be76526203143e65e9e350a841e0877f69ae199006712ad5",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "web/app.js",
+    "official": "a500a9ef61e5c68c0dc00d1974bfb3e46ba488f2802d75e81d8227fcf7553820",
+    "workspace": "a500a9ef61e5c68c0dc00d1974bfb3e46ba488f2802d75e81d8227fcf7553820",
+    "local": "a500a9ef61e5c68c0dc00d1974bfb3e46ba488f2802d75e81d8227fcf7553820",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "web/commute-map.mjs",
+    "official": "c196fc766fd087386ae8fab3f17430d8811d9810425f6f5c52592c003084c068",
+    "workspace": "c196fc766fd087386ae8fab3f17430d8811d9810425f6f5c52592c003084c068",
+    "local": "c196fc766fd087386ae8fab3f17430d8811d9810425f6f5c52592c003084c068",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "web/commute.css",
+    "official": "1fb8c281da958548dacbd488a19a2250ccb673b0008bbcfc9bb1737ca8e30239",
+    "workspace": "1fb8c281da958548dacbd488a19a2250ccb673b0008bbcfc9bb1737ca8e30239",
+    "local": "1fb8c281da958548dacbd488a19a2250ccb673b0008bbcfc9bb1737ca8e30239",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "web/commute.html",
+    "official": "44ed0058f6f2925f079a275f17040b89a9b99f0cebb117f70fc638a6a9e46ba3",
+    "workspace": "44ed0058f6f2925f079a275f17040b89a9b99f0cebb117f70fc638a6a9e46ba3",
+    "local": "44ed0058f6f2925f079a275f17040b89a9b99f0cebb117f70fc638a6a9e46ba3",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "web/commute.mjs",
+    "official": "62f4f72e110f43cb2e41d90037a8a722acd8e02b8130e7cfcb09df4af66f82d4",
+    "workspace": "62f4f72e110f43cb2e41d90037a8a722acd8e02b8130e7cfcb09df4af66f82d4",
+    "local": "e4dd420b2121b6a954e38be0ac39ce168ec4f9c5500eb11871d5449742aae34d",
+    "workspace_equal": true,
+    "local_equal": false
+  },
+  {
+    "path": "web/driver-onboarding-ui.test.mjs",
+    "official": "4ed43e36f09cddbafed9fbc60cd5b5efeeb8672086ef1835fa964616fdf4c5d0",
+    "workspace": "4ed43e36f09cddbafed9fbc60cd5b5efeeb8672086ef1835fa964616fdf4c5d0",
+    "local": "4ed43e36f09cddbafed9fbc60cd5b5efeeb8672086ef1835fa964616fdf4c5d0",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "web/index.html",
+    "official": "79e8d8a5b91e44212ec4a1f9e17643eb2b224b1cc07267b3927b4286dd1cd47f",
+    "workspace": "79e8d8a5b91e44212ec4a1f9e17643eb2b224b1cc07267b3927b4286dd1cd47f",
+    "local": "79e8d8a5b91e44212ec4a1f9e17643eb2b224b1cc07267b3927b4286dd1cd47f",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "web/maps-state.mjs",
+    "official": "d5ef4f92d14c872e4ef757d62e927612dc90aed0c4d1eaa1ceb44d8e0a35e631",
+    "workspace": "d5ef4f92d14c872e4ef757d62e927612dc90aed0c4d1eaa1ceb44d8e0a35e631",
+    "local": "d5ef4f92d14c872e4ef757d62e927612dc90aed0c4d1eaa1ceb44d8e0a35e631",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "web/maps.css",
+    "official": "e07ea6707505546c4bb715b8bb7f6d98abce58019a1f8bec841d8726dfbb4a2a",
+    "workspace": "e07ea6707505546c4bb715b8bb7f6d98abce58019a1f8bec841d8726dfbb4a2a",
+    "local": "e07ea6707505546c4bb715b8bb7f6d98abce58019a1f8bec841d8726dfbb4a2a",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "web/maps.html",
+    "official": "a5fe1fc4ffa02e49039915574297b16da7b4f6e317e543f2ef54256f411d2be5",
+    "workspace": "a5fe1fc4ffa02e49039915574297b16da7b4f6e317e543f2ef54256f411d2be5",
+    "local": "a5fe1fc4ffa02e49039915574297b16da7b4f6e317e543f2ef54256f411d2be5",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "web/maps.js",
+    "official": "eadae280d105c71d1bb6a8c9d4945d6b15487057b408223b305f798df4f84e73",
+    "workspace": "eadae280d105c71d1bb6a8c9d4945d6b15487057b408223b305f798df4f84e73",
+    "local": "eadae280d105c71d1bb6a8c9d4945d6b15487057b408223b305f798df4f84e73",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "web/place-search.mjs",
+    "official": "5ba000ed73d90eee5a9bcb5ff54b0a7b260cd38ab71253744f8b96d99f75e1e4",
+    "workspace": "5ba000ed73d90eee5a9bcb5ff54b0a7b260cd38ab71253744f8b96d99f75e1e4",
+    "local": "5ba000ed73d90eee5a9bcb5ff54b0a7b260cd38ab71253744f8b96d99f75e1e4",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "web/private-journey-ui.mjs",
+    "official": "706f0f39611c937e18fd5b88b97f2cc8aea1cd4fb1c01084443c6275aebda363",
+    "workspace": "706f0f39611c937e18fd5b88b97f2cc8aea1cd4fb1c01084443c6275aebda363",
+    "local": "706f0f39611c937e18fd5b88b97f2cc8aea1cd4fb1c01084443c6275aebda363",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "web/tracking-state.mjs",
+    "official": "03078dc52ed19d0d3e7a3c26fe71dc2fe2c91b489295a5248a2f3a3a33f928ba",
+    "workspace": "03078dc52ed19d0d3e7a3c26fe71dc2fe2c91b489295a5248a2f3a3a33f928ba",
+    "local": "03078dc52ed19d0d3e7a3c26fe71dc2fe2c91b489295a5248a2f3a3a33f928ba",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "web/tracking-state.test.mjs",
+    "official": "c52154dc713f4a38b00a35751e004885a0c91b1f9472b09ab545e0ebfbfa4f3e",
+    "workspace": "c52154dc713f4a38b00a35751e004885a0c91b1f9472b09ab545e0ebfbfa4f3e",
+    "local": "c52154dc713f4a38b00a35751e004885a0c91b1f9472b09ab545e0ebfbfa4f3e",
+    "workspace_equal": true,
+    "local_equal": true
+  },
+  {
+    "path": "web/trip-chat-ui.mjs",
+    "official": "42920702ff4a73d82a10f0493e4cbcb40bdd7b3e33cb32981dea0fcc585b2848",
+    "workspace": "42920702ff4a73d82a10f0493e4cbcb40bdd7b3e33cb32981dea0fcc585b2848",
+    "local": "42920702ff4a73d82a10f0493e4cbcb40bdd7b3e33cb32981dea0fcc585b2848",
+    "workspace_equal": true,
+    "local_equal": true
+  }
+]

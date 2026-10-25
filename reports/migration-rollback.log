@@ -1,0 +1,14 @@
+
+
+
+
+
+   INFO  Rolling back migrations.  
+
+  2026_10_26_000100_harden_commute_integrity ................... 143.72ms DONE
+
+
+   INFO  Running migrations.  
+
+  2026_10_26_000100_harden_commute_integrity ......................... 1s DONE
+

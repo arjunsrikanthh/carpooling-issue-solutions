@@ -1,0 +1,304 @@
+diff --git a/prototype/campuspool-extension/Mobility/Commute/CommuteMatchingService.php b/prototype/campuspool-extension/Mobility/Commute/CommuteMatchingService.php
+index 3457633..9ba06d8 100644
+--- a/prototype/campuspool-extension/Mobility/Commute/CommuteMatchingService.php
++++ b/prototype/campuspool-extension/Mobility/Commute/CommuteMatchingService.php
+@@ -56,7 +56,7 @@ public function publish(User$driver,array$v):array {
+    $trip=Trip::factory()->create(['user_id'=>$driver->id,'trip_date'=>$at->format('Y-m-d H:i:s'),'total_seats'=>1,'state'=>Trip::STATE_READY,'from_town'=>$from['label'],'to_town'=>$to['label'],'description'=>'Driver-published local demo commute; nonredeemable credits only','distance'=>$path['distance_meters']/1000,'estimated_time'=>gmdate('H:i:s',$path['duration_seconds'])]);
+    DB::table('mobility_trip_lifecycles')->insert(['trip_id'=>$trip->id,'state'=>'planned','version'=>0,'created_at'=>now(),'updated_at'=>now()]);
+    $snapshot=['driver_origin'=>$from,'driver_destination'=>$to,'driver_path'=>$path,'choice'=>$v['choice'],'max_walk_meters'=>999,'max_detour_meters'=>$v['max_detour_meters']??3000,'max_detour_seconds'=>$v['max_detour_seconds']??600];
+-   DB::table('mobility_commute_demo_trips')->insert(['trip_id'=>$trip->id,'audience_id'=>0,'fixture_key'=>$key,'vehicle_type'=>$v['vehicle_type'],'is_publication'=>true,'direction'=>$v['direction'],'fare_minor'=>0,'base_fare_minor'=>0,'surcharge_minor'=>0,'journey'=>json_encode($snapshot,JSON_THROW_ON_ERROR),'created_at'=>now(),'updated_at'=>now()]);
++   DB::table('mobility_commute_demo_trips')->insert(['trip_id'=>$trip->id,'audience_id'=>null,'fixture_key'=>$key,'vehicle_type'=>$v['vehicle_type'],'is_publication'=>true,'direction'=>$v['direction'],'fare_minor'=>0,'base_fare_minor'=>0,'surcharge_minor'=>0,'journey'=>json_encode($snapshot,JSON_THROW_ON_ERROR),'created_at'=>now(),'updated_at'=>now()]);
+    return['data'=>$this->offerDto(DB::table('mobility_commute_demo_trips')->where('trip_id',$trip->id)->first())];
+   });
+  }
+diff --git a/prototype/campuspool-extension/migrations/2026_10_26_000100_harden_commute_integrity.php b/prototype/campuspool-extension/migrations/2026_10_26_000100_harden_commute_integrity.php
+new file mode 100644
+index 0000000..7d2c6db
+--- /dev/null
++++ b/prototype/campuspool-extension/migrations/2026_10_26_000100_harden_commute_integrity.php
+@@ -0,0 +1,133 @@
++<?php
++
++use Illuminate\Database\Migrations\Migration;
++use Illuminate\Database\Schema\Blueprint;
++use Illuminate\Support\Facades\DB;
++use Illuminate\Support\Facades\Schema;
++
++return new class extends Migration
++{
++    public function up(): void
++    {
++        // Publications are intentionally visible to every eligible rider. The
++        // old sentinel 0 represented that audience and cannot satisfy a user FK.
++        // Make the relationship nullable before normalizing legacy sentinel rows.
++        if (DB::getDriverName() === 'mysql') {
++            DB::statement('ALTER TABLE mobility_commute_demo_trips MODIFY audience_id INT UNSIGNED NULL');
++            DB::statement('UPDATE mobility_commute_demo_trips SET audience_id = NULL WHERE audience_id = 0');
++        } else {
++            Schema::table('mobility_commute_demo_trips', fn (Blueprint $table) => $table->unsignedInteger('audience_id')->nullable()->change());
++        }
++        Schema::table('mobility_commute_profiles', function (Blueprint $table): void {
++            $table->foreign('user_id', 'commute_profiles_user_fk')->references('id')->on('users')->restrictOnDelete();
++        });
++        Schema::table('mobility_commute_demo_actors', function (Blueprint $table): void {
++            $table->foreign('user_id', 'commute_demo_actors_user_fk')->references('id')->on('users')->cascadeOnDelete();
++        });
++        Schema::table('mobility_commute_demo_trips', function (Blueprint $table): void {
++            $table->foreign('trip_id', 'commute_demo_trips_trip_fk')->references('id')->on('trips')->cascadeOnDelete();
++            $table->foreign('audience_id', 'commute_demo_trips_audience_fk')->references('id')->on('users')->restrictOnDelete();
++            $table->index(['audience_id', 'vehicle_type'], 'commute_demo_trips_audience_vehicle_idx');
++        });
++        Schema::table('mobility_commute_demo_wallets', function (Blueprint $table): void {
++            $table->foreign('user_id', 'commute_demo_wallets_user_fk')->references('id')->on('users')->cascadeOnDelete();
++        });
++        Schema::table('mobility_commute_demo_holds', function (Blueprint $table): void {
++            $table->foreign('booking_id', 'commute_demo_holds_booking_fk')->references('id')->on('trip_passengers')->restrictOnDelete();
++            $table->foreign('rider_id', 'commute_demo_holds_rider_fk')->references('id')->on('users')->restrictOnDelete();
++            $table->foreign('driver_id', 'commute_demo_holds_driver_fk')->references('id')->on('users')->restrictOnDelete();
++            $table->index(['rider_id', 'state'], 'commute_demo_holds_rider_state_idx');
++            $table->index(['driver_id', 'state'], 'commute_demo_holds_driver_state_idx');
++        });
++        Schema::table('mobility_commute_demo_entries', function (Blueprint $table): void {
++            $table->foreign('user_id', 'commute_demo_entries_user_fk')->references('id')->on('users')->restrictOnDelete();
++            $table->foreign('booking_id', 'commute_demo_entries_booking_fk')->references('id')->on('trip_passengers')->restrictOnDelete();
++            $table->index(['user_id', 'booking_id', 'kind'], 'commute_demo_entries_lookup_idx');
++            $table->unique(['booking_id', 'kind'], 'commute_demo_entries_booking_kind_unique');
++        });
++        Schema::table('mobility_commute_receipts', function (Blueprint $table): void {
++            $table->foreign('user_id', 'commute_receipts_user_fk')->references('id')->on('users')->cascadeOnDelete();
++        });
++        Schema::table('mobility_commute_matches', function (Blueprint $table): void {
++            $table->foreign('trip_id', 'commute_matches_trip_fk')->references('id')->on('trips')->restrictOnDelete();
++            $table->foreign('rider_id', 'commute_matches_rider_fk')->references('id')->on('users')->restrictOnDelete();
++            $table->index(['trip_id', 'expires_at'], 'commute_matches_trip_expiry_idx');
++        });
++        Schema::table('mobility_commute_booking_terms', function (Blueprint $table): void {
++            $table->foreign('booking_id', 'commute_booking_terms_booking_fk')->references('id')->on('trip_passengers')->restrictOnDelete();
++            $table->foreign('match_key', 'commute_booking_terms_match_fk')->references('match_key')->on('mobility_commute_matches')->restrictOnDelete();
++        });
++
++        // MySQL 8 is the supported integrity-verification database. Keep the
++        // driver-specific checks out of SQLite's schema rebuild path.
++        if (DB::getDriverName() === 'mysql') {
++            DB::statement("ALTER TABLE mobility_commute_demo_trips ADD CONSTRAINT commute_demo_trips_vehicle_ck CHECK (vehicle_type IN ('car','bike'))");
++            DB::statement('ALTER TABLE mobility_commute_demo_trips ADD CONSTRAINT commute_demo_trips_amount_ck CHECK (fare_minor >= 0 AND base_fare_minor >= 0 AND surcharge_minor >= 0)');
++            DB::statement("ALTER TABLE mobility_commute_demo_trips ADD CONSTRAINT commute_demo_trips_direction_ck CHECK (direction IS NULL OR direction IN ('outbound','return'))");
++            DB::statement('ALTER TABLE mobility_commute_demo_wallets ADD CONSTRAINT commute_demo_wallets_balance_ck CHECK (available_minor >= 0)');
++            DB::statement("ALTER TABLE mobility_commute_demo_holds ADD CONSTRAINT commute_demo_holds_state_ck CHECK (state IN ('held','refunded','released'))");
++            DB::statement('ALTER TABLE mobility_commute_demo_holds ADD CONSTRAINT commute_demo_holds_amount_ck CHECK (amount_minor > 0)');
++            DB::statement("ALTER TABLE mobility_commute_demo_entries ADD CONSTRAINT commute_demo_entries_kind_ck CHECK (kind IN ('demo_credit','ride_hold','refund','driver_release'))");
++            DB::statement("ALTER TABLE mobility_commute_receipts ADD CONSTRAINT commute_receipts_hash_ck CHECK (CHAR_LENGTH(key_hash) = 64 AND CHAR_LENGTH(request_hash) = 64)");
++            DB::unprepared("CREATE TRIGGER commute_trip_passengers_insert_guard BEFORE INSERT ON trip_passengers FOR EACH ROW BEGIN IF EXISTS (SELECT 1 FROM mobility_commute_demo_trips m WHERE m.trip_id = NEW.trip_id) THEN IF NEW.passenger_type = 1 AND NEW.user_id = (SELECT t.user_id FROM trips t WHERE t.id = NEW.trip_id) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'COMMUTE_SELF_BOOKING'; END IF; IF NEW.request_state NOT IN (0,1,2,3,4) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'COMMUTE_INVALID_BOOKING_STATE'; END IF; END IF; END");
++            DB::unprepared("CREATE TRIGGER commute_trip_passengers_update_guard BEFORE UPDATE ON trip_passengers FOR EACH ROW BEGIN IF EXISTS (SELECT 1 FROM mobility_commute_demo_trips m WHERE m.trip_id = NEW.trip_id) THEN IF NEW.passenger_type = 1 AND NEW.user_id = (SELECT t.user_id FROM trips t WHERE t.id = NEW.trip_id) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'COMMUTE_SELF_BOOKING'; END IF; IF NEW.request_state NOT IN (0,1,2,3,4) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'COMMUTE_INVALID_BOOKING_STATE'; END IF; END IF; END");
++        }
++    }
++
++    public function down(): void
++    {
++        if (DB::getDriverName() === 'mysql') {
++            DB::unprepared('DROP TRIGGER IF EXISTS commute_trip_passengers_update_guard');
++            DB::unprepared('DROP TRIGGER IF EXISTS commute_trip_passengers_insert_guard');
++            foreach ([
++                'commute_receipts_hash_ck' => 'mobility_commute_receipts',
++                'commute_demo_entries_kind_ck' => 'mobility_commute_demo_entries',
++                'commute_demo_holds_amount_ck' => 'mobility_commute_demo_holds',
++                'commute_demo_holds_state_ck' => 'mobility_commute_demo_holds',
++                'commute_demo_trips_amount_ck' => 'mobility_commute_demo_trips',
++                'commute_demo_trips_vehicle_ck' => 'mobility_commute_demo_trips',
++                'commute_demo_trips_direction_ck' => 'mobility_commute_demo_trips',
++                'commute_demo_wallets_balance_ck' => 'mobility_commute_demo_wallets',
++            ] as $constraint => $table) {
++                DB::statement("ALTER TABLE {$table} DROP CHECK {$constraint}");
++            }
++        }
++        Schema::table('mobility_commute_receipts', fn (Blueprint $table) => $table->dropForeign('commute_receipts_user_fk'));
++        Schema::table('mobility_commute_demo_entries', function (Blueprint $table): void {
++            $table->dropForeign('commute_demo_entries_booking_fk');
++            $table->dropForeign('commute_demo_entries_user_fk');
++            $table->dropUnique('commute_demo_entries_booking_kind_unique');
++            $table->dropIndex('commute_demo_entries_lookup_idx');
++        });
++        Schema::table('mobility_commute_booking_terms', function (Blueprint $table): void {
++            $table->dropForeign('commute_booking_terms_match_fk');
++            $table->dropForeign('commute_booking_terms_booking_fk');
++        });
++        Schema::table('mobility_commute_matches', function (Blueprint $table): void {
++            $table->dropForeign('commute_matches_rider_fk');
++            $table->dropForeign('commute_matches_trip_fk');
++            $table->dropIndex('commute_matches_trip_expiry_idx');
++        });
++        Schema::table('mobility_commute_demo_holds', function (Blueprint $table): void {
++            $table->dropForeign('commute_demo_holds_driver_fk');
++            $table->dropForeign('commute_demo_holds_rider_fk');
++            $table->dropForeign('commute_demo_holds_booking_fk');
++            $table->dropIndex('commute_demo_holds_driver_state_idx');
++            $table->dropIndex('commute_demo_holds_rider_state_idx');
++        });
++        Schema::table('mobility_commute_demo_wallets', fn (Blueprint $table) => $table->dropForeign('commute_demo_wallets_user_fk'));
++        Schema::table('mobility_commute_demo_trips', function (Blueprint $table): void {
++            $table->dropForeign('commute_demo_trips_audience_fk');
++            $table->dropForeign('commute_demo_trips_trip_fk');
++            $table->dropIndex('commute_demo_trips_audience_vehicle_idx');
++        });
++        if (DB::getDriverName() === 'mysql') {
++            DB::statement('UPDATE mobility_commute_demo_trips SET audience_id = 0 WHERE audience_id IS NULL');
++            DB::statement('ALTER TABLE mobility_commute_demo_trips MODIFY audience_id INT UNSIGNED NOT NULL');
++        } else {
++            Schema::table('mobility_commute_demo_trips', fn (Blueprint $table) => $table->unsignedInteger('audience_id')->default(0)->nullable(false)->change());
++        }
++        Schema::table('mobility_commute_demo_actors', fn (Blueprint $table) => $table->dropForeign('commute_demo_actors_user_fk'));
++        Schema::table('mobility_commute_profiles', fn (Blueprint $table) => $table->dropForeign('commute_profiles_user_fk'));
++    }
++};
+diff --git a/prototype/reproduction/compose.yml b/prototype/reproduction/compose.yml
+index a0c3bca..65854b1 100644
+--- a/prototype/reproduction/compose.yml
++++ b/prototype/reproduction/compose.yml
+@@ -42,6 +42,10 @@ services:
+     env_file: ./package.env
+     environment:
+       MOBILITY_EXTENSION_ROOT: /opt/mobility-extension
++      # Disposable DDL uses the migration administrator; the app keeps its
++      # restricted carpoolear account. Do not relax MySQL binary-log checks.
++      DB_USERNAME: root
++      DB_PASSWORD: smoke-root-password
+     depends_on:
+       deps: {condition: service_completed_successfully}
+       mysql: {condition: service_healthy}
+diff --git a/prototype/tests/extension/MobilityCommuteIntegrityTest.php b/prototype/tests/extension/MobilityCommuteIntegrityTest.php
+new file mode 100644
+index 0000000..59740ab
+--- /dev/null
++++ b/prototype/tests/extension/MobilityCommuteIntegrityTest.php
+@@ -0,0 +1,131 @@
++<?php
++
++namespace Tests\Feature\Mobility;
++
++use Illuminate\Database\QueryException;
++use Illuminate\Support\Facades\DB;
++use STS\Models\Passenger;
++use STS\Models\Trip;
++use STS\Models\User;
++use Tests\TestCase;
++
++final class MobilityCommuteIntegrityTest extends TestCase
++{
++    public function test_commute_tables_have_foreign_keys_and_unique_receipt_identity(): void
++    {
++        if (DB::getDriverName() !== 'mysql') {
++            $this->markTestSkipped('MySQL constraint proof is intentionally run against the disposable MySQL test database.');
++        }
++
++        $database = DB::connection()->getDatabaseName();
++        $foreignKeys = DB::table('information_schema.TABLE_CONSTRAINTS')
++            ->where('CONSTRAINT_SCHEMA', $database)
++            ->where('CONSTRAINT_TYPE', 'FOREIGN KEY')
++            ->whereIn('TABLE_NAME', [
++                'mobility_commute_profiles', 'mobility_commute_demo_actors', 'mobility_commute_demo_trips',
++                'mobility_commute_demo_wallets', 'mobility_commute_demo_holds', 'mobility_commute_demo_entries',
++                'mobility_commute_receipts',
++            ])->pluck('CONSTRAINT_NAME')->all();
++
++        $this->assertNotEmpty($foreignKeys);
++        $this->assertContains('commute_profiles_user_fk', $foreignKeys);
++        $this->assertContains('commute_demo_holds_booking_fk', $foreignKeys);
++        $this->assertContains('commute_demo_entries_booking_fk', $foreignKeys);
++
++        $this->assertGreaterThanOrEqual(2, DB::table('information_schema.STATISTICS')
++            ->where('TABLE_SCHEMA', $database)->where('TABLE_NAME', 'mobility_commute_receipts')
++            ->where('INDEX_NAME', 'mobility_commute_receipts_user_id_key_hash_unique')->count());
++        $checks = DB::table('information_schema.TABLE_CONSTRAINTS')
++            ->where('CONSTRAINT_SCHEMA', $database)->where('CONSTRAINT_TYPE', 'CHECK')
++            ->pluck('CONSTRAINT_NAME')->all();
++        $this->assertContains('commute_demo_trips_vehicle_ck', $checks);
++        $this->assertContains('commute_demo_holds_state_ck', $checks);
++        $this->assertContains('commute_demo_entries_kind_ck', $checks);
++        $this->assertSame('YES', DB::table('information_schema.COLUMNS')->where('TABLE_SCHEMA', $database)
++            ->where('TABLE_NAME', 'mobility_commute_demo_trips')->where('COLUMN_NAME', 'audience_id')->value('IS_NULLABLE'));
++    }
++
++    public function test_orphan_demo_wallet_and_negative_hold_are_rejected_by_mysql(): void
++    {
++        if (DB::getDriverName() !== 'mysql') {
++            $this->markTestSkipped('MySQL constraint proof is intentionally run against the disposable MySQL test database.');
++        }
++
++        $this->expectException(QueryException::class);
++        DB::table('mobility_commute_demo_wallets')->insert([
++            'user_id' => 2147483000,
++            'available_minor' => 0,
++            'created_at' => now(),
++            'updated_at' => now(),
++        ]);
++    }
++
++    public function test_valid_hold_cannot_use_negative_amount_or_unknown_state(): void
++    {
++        if (DB::getDriverName() !== 'mysql') {
++            $this->markTestSkipped('MySQL constraint proof is intentionally run against the disposable MySQL test database.');
++        }
++        $driver = User::factory()->create();
++        $rider = User::factory()->create();
++        $trip = Trip::factory()->create(['user_id' => $driver->id]);
++        $booking = Passenger::factory()->create(['trip_id' => $trip->id, 'user_id' => $rider->id]);
++        $this->expectException(QueryException::class);
++        DB::table('mobility_commute_demo_holds')->insert([
++            'booking_id' => $booking->id,
++            'rider_id' => $rider->id,
++            'driver_id' => $driver->id,
++            'amount_minor' => -1,
++            'state' => 'held',
++            'created_at' => now(),
++            'updated_at' => now(),
++        ]);
++    }
++
++    public function test_commute_trigger_accepts_rider_and_rejects_self_booking_and_invalid_state(): void
++    {
++        if (DB::getDriverName() !== 'mysql') {
++            $this->markTestSkipped('MySQL trigger proof is intentionally run against the disposable MySQL test database.');
++        }
++        $driver = User::factory()->create();
++        $rider = User::factory()->create();
++        $trip = Trip::factory()->create(['user_id' => $driver->id]);
++        DB::table('mobility_commute_demo_trips')->insert(['trip_id' => $trip->id, 'audience_id' => null, 'fixture_key' => hash('sha256', 'trigger-'.$trip->id), 'vehicle_type' => 'car', 'is_publication' => true, 'direction' => 'outbound', 'fare_minor' => 0, 'base_fare_minor' => 0, 'surcharge_minor' => 0, 'journey' => '{}', 'created_at' => now(), 'updated_at' => now()]);
++        $valid = DB::table('trip_passengers')->insertGetId(['trip_id' => $trip->id, 'user_id' => $rider->id, 'passenger_type' => Passenger::TYPE_PASAJERO, 'request_state' => Passenger::STATE_PENDING]);
++        $this->assertDatabaseHas('trip_passengers', ['id' => $valid, 'request_state' => Passenger::STATE_PENDING]);
++        $conductor = DB::table('trip_passengers')->insertGetId(['trip_id' => $trip->id, 'user_id' => $driver->id, 'passenger_type' => Passenger::TYPE_CONDUCTOR, 'request_state' => Passenger::STATE_PENDING]);
++        $this->assertDatabaseHas('trip_passengers', ['id' => $conductor, 'passenger_type' => Passenger::TYPE_CONDUCTOR]);
++        try {
++            DB::table('trip_passengers')->insertGetId(['trip_id' => $trip->id, 'user_id' => $driver->id, 'passenger_type' => Passenger::TYPE_PASAJERO, 'request_state' => Passenger::STATE_PENDING]);
++            $this->fail('self-booking trigger did not reject the insert');
++        } catch (QueryException $e) {
++            $this->assertStringContainsString('COMMUTE_SELF_BOOKING', $e->getMessage());
++            $this->assertSame('45000', $e->errorInfo[0]);
++        }
++        try {
++            DB::table('trip_passengers')->insertGetId(['trip_id' => $trip->id, 'user_id' => User::factory()->create()->id, 'passenger_type' => Passenger::TYPE_PASAJERO, 'request_state' => 99]);
++            $this->fail('invalid booking state trigger did not reject the insert');
++        } catch (QueryException $e) {
++            $this->assertStringContainsString('COMMUTE_INVALID_BOOKING_STATE', $e->getMessage());
++            $this->assertSame('45000', $e->errorInfo[0]);
++        }
++        foreach ([['request_state' => 99], ['user_id' => $driver->id]] as $invalidUpdate) {
++            try {
++                DB::table('trip_passengers')->where('id', $valid)->update($invalidUpdate);
++                $this->fail('commute update trigger did not reject invalid data');
++            } catch (QueryException $e) {
++                $this->assertSame('45000', $e->errorInfo[0]);
++            }
++            $this->assertDatabaseHas('trip_passengers', ['id' => $valid, 'user_id' => $rider->id, 'request_state' => Passenger::STATE_PENDING]);
++        }
++    }
++
++    public function test_commute_wallet_balance_check_rejects_negative_balance(): void
++    {
++        if (DB::getDriverName() !== 'mysql') {
++            $this->markTestSkipped('MySQL check proof is intentionally run against the disposable MySQL test database.');
++        }
++        $user = User::factory()->create();
++        $this->expectException(QueryException::class);
++        DB::table('mobility_commute_demo_wallets')->insert(['user_id' => $user->id, 'available_minor' => -1, 'created_at' => now(), 'updated_at' => now()]);
++    }
++}

@@ -1,0 +1,607 @@
+diff --git a/docs/COURSE_REQUIREMENTS_RECONCILIATION.md b/docs/COURSE_REQUIREMENTS_RECONCILIATION.md
+new file mode 100644
+index 0000000..8e953c4
+--- /dev/null
++++ b/docs/COURSE_REQUIREMENTS_RECONCILIATION.md
+@@ -0,0 +1,56 @@
++# Course requirements reconciliation
++
++**Date:** 26 October 2026
++**Status:** Evidence-based planning note, not a faculty submission or approval.
++
++The available connected-source search did not locate a submitted CampusPool SRS, SAD or Test Plan. The saved faculty files are templates/model examples, and the Drive SE+DBMS plan is a proposal/backlog document. The drafts in this package therefore use new `CP-*` requirement IDs and `NCP-*` test IDs marked proposed. They must be replaced or reconciled against the real submitted documents if the team finds them.
++
++## Evidence consulted
++
++- Faculty/course messages: Gmail message IDs `1a11041dddadf013`, `1a0571d4d8ca9e6e` and `1a11f5cf547b2f7e8` (saved extracts in the private evidence directory; no raw mail content is copied here).
++- Faculty SRS, SAD and STP template extracts supplied through the connected course material.
++- SE Mini-Project Deliverables Part-2 handout dated 6 October 2026.
++- Drive SE+DBMS plan with ID beginning `1whLK4...`; it is treated as a proposal and planning source, not proof of submission or approval.
++- DBMS Level 3 Project Requirements extract dated 9 October 2026.
++
++## Software Engineering requirements
++
++| Requirement | Current evidence | Gap/action |
++|---|---|---|
++| SRS with FR/NFR, security and acceptance criteria | `docs/SRS_DRAFT.md` is a new proposed draft | Locate the submitted SRS or have the team review and submit an adopted revision. No approval is claimed. |
++| SAD with architecture, component diagram, two sequence diagrams and two-component API design | `docs/SAD_DRAFT.md` supplies Mermaid diagrams and API descriptions | Review architecture against the actual submission and add instructor-approved diagrams if required. |
++| STP with exact template sections, test items, strategy, environment, metrics and approvals | `docs/TEST_PLAN_DRAFT.md` follows the faculty headings | Replace provisional IDs with submitted test-case IDs; obtain role approvals/signatures. |
++| RTM | `docs/RTM_DRAFT.md` maps proposed IDs to real source test filenames | Validate every row against the submitted SRS/STP and final integrated test output. |
++| Sprint 1 implementation and reviewed PRs | Current official repository has CI and prototype evidence; teammate implementation PRs remain separate acceptance gates | Review and merge only through the official team workflow; this private package does not alter official issues or PRs. |
++| One-minute working-product video | Runbook and capture checklist exist | Record and review the real UI, then upload through a reviewed media PR. No recording is claimed here. |
++| Deviations from submitted documents | `docs/DEVIATIONS.md` and runbook describe synthetic routing and scope limits | Reconcile against the actual submitted documents and explain during the final demo. |
++
++## DBMS Level 3 requirements
++
++| Requirement | Current CampusPool Sprint 1 evidence | Gap/action |
++|---|---|---|
++| Approved two-member team with defined individual contributions | Four GitHub issue assignees are visible; instructor-approved two-person DBMS membership is not evidenced | Obtain instructor/team approval and document exactly two members and responsibilities. Do not infer approval from GitHub roster. |
++| Meaningful non-CRUD problem and originality | Carpool booking/capacity is beyond simple CRUD, but the source includes attributed upstream/prototype material | Complete originality/provenance review, preserve licenses and document original design changes. |
++| SQL database | MySQL migrations, foreign keys, indexes and transactional booking tests exist | Prepare ERD, relational schema, data dictionary and representative DDL/DML evidence for the course deliverable. |
++| Second database paradigm: NoSQL or vector | No MongoDB, Neo4j, pgvector, Qdrant, Pinecone or Chroma implementation is established in this Sprint 1 baseline | Implement and justify a real second paradigm in Sprint 2 or obtain an instructor-approved scope decision. Do not claim synthetic route data as NoSQL/vector. |
++| SQL DDL including CREATE, ALTER, DROP, keys, constraints, indexes and views | Migrations demonstrate many CREATE/ALTER/constraint/index operations; a complete course evidence set and appropriate view are not assembled here | Add isolated SQL demonstrations and schema evidence without resetting existing databases. |
++| DML and advanced queries | Application exercises INSERT/UPDATE/SELECT and transactional operations; full JOIN/GROUP BY/HAVING/ORDER BY/subquery evidence is not packaged | Add meaningful query script and result evidence tied to the final schema. |
++| Four advanced SQL concepts and one NoSQL/vector concept | Transactions, indexes and integrity checks are present; four-course-feature proof plus second-paradigm proof is incomplete | Select, implement and document four SQL features and one second-paradigm feature. Current Sprint 1 package is partial. |
++| Next.js web interface | Current interface is Laravel-served HTML/JavaScript; `prototype/package.json` has Vite configuration but no verified Next.js application | Build the required Next.js interface and API integration in Sprint 2 or obtain explicit instructor guidance. Do not label the current browser UI Next.js. |
++| API integration and environment-managed secrets | Laravel API and environment examples exist; production deployment is not established | Document API contracts and secret handling; test with synthetic configuration only. |
++| Authentication and at least two roles | Synthetic driver/rider sessions and authorization checks exist; production college identity is not verified | Implement/verify the required authentication model and role evidence. |
++| Database-level validation and integrity | MySQL constraints, migrations, transaction tests and cancellation invariants are partially evidenced | Complete fresh-database migration, rollback and concurrency proof on disposable services. |
++| Documentation, screenshots, testing and conclusion | Runbook, drafts and test evidence package exist; actual video/screenshots and final academic documentation are pending | Capture genuine UI evidence and assemble final report after review. |
++| Git/GitHub individual contributions | Official repository has branches/issues/Actions; this package is private proposed work | Preserve truthful authorship and obtain reviewed team PRs. Never fabricate teammate commits. |
++| Final demonstration | Synthetic publication → search → request → accept → cancel path is documented and being strengthened | Demonstrate ERD, schema, SQL/second paradigm, Next.js interface and tests only after those components actually exist. |
++
++## Scope decision
++
++The current package can support a truthful Sprint 1 engineering handoff for a synthetic Laravel/MySQL/browser prototype. It cannot by itself satisfy all DBMS Level 3 requirements, especially the Next.js interface, second NoSQL/vector paradigm, four advanced SQL demonstrations, approved two-member team and originality evidence. Those are explicit follow-up gates, not reasons to relabel the current implementation.
++
++## Required owner actions
++
++1. Search the team accounts and course folders for the actual submitted SRS, SAD and STP; record filenames, versions, dates and approval evidence.
++2. If they do not exist, ask the instructor which draft/version may be adopted before using these documents for submission.
++3. Obtain DBMS two-member approval and originality/provenance review.
++4. Plan Sprint 2 implementation for Next.js plus SQL/NoSQL or vector requirements, with a fresh test and evidence package.
+diff --git a/docs/RTM_DRAFT.md b/docs/RTM_DRAFT.md
+new file mode 100644
+index 0000000..e9e9a20
+--- /dev/null
++++ b/docs/RTM_DRAFT.md
+@@ -0,0 +1,30 @@
++# Requirements Traceability Matrix (RTM) — proposed
++
++**Status:** DRAFT / NEW PROPOSED IDS — not approved and not a replacement for a submitted faculty Test Plan.
++**Baseline:** official `main` `0478ae0ba2549f8fba3bd44b590e91e067a46e0d`.
++
++| Proposed requirement(s) | Proposed test ID(s) | Actual test file or command | Current evidence |
++|---|---|---|---|
++| CP-F-001..003 | NCP-AUTH-01..03 | `MobilityCommuteProductTest.php`; `driver-onboarding-ui.test.mjs` | Focused source/harness coverage; integrated result pending |
++| CP-F-004, CP-F-007 | NCP-VEH-01..03 | `MobilityCommuteProductTest.php`; `test-commute-ui.mjs` | Vehicle and validation cases present; exact acceptance mapping provisional |
++| CP-F-005..008 | NCP-PUB-01..04 | `MobilityCommuteProductTest.php`; `smoke-booking.py` | Publication/idempotency source tests; smoke assertions proposed in issue package |
++| CP-F-009..011 | NCP-SEARCH-01..06 | `MobilityCommuteProductTest.php`; `test-place-search.mjs`; `test-commute-map.mjs` | Historical focused run and current tests; provider-backed behavior unverified |
++| CP-F-012 | NCP-QUOTE-01..02 | `MobilityCommuteProductTest.php`, matching worker focused tests when integrated | Proposed stale/changed quote coverage; final file name/result pending integration |
++| CP-F-013..014 | NCP-BOOK-01..04 | `MobilityCommuteProductTest.php`; `MobilitySegmentBookingTest.php` | Self/duplicate authorization coverage present or being strengthened by issue #23 |
++| CP-F-015..016 | NCP-BOOK-05..08 | `MobilitySegmentBookingTest.php`; `smoke-booking.py` | Acceptance and capacity tests; concurrency result pending combined run |
++| CP-F-017 | NCP-LIFE-01..02 | `MobilityLifecycleTest.php`; `smoke-booking.py` | History/status checks present; final integrated result pending |
++| CP-F-018..019 | NCP-CANCEL-01..05 | `MobilityLifecycleTest.php`; `MobilityFinancialInvariantsTest.php`; `smoke-booking.py` | Cancellation/refund/idempotency tests present or strengthened in issue #24 |
++| CP-F-020 | NCP-DB-01..05 | extension migrations; `MobilityFinancialInvariantsTest.php`; `MobilitySegmentBookingTest.php` | Schema/invariant coverage; fresh migration and race proof pending issue #37 integration |
++| CP-NF-001 | NCP-ERR-01..03 | `MobilityCommuteProductTest.php`; frontend harnesses | Structured validation checks present |
++| CP-NF-002 | NCP-TXN-01..03 | `MobilitySegmentBookingTest.php`; `MobilityFinancialInvariantsTest.php`; Docker MySQL suite | Transaction behavior proposed; must rerun against disposable MySQL |
++| CP-NF-003, CP-SEC-004 | NCP-PRIV-01..03 | `smoke-booking.py`; CI syntax/static step | Smoke client avoids response-body token logging; full log review pending |
++| CP-NF-004 | NCP-CI-01..04 | `reproduction/verify-package.sh`; `.github/workflows/application.yml` | Manifest, syntax, migration and smoke gates present |
++| CP-NF-005 | NCP-UI-01..03 | `test-commute-ui.mjs`; `test-commute-map.mjs`; manual runbook | Frontend harness evidence; provider failure still synthetic |
++| CP-NF-006 | NCP-FIN-01..03 | `MobilityFinancialInvariantsTest.php`; `smoke-booking.py` | Refund/ledger idempotency cases present or being strengthened |
++| CP-SEC-001..002 | NCP-SEC-01..04 | `MobilityCommuteProductTest.php`; `MobilitySegmentBookingTest.php` | Authorization/self-booking cases present; integrated result pending |
++| CP-SEC-003 | NCP-SEC-05..06 | `MobilityCommuteProductTest.php`; matching worker tests | Quote binding/staleness coverage proposed; final integration pending |
++| CP-SEC-005 | NCP-SEC-07 | `MobilityFinancialInvariantsTest.php`; `smoke-booking.py` | Synthetic wallet boundary documented; no real payment claimed |
++
++## Naming and evidence rules
++
++`NCP-*` identifiers are new proposed IDs created for this draft. They must not be presented to faculty as approved test-case IDs. The commands and filenames above are the actual current repository names; rows that mention “pending integration” require the coordinator to update them after applying all issue patches. A passing synthetic fixture does not establish production Maps, identity, payment, Next.js or NoSQL/vector requirements.
+diff --git a/docs/SAD_DRAFT.md b/docs/SAD_DRAFT.md
+new file mode 100644
+index 0000000..14162f3
+--- /dev/null
++++ b/docs/SAD_DRAFT.md
+@@ -0,0 +1,177 @@
++# Software Architecture and Design Specification (SAD) — CampusPool
++
++**Project:** CampusPool
++**Version:** 0.1 (proposed draft)
++**Date:** 26 October 2026
++**Status:** DRAFT — not submitted, approved, or signed
++**Related documents:** [SRS_DRAFT.md](SRS_DRAFT.md), [TEST_PLAN_DRAFT.md](TEST_PLAN_DRAFT.md), [RTM_DRAFT.md](RTM_DRAFT.md)
++
++## Revision history and approvals
++
++This is a new AI-assisted proposed document based on the current prototype and course templates. No author, reviewer, signature or approval is asserted.
++
++## 1. Introduction
++
++### 1.1 Purpose
++
++Describe the current Sprint 1 architecture and the design needed to verify ride publication, matching, booking, cancellation and synthetic wallet behavior.
++
++### 1.2 Scope
++
++This SAD describes the Laravel/MySQL/browser prototype and its isolated Docker verification. Next.js, NoSQL/vector retrieval, live routing, production identity and real payment architecture remain future work.
++
++### 1.3 Audience
++
++Students, instructors, developers, testers and maintainers.
++
++### 1.4 Definitions
++
++API: application programming interface. DTO: data transfer object. RTM: requirements traceability matrix. STP: software test plan. Quote: signed search result.
++
++## 2. Document overview
++
++The document presents the architecture, component responsibilities, data boundaries, API design, security controls, sequences, risks and open work.
++
++## 3. Architecture
++
++### 3.1 Goals and constraints
++
++Goals are deterministic verification, transactional booking state, explicit authorization and understandable UI evidence. Constraints are the inherited Laravel/MySQL baseline, synthetic route provider, incomplete course documents and no production credentials.
++
++### 3.2 Stakeholders and concerns
++
++Riders need clear availability and status. Drivers need safe publication and acceptance. Instructors need reproducible evidence and traceability. Developers need isolated migrations, tests and attribution. Reviewers need clear limits on synthetic behavior.
++
++### 3.3 Component diagram
++
++```mermaid
++flowchart TB
++  Browser[Browser commute UI\nHTML/CSS/JS] -->|JSON + bearer session| API[Laravel Commute API]
++  API --> Auth[Authorization and demo-session policy]
++  API --> Match[Matching and quote service]
++  API --> Life[Booking lifecycle service]
++  API --> Wallet[Demo wallet/refund service]
++  Auth --> SQL[(MySQL transactional schema)]
++  Match --> SQL
++  Life --> SQL
++  Wallet --> SQL
++  Match --> Route[Routing adapter\nsynthetic fixture in CI]
++  CI[GitHub Actions / Docker Compose] --> Verify[Package, syntax, migration and smoke verification]
++  Verify --> API
++```
++
++### 3.4 Component descriptions
++
++| Component | Responsibility | Current source |
++|---|---|---|
++| Browser commute UI | Profile, offer, search, booking and cancellation presentation | `prototype/campuspool-extension/web/` |
++| Commute API | Request validation, response envelope and route binding | `prototype/campuspool-extension/routes/commute.php`, `Mobility/Commute/CommuteController.php` |
++| Matching/quote service | Time, direction, vehicle, capacity and route-term filtering | `Mobility/Commute/CommuteMatchingService.php` |
++| Lifecycle service | Request, accept/reject/cancel, booking DTO and transactions | `Mobility/Commute/CommuteService.php` |
++| MySQL schema | Users, trips, passengers, lifecycle, wallet and constraints | `prototype/database/migrations/`, extension migrations |
++| Verification runner | Fresh package, syntax, migration, HTTP health and smoke journey | `prototype/reproduction/verify-package.sh`, `smoke-booking.py` |
++
++### 3.5 Architecture pattern and rationale
++
++The current design is a layered modular monolith: browser, HTTP/controller, domain services and relational persistence. This fits Sprint 1 review and keeps booking authority in one transactional database. A distributed microservice split would add deployment and consistency risk without a demonstrated requirement.
++
++### 3.6 Technology stack and data stores
++
++Laravel/PHP, MySQL 8, browser JavaScript, Python verification and Docker Compose. The DBMS course requirement for a second NoSQL/vector database and Next.js interface is not satisfied by this current Sprint 1 baseline and is recorded in [COURSE_REQUIREMENTS_RECONCILIATION.md](COURSE_REQUIREMENTS_RECONCILIATION.md).
++
++### 3.7 Risks and mitigations
++
++Synthetic routing can hide provider failures; CI and the runbook label it. Shared service edits can conflict; issue packages apply sequentially. Missing submitted documents can cause traceability errors; all IDs in this package are marked proposed. Real payments and identity are excluded from fixtures.
++
++### 3.8 Traceability to requirements
++
++`CP-F-009..020` map to matching/lifecycle services; `CP-NF-002` maps to MySQL transactions; `CP-SEC-001..005` map to policy, route validation and redacted verification. Full provisional mapping is in [RTM_DRAFT.md](RTM_DRAFT.md).
++
++### 3.9 Security architecture
++
++Authentication is represented by the current API session mechanism. Authorization is enforced in controller/service paths for driver, rider and owner actions. Quote and idempotency tokens are request-bound. Logs and CI output must redact tokens and identity/licence data. Production threat modelling, TLS termination, secret rotation and identity-provider review remain open.
++
++## 4. Design
++
++### 4.1 Design overview
++
++The API validates input at the boundary, delegates matching or lifecycle transitions to domain services, and commits state changes in MySQL transactions. Search returns a quote token; request consumes that quote; acceptance locks the trip and reserves capacity; cancellation records state and applies one refund effect.
++
++### 4.2 UML sequence diagrams
++
++#### Search and request
++
++```mermaid
++sequenceDiagram
++  actor Rider
++  participant UI as Browser UI
++  participant API as Commute API
++  participant Match as Matching service
++  participant DB as MySQL
++  Rider->>UI: Select date, direction, vehicle and time
++  UI->>API: GET /rides with filters
++  API->>Match: Validate filters and inspect offers
++  Match->>DB: Read future published rides and capacity
++  DB-->>Match: Matching ride rows
++  Match-->>API: Ride DTO + quote token
++  API-->>UI: Search results
++  Rider->>UI: Request seat
++  UI->>API: POST /rides/{trip}/request quote_token
++  API->>Match: Verify quote binding and freshness
++  Match->>DB: Insert pending booking transactionally
++  DB-->>API: Booking id/state=pending
++  API-->>UI: Pending booking
++```
++
++#### Accept, pay, cancel and refund
++
++```mermaid
++sequenceDiagram
++  actor Driver
++  actor Rider
++  participant UI as Browser UI
++  participant API as Commute API
++  participant Life as Lifecycle service
++  participant DB as MySQL
++  Driver->>UI: Accept pending request
++  UI->>API: POST /bookings/{id}/accept
++  API->>Life: Authorize owner and lock trip/booking
++  Life->>DB: Check free seat and set confirmed
++  DB-->>Life: Confirmed state
++  Life-->>UI: Confirmed booking
++  Rider->>UI: Top up and pay
++  UI->>API: POST /bookings/{id}/pay
++  API->>DB: Lock wallet, create one hold and ledger entry
++  DB-->>UI: wallet_state=held
++  Rider->>UI: Cancel booking
++  UI->>API: POST /bookings/{id}/cancel
++  API->>Life: Lock booking and apply cancellation
++  Life->>DB: Set cancelled, restore capacity, refund held amount once
++  DB-->>UI: Cancelled history and wallet balance
++```
++
++### 4.3 API design
++
++**Component 1 — Matching API**
++
++`GET /api/mobility/commute/rides?direction=outbound&date=YYYY-MM-DD&start_time=08:00&end_time=09:00&vehicle_type=car` returns `data[]` ride DTOs with `trip_id`, vehicle, departure, seats and `quote_token`. Invalid ranges return validation errors; stale or changed quotes are rejected when requesting.
++
++**Component 2 — Booking/lifecycle API**
++
++`POST /api/mobility/commute/bookings/{booking}/accept|reject|cancel` requires the authenticated actor and returns `data.request_state`. Acceptance is state `1`, rejection is state `2` and cancellation is state `3` in the current prototype. Unauthorized actors, unavailable capacity and changed state return controlled errors.
++
++### 4.4 Error handling, logging and monitoring
++
++Validation and domain errors use structured JSON. Verification scripts report status and safe error codes only. Tokens, credentials, licence data and private identity values must not be printed. Production metrics, alerting and log retention are open.
++
++### 4.5 UX design
++
++Forms should show vehicle/date/capacity errors near their fields; search should preserve pickup/fare summaries when route rendering fails; pending, confirmed and cancelled states must remain visible. Accessibility and real device testing require manual follow-up.
++
++### 4.6 Open issues and next steps
++
++Complete the faculty-approved SRS/STP/SAD if available, add Next.js and the required second data paradigm for DBMS, obtain instructor-approved two-person scope, perform originality review, configure real provider profiles separately and record the actual video. Waitlist/rematching remains Sprint 2.
++
++## 5. Appendices
++
++References are the saved faculty SRS/SAD/STP templates, the 6 October SE Part-2 handout, the 9 October DBMS requirements and the current official repository baseline. No template is represented as an approved CampusPool submission.
+diff --git a/docs/SPRINT1_DEMO_RUNBOOK.md b/docs/SPRINT1_DEMO_RUNBOOK.md
+new file mode 100644
+index 0000000..8b240e0
+--- /dev/null
++++ b/docs/SPRINT1_DEMO_RUNBOOK.md
+@@ -0,0 +1,49 @@
++# Sprint 1 demo runbook
++
++This runbook describes the reproducible engineering demonstration for issues #12, #21, #22, #23, #24, #37, #39, #43 and #44. It does not represent a submitted course video or approval. The demo uses synthetic users, coordinates and credits.
++
++## Start and verify
++
++From a clean checkout, confirm Docker Compose, Python 3, Node.js and an available local port, then run:
++
++```sh
++cd prototype
++sh reproduction/verify-package.sh
++sh reproduction/start-local.sh
++python3 reproduction/smoke-booking.py
++```
++
++Open `http://127.0.0.1:18180/mobility/?demo=campus-route` in separate driver and rider browser profiles. Stop the disposable stack with `sh reproduction/stop-local.sh` after the capture. Do not use production credentials, real student data or a production database.
++
++The portable demo uses deterministic synthetic routing. It does not establish live Maps/OSRM behavior, college identity verification, GPS tracking, payment settlement or production readiness. A routing-provider failure must leave readable pickup and fare summaries visible; it is not evidence of real road navigation.
++
++## One-minute script
++
++| Time | Action and spoken evidence |
++|---|---|
++| 0–10 s | State that this is a synthetic CampusPool demo. Show the actual vehicle summary and verification label. Demo eligibility is not vehicle approval: if no current approved onboarding exists, show the unverified label and explain that approval remains pending. Keep licence data private. |
++| 10–22 s | Publish one future ride with origin, destination, vehicle and the displayed one-passenger Sprint 1 limit. Use the focused tests as separate evidence for rejected past times and invalid seat counts. |
++| 22–34 s | As the rider, search the same date and compatible direction. Show host, the actual available vehicle metadata, free seats and pickup/fare summary. Explain that an empty result or routing failure remains readable. |
++| 34–46 s | Request one seat, show the pending state, accept as the driver, and show the rider's confirmed state. The rider and driver must be distinct synthetic accounts. |
++| 46–60 s | Cancel the booking as the authorized participant. Show the cancelled history, one refund/credit effect and restored capacity. Repeat the cancel action only to demonstrate that it is idempotent. |
++
++Keep the capture continuous. A script, screenshot or test log is evidence of preparation; it is not a substitute for the actual recorded UI video.
++
++## Evidence checklist
++
++- [ ] Fresh-clone package verification completed with its exit status recorded.
++- [ ] Focused backend and frontend tests recorded with command, revision and assertion counts.
++- [ ] Driver/rider accounts are synthetic and visibly distinct.
++- [ ] Current approved vehicle metadata is visible before confirmation when an approved onboarding exists; any unverified demo fallback is described honestly.
++- [ ] Invalid future time, capacity and malformed search input show useful errors.
++- [ ] Search excludes full, cancelled, unpublished, incompatible and out-of-window rides.
++- [ ] Self-booking, unauthorized acceptance, duplicate request and competing last-seat cases have automated evidence.
++- [ ] Cancellation retains history, restores capacity and does not duplicate a refund.
++- [ ] Any routing-provider failure and known limitation is stated during the demo.
++- [ ] The real one-minute recording is reviewed before uploading through a reviewed media PR linked to #44.
++
++## Academic reconciliation
++
++The owner reports that the documents may not have been created. Gmail/Drive searches found faculty templates and the team plan but no submitted/approved versions. New SRS, SAD, Test Plan and RTM drafts are included; obtain instructor acceptance of the appropriate versions. Traceability remains provisional; new proposed IDs are not historical submitted IDs. The engineering package can be ready while the academic submission remains pending. The Sprint 2 waitlist/rematching behavior is outside the Sprint 1 cancellation demonstration.
++
++For the final handoff, attach the exact baseline SHA, issue/PR links, focused test output, migration result and recording URL. Preserve contributor attribution and third-party notices. Never claim a recording, review, upload or faculty approval that has not actually occurred.
+diff --git a/docs/SRS_DRAFT.md b/docs/SRS_DRAFT.md
+new file mode 100644
+index 0000000..db6549b
+--- /dev/null
++++ b/docs/SRS_DRAFT.md
+@@ -0,0 +1,146 @@
++# Software Requirements Specification (SRS) — CampusPool
++
++**Project:** CampusPool student carpooling and bikepooling
++**Version:** 0.1 (proposed draft)
++**Date:** 26 October 2026
++**Status:** DRAFT — not submitted, approved, or signed
++**Authors:** To be completed by the student team; this package is AI-assisted proposed documentation.
++
++## Revision history
++
++| Version | Date | Author | Change | Approval |
++|---|---|---|---|---|
++| 0.1 | 2026-10-26 | Proposed package | Initial reconstruction from current prototype and course templates | None |
++
++## Approvals
++
++No approval has been recorded. Course coordinator, team and instructor fields must be completed by the students if this draft is adopted.
++
++## 1. Introduction
++
++### 1.1 Purpose
++
++This draft specifies a campus commute application in which a verified or locally synthetic driver publishes a future car/bike ride and a rider searches, requests, confirms and cancels a seat.
++
++### 1.2 Scope
++
++The current engineering baseline covers a Laravel/MySQL API, browser commute UI, deterministic synthetic routing, vehicle and ride metadata, matching, booking lifecycle, cancellation and demo wallet records. College identity, production routing, live GPS, real payments, Next.js and NoSQL/vector storage are outside this Sprint 1 package.
++
++### 1.3 Audience
++
++Students, instructors, developers, testers, reviewers and future maintainers.
++
++### 1.4 Definitions
++
++Driver/host: ride publisher. Rider/passenger: seat requester. Quote: signed, time-bound search result. Booking: rider request and lifecycle state. Synthetic demo: isolated fixture mode with nonredeemable credits. RTM: requirements traceability matrix. STP: software test plan.
++
++## 2. Overall description
++
++### 2.1 Product perspective
++
++The browser client calls a Laravel API. MySQL is authoritative for users, vehicles, trips, bookings, lifecycle states and demo wallet entries. A routing adapter supplies synthetic route terms in the portable test environment.
++
++### 2.2 Major product functions
++
++The proposed functional requirements are:
++
++| ID | Requirement | Priority |
++|---|---|---|
++| CP-F-001 | The system shall create distinct driver and rider sessions in synthetic evaluation mode. | High |
++| CP-F-002 | The system shall save a user commute profile with role, vehicle preference, home, campus, schedule and weekdays. | High |
++| CP-F-003 | The system shall show driver approval state without allowing a user to self-approve. | High |
++| CP-F-004 | The system shall record vehicle type, model/registration summary and legal passenger-seat capacity. | High |
++| CP-F-005 | The system shall prevent a rider from publishing an offer when the role or approval policy is not eligible. | High |
++| CP-F-006 | The system shall publish a future car or bike offer with origin, destination, departure window and seat limit. | High |
++| CP-F-007 | The system shall reject past departures and capacities above the configured vehicle limit. | High |
++| CP-F-008 | The system shall make duplicate publish requests idempotent. | Medium |
++| CP-F-009 | The system shall search future offers by date, direction, time window, vehicle and pickup choice. | High |
++| CP-F-010 | The system shall exclude cancelled, unpublished, full, incompatible and out-of-window offers. | High |
++| CP-F-011 | The system shall return readable pickup, drop-off and fare summaries when routing data is unavailable. | High |
++| CP-F-012 | The system shall issue a quote token bound to the searched ride and request context. | High |
++| CP-F-013 | The system shall reject self-booking and requests from unauthorized actors. | High |
++| CP-F-014 | The system shall prevent duplicate pending or confirmed requests for the same rider and ride. | High |
++| CP-F-015 | The system shall permit an eligible driver to accept or reject a pending request. | High |
++| CP-F-016 | The system shall reserve a seat atomically and prevent simultaneous acceptances from overselling capacity. | High |
++| CP-F-017 | The system shall expose pending, confirmed and cancelled booking history to the appropriate participant. | High |
++| CP-F-018 | The system shall permit an authorized participant to cancel a booking and restore capacity exactly once. | High |
++| CP-F-019 | The system shall make repeated cancellation safe and prevent duplicate refund effects. | High |
++| CP-F-020 | The system shall retain database relationships, state constraints and audit-relevant wallet entries after lifecycle changes. | High |
++
++### 2.3 User roles and characteristics
++
++The product roles are driver/host and rider/passenger. An operator or instructor may inspect synthetic evidence. Production identity and role approval are not established by this draft.
++
++### 2.4 Operating environment
++
++Portable verification uses Docker Compose, PHP/Laravel, MySQL 8, Python 3 and Node.js on a local or GitHub Actions Linux runner. The UI is served on `127.0.0.1:18180`.
++
++### 2.5 Constraints and assumptions
++
++The current package uses synthetic routing and data. It does not claim real road navigation, payment settlement, identity verification, production availability or an approved course submission.
++
++## 3. External interface requirements
++
++### 3.1 User interfaces
++
++The browser UI provides onboarding, vehicle/ride fields, search, request, acceptance and cancellation status. The driver and rider should be shown in separate browser profiles during demonstration.
++
++### 3.2 Software interfaces
++
++Representative API resources are `/api/mobility/commute/profile`, `/offers`, `/rides`, `/rides/{trip}/request`, `/bookings`, `/bookings/{booking}/accept|reject|cancel`, `/wallet` and `/wallet/top-up`.
++
++### 3.3 Communications
++
++JSON over HTTP is used in the local demo. Production TLS, authentication provider and provider credentials require a separate design and review.
++
++## 4. System features and requirements
++
++The numbered requirements in section 2.2 are the proposed feature baseline. Exact acceptance evidence is provisional until the submitted SRS and faculty-approved Test Plan are located.
++
++## 5. Non-functional requirements
++
++| ID | Requirement | Measurement/status |
++|---|---|---|
++| CP-NF-001 | All state-changing API operations shall validate input and return a stable error shape. | Focused tests; proposed |
++| CP-NF-002 | Booking acceptance and cancellation shall use a transaction and row locks appropriate to MySQL. | Integration/concurrency tests; proposed |
++| CP-NF-003 | Sensitive identity, licence and bearer-token values shall not be written to demo output or application logs. | Review and redaction checks; proposed |
++| CP-NF-004 | A fresh checkout shall be able to verify package integrity and initialize an isolated database without developer state. | `verify-package.sh`; proposed |
++| CP-NF-005 | The commute UI shall remain usable with empty results and routing-provider failure. | Frontend harness/manual demonstration; proposed |
++| CP-NF-006 | The application shall preserve cancelled history and idempotent financial effects. | Lifecycle tests; proposed |
++
++## 6. Security objectives and requirements
++
++Objectives: (SO-1) prevent unauthorized role, booking and cancellation actions; (SO-2) minimize disclosure of identity, licence, token and financial data.
++
++| ID | Security requirement |
++|---|---|
++| CP-SEC-001 | The API shall authorize driver-only publication and acceptance actions against the authenticated actor. |
++| CP-SEC-002 | The API shall reject self-booking and unauthorized cancellation. |
++| CP-SEC-003 | Quote tokens shall be bound to the ride and request context and stale/changed quotes shall be rejected. |
++| CP-SEC-004 | Bearer tokens, licence data and private identity fields shall not appear in CI output, screenshots or demo logs. |
++| CP-SEC-005 | Synthetic demo credits shall be clearly nonredeemable and isolated from production payment systems. |
++
++## 7. Quality attributes and acceptance tests
++
++Acceptance is proposed in [RTM_DRAFT.md](RTM_DRAFT.md) and [TEST_PLAN_DRAFT.md](TEST_PLAN_DRAFT.md). No test ID in those documents is an approved faculty identifier.
++
++## 8. UML use-case diagram
++
++```mermaid
++flowchart LR
++  Driver((Driver)) --> Publish[Publish ride]
++  Driver --> Accept[Accept or reject request]
++  Rider((Rider)) --> Search[Search rides]
++  Rider --> Request[Request seat]
++  Rider --> Cancel[Cancel booking]
++  Publish --> API[Commute API]
++  Search --> API
++  Request --> API
++  Accept --> API
++  Cancel --> API
++  API --> DB[(MySQL)]
++```
++
++## 9. Requirements traceability
++
++See [RTM_DRAFT.md](RTM_DRAFT.md). The mapping is new and provisional because no submitted SRS/STP was found in the available evidence.
+diff --git a/docs/TEST_PLAN_DRAFT.md b/docs/TEST_PLAN_DRAFT.md
+new file mode 100644
+index 0000000..3059182
+--- /dev/null
++++ b/docs/TEST_PLAN_DRAFT.md
+@@ -0,0 +1,113 @@
++# Software Test Plan (STP) — CampusPool
++
++**Project:** CampusPool Sprint 1
++**Version:** 0.1 (proposed draft)
++**Date:** 26 October 2026
++**Status:** DRAFT — not submitted, approved, or signed
++**References:** [SRS_DRAFT.md](SRS_DRAFT.md), [SAD_DRAFT.md](SAD_DRAFT.md), [RTM_DRAFT.md](RTM_DRAFT.md)
++
++## 1. Introduction
++
++**Purpose:** Define the proposed verification strategy for the CampusPool commute prototype. This document is reconstructed from the faculty STP template and current source evidence; it is not the submitted Test Plan.
++
++**Scope:** Registration/profile bridge, vehicle and ride publication, search/matching, request/accept/reject, capacity, cancellation/history, synthetic wallet effects, package integrity, migrations and browser harnesses.
++
++**References:** Proposed SRS/SAD above, official baseline `0478ae0ba2549f8fba3bd44b590e91e067a46e0d`, current issue acceptance criteria, faculty templates and DBMS requirements.
++
++**Definitions:** Driver, rider, quote token, booking, lifecycle state, synthetic demo, RTM, UAT.
++
++## 2. Test Items
++
++- Commute profile and driver/vehicle bridge
++- Ride publication and validation
++- Search/matching and quote freshness
++- Booking request, acceptance, rejection and authorization
++- Seat contention and cancellation/refund lifecycle
++- MySQL migrations, constraints and isolated database setup
++- Browser commute, map and place-search harnesses
++- CI package/source integrity and synthetic HTTP smoke journey
++
++## 3. Features to be Tested
++
++Features map to proposed SRS IDs: `CP-F-002..020`, `CP-NF-001..006` and `CP-SEC-001..005`. Concrete current test files include:
++
++- `prototype/campuspool-extension/tests/MobilityCommuteProductTest.php`
++- `prototype/campuspool-extension/tests/MobilitySegmentBookingTest.php`
++- `prototype/campuspool-extension/tests/MobilityLifecycleTest.php`
++- `prototype/campuspool-extension/tests/MobilityFinancialInvariantsTest.php`
++- `prototype/tests/frontend/test-commute-ui.mjs`
++- `prototype/tests/frontend/test-commute-map.mjs`
++- `prototype/tests/frontend/test-place-search.mjs`
++- `prototype/campuspool-extension/web/driver-onboarding-ui.test.mjs`
++- `prototype/campuspool-extension/web/tracking-state.test.mjs`
++- `prototype/reproduction/smoke-booking.py`
++- `prototype/reproduction/verify-package.sh`
++
++The final integrated package must add each sibling issue worker's focused test file to this inventory after integration. Names and results must be updated from the actual checkout rather than invented here.
++
++## 4. Features Not to be Tested
++
++Production college identity provider, live road-routing/Maps/OSRM behavior, real GPS, payment settlement/payouts, native mobile clients, production uptime, Next.js client, NoSQL/vector retrieval and Sprint 2 waitlist/rematching are outside this Sprint 1 package. They require separate implementation and evidence.
++
++## 5. Test Approach / Strategy
++
++Levels are unit/service tests, integration tests against disposable MySQL, browser harness checks, package/static validation, fresh-clone verification, synthetic HTTP smoke flow and manual UAT capture. Positive, negative, boundary, authorization, idempotency and concurrency cases are required where the behavior applies.
++
++**Entry criteria:** pinned baseline, isolated checkout, disposable database, dependencies available, synthetic fixtures and test commands documented.
++
++**Exit criteria:** planned in-scope tests executed, no unresolved critical failure, package integrity passes, limitations recorded and actual evidence attached. A green synthetic run does not prove production provider behavior.
++
++### 5.1 Security Validation
++
++Validate self-booking rejection, driver-only publication/acceptance, unauthorized cancellation, duplicate requests, stale quote rejection, input validation and absence of bearer tokens/licence data in output. Do not use real credentials or student data. Production TLS, penetration testing and identity-provider review remain pending.
++
++## 6. Test Environment
++
++Docker Compose with MySQL 8, PHP/Laravel, Node.js and Python on a fresh checkout or GitHub Actions Linux runner. The local demo uses `127.0.0.1:18180`, a disposable database and synthetic route fixtures. Commands are documented in `prototype/reproduction/verify-package.sh`, `prototype/reproduction/start-local.sh` and `prototype/reproduction/smoke-booking.py`.
++
++## 7. Test Schedule
++
++The faculty handout specifies Sprint 1 as 19–23 October 2026 and Sprint 2 as 26–30 October 2026. This package is prepared on 26 October as proposed evidence; it does not assert that the original submission deadlines, video upload or approvals were met.
++
++## 8. Test Deliverables
++
++- Proposed SRS, SAD, STP and RTM drafts
++- Focused unit/integration/frontend test files
++- Package manifest and source map
++- CI logs and safe smoke output
++- Manual one-minute recording and review checklist (recording itself pending)
++- Defect notes and deviation/reconciliation report
++
++## 9. Roles and Responsibilities
++
++Roles follow the live issue assignments provisionally: Arjun (#23, #39, #44), Zayaan (#12, #21), Nikhil (#22, #43) and Nithesh (#24, #37). This table is not proof of instructor-approved two-person DBMS membership or authorship. Each student must review, understand and submit their own contribution.
++
++## 10. Risks and Mitigation
++
++| Risk | Mitigation |
++|---|---|
++| Synthetic routing hides provider failures | Keep provider behavior marked unverified; test readable fallback states. |
++| Shared service/migration conflicts | Apply issue patches in dependency order and rerun integrated tests. |
++| Missing submitted documents | Use proposed IDs only and request the actual documents. |
++| CI resource or Docker failure | Preserve logs, isolate disposable services and report blocked checks. |
++| Sensitive data in evidence | Use synthetic fixtures and redact tokens and identity/licence values. |
++
++## 11. Assumptions & Dependencies
++
++The current run assumes Docker Compose, PHP, Node.js and Python availability, a disposable MySQL service, stable fixture routing and approved access to the source baseline. It depends on issue #37 schema work for transaction evidence and issue #39 CI for repeatability.
++
++## 12. Suspension & Resumption Criteria
++
++Suspend testing if the disposable environment is unavailable, migrations fail, package integrity mismatches, or a critical authorization/data-loss defect blocks meaningful cases. Resume after the isolated environment is repaired, the failure is diagnosed and the affected tests are rerun. Never weaken assertions to obtain a pass.
++
++## 13. Test Case Management & Traceability
++
++The proposed IDs in [RTM_DRAFT.md](RTM_DRAFT.md) map requirements to actual source test files and commands. IDs prefixed `NCP-` are new proposed IDs for this package; they are not approved faculty test-case identifiers. Replace them only after locating the submitted Test Plan.
++
++## 14. Test Metrics & Reporting
++
++Record executed/passed/failed/skipped counts, assertions, migration status, package revision, environment and limitations. The previous local evidence recorded 10 backend tests/208 assertions and 25 frontend checks at prototype revision `faccb66`; that historical result is not a claim about every proposed patch or the missing academic submission.
++
++## 15. Approvals
++
++No QA lead, developer lead, product owner, course coordinator or instructor approval is recorded in this draft.

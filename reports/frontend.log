@@ -1,0 +1,36 @@
+✔ driver onboarding screen exposes the applicant and operator surfaces (0.761042ms)
+✔ client uses current onboarding contracts and protects stale versions (0.358584ms)
+✔ credentials remain memory-only and document data is never logged (0.265458ms)
+✔ ride review surfaces approved vehicle details before requesting a seat (2.57625ms)
+✔ offer form keeps the start/end time API contract and validates publishing inputs (0.462416ms)
+✔ rejects inaccurate or out-of-range browser samples and preserves UTC milliseconds (4.955125ms)
+✔ keeps a bounded queue and drops only the oldest sample (0.148041ms)
+✔ suppresses stale/future reader coordinates and keeps retry identity stable (0.082042ms)
+✔ rejects a GPS timestamp that would block the ordered server stream (0.050083ms)
+✔ changed saved places cannot select an old booking or publication as the current commute (0.615666ms)
+✔ rider overlay follows the ordered shared leg of the server geometry (1.227ms)
+✔ map renders the stored paths, labelled stops, walking gaps, and focus controls (3.572833ms)
+✔ late SDK load cannot mount a map after navigation or sign out (1.098375ms)
+✔ map failures expose retry and can recover without changing the booking data (0.931875ms)
+PASS: commute UI checks
+✔ commute page is self contained and contract shaped (0.733833ms)
+✔ role navigation and rider/driver contract copy are visible (0.136459ms)
+✔ mounted rider search updates direction and sends requested time (36.91475ms)
+✔ mounted ride detail requires exact fare consent and retries with the same key (3.372042ms)
+✔ meeting consent covers both walking legs and maximum-limit guidance stays actionable (4.370416ms)
+✔ mounted driver controls and wallet are participant scoped (8.004792ms)
+✔ driver publication submits the dated saved route and explicit detour limits (4.695208ms)
+✔ typing invalidates old coordinates; selection resolves and fills both coordinates (14.615958ms)
+✔ older suggestions cannot replace results for newer text (23.848417ms)
+✔ editing during place resolution prevents stale coordinates from being restored (11.839667ms)
+✔ disposed field cannot apply a late response and no duplicate listeners remain (12.873709ms)
+✔ provider errors remain visible and cannot retain old selected coordinates (6.610625ms)
+✔ Places requests restrict Bengaluru and omit app credentials; selection shares session token (0.526541ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 378487.427583

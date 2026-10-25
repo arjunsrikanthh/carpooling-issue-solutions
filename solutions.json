@@ -1,0 +1,77 @@
+{
+  "baseline": "0478ae0ba2549f8fba3bd44b590e91e067a46e0d",
+  "upstream": "https://github.com/CampusPool/carpooling.git",
+  "order": [
+    "37",
+    "12",
+    "21",
+    "23",
+    "24",
+    "43",
+    "39",
+    "44"
+  ],
+  "issues": {
+    "37": {
+      "dependencies": [],
+      "patches": [
+        "solution.patch"
+      ]
+    },
+    "12": {
+      "dependencies": [],
+      "patches": [
+        "solution.patch"
+      ]
+    },
+    "21": {
+      "dependencies": [
+        "37",
+        "12"
+      ],
+      "patches": [
+        "solution.patch"
+      ]
+    },
+    "23": {
+      "dependencies": [
+        "21"
+      ],
+      "patches": [
+        "solution.patch"
+      ]
+    },
+    "24": {
+      "dependencies": [
+        "23"
+      ],
+      "patches": [
+        "solution.patch"
+      ]
+    },
+    "43": {
+      "dependencies": [
+        "24"
+      ],
+      "patches": [
+        "solution.patch"
+      ]
+    },
+    "39": {
+      "dependencies": [
+        "43"
+      ],
+      "patches": [
+        "solution.patch"
+      ]
+    },
+    "44": {
+      "dependencies": [
+        "39"
+      ],
+      "patches": [
+        "solution.patch"
+      ]
+    }
+  }
+}

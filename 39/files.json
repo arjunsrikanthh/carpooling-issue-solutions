@@ -1,0 +1,6 @@
+[
+  ".github/workflows/application.yml",
+  "prototype/config/.env.example",
+  "prototype/reproduction/smoke-booking.py",
+  "prototype/reproduction/verify-package.sh"
+]

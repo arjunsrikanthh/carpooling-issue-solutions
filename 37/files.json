@@ -1,0 +1,6 @@
+[
+  "prototype/campuspool-extension/Mobility/Commute/CommuteMatchingService.php",
+  "prototype/campuspool-extension/migrations/2026_10_26_000100_harden_commute_integrity.php",
+  "prototype/reproduction/compose.yml",
+  "prototype/tests/extension/MobilityCommuteIntegrityTest.php"
+]

@@ -1,0 +1,54 @@
+{
+  "authority": "coordinator",
+  "baseline": "0478ae0ba2549f8fba3bd44b590e91e067a46e0d",
+  "tasks": [
+    {
+      "owner": "frontend",
+      "issues": [
+        12,
+        21
+      ],
+      "state": "in_progress"
+    },
+    {
+      "owner": "booking",
+      "issues": [
+        23
+      ],
+      "state": "in_progress"
+    },
+    {
+      "owner": "integrity",
+      "issues": [
+        24,
+        37
+      ],
+      "state": "in_progress"
+    },
+    {
+      "owner": "search_tests",
+      "issues": [
+        43
+      ],
+      "state": "in_progress"
+    },
+    {
+      "owner": "ci_docs",
+      "issues": [
+        39,
+        44
+      ],
+      "state": "in_progress"
+    }
+  ],
+  "phase": "runtime_repair",
+  "private_repository": "https://github.com/arjunsrikanthh/carpooling-issue-solutions",
+  "published": false,
+  "remaining": [
+    "repair43runtime",
+    "integratedandfreshverification",
+    "publishpackages",
+    "actualActionsgreen",
+    "protectedstateauditandfinalreport"
+  ]
+}

@@ -1,0 +1,12 @@
+[
+  "prototype/app/Repository/PassengersRepository.php",
+  "prototype/app/Repository/TripRepository.php",
+  "prototype/app/Services/Logic/PassengersManager.php",
+  "prototype/app/Services/Logic/TripsManager.php",
+  "prototype/campuspool-extension/Mobility/Admission/DriverReservationPolicy.php",
+  "prototype/campuspool-extension/Mobility/Recurrence/ProgramService.php",
+  "prototype/campuspool-extension/Mobility/Recurrence/RecurrenceCreationContext.php",
+  "prototype/campuspool-extension/Mobility/Segments/MatchController.php",
+  "prototype/campuspool-extension/Mobility/Segments/SegmentBookingService.php",
+  "prototype/tests/extension/MobilitySearchRegressionTest.php"
+]

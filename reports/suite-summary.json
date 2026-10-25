@@ -1,0 +1,106 @@
+[
+  {
+    "name": "Tests\\Unit\\Services\\Logic\\TripLiveShareManagerTest",
+    "tests": "23",
+    "assertions": "67",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "Tests\\Feature\\Http\\CarApiTest",
+    "tests": "9",
+    "assertions": "47",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "Tests\\Unit\\Services\\Logic\\CarsManagerTest",
+    "tests": "23",
+    "assertions": "65",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "Tests\\Feature\\Mobility\\MobilityCommuteProductTest",
+    "tests": "14",
+    "assertions": "262",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "Tests\\Feature\\Mobility\\DriverOnboardingHttpTest",
+    "tests": "2",
+    "assertions": "36",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "Tests\\Feature\\Mobility\\MobilityDriverProfileBridgeTest",
+    "tests": "3",
+    "assertions": "10",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "Tests\\Feature\\Mobility\\MobilityLifecycleTest",
+    "tests": "10",
+    "assertions": "54",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "Tests\\Feature\\Mobility\\MobilityFinancialInvariantsTest",
+    "tests": "9",
+    "assertions": "70",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "Tests\\Feature\\Mobility\\MobilitySegmentBookingTest",
+    "tests": "12",
+    "assertions": "265",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "Tests\\Feature\\Mobility\\MobilityBookingCorrectnessTest",
+    "tests": "6",
+    "assertions": "124",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "Tests\\Feature\\Mobility\\MobilityCommuteIntegrityTest",
+    "tests": "5",
+    "assertions": "23",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "Tests\\Feature\\Mobility\\MobilitySearchRegressionTest",
+    "tests": "4",
+    "assertions": "33",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "Tests\\Feature\\Mobility\\MobilityCommuteCancellationTest",
+    "tests": "1",
+    "assertions": "27",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0"
+  }
+]

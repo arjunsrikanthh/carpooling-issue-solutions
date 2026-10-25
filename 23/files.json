@@ -1,0 +1,6 @@
+[
+  "prototype/campuspool-extension/tests/MobilityBookingCorrectnessTest.php",
+  "prototype/reproduction/booking-concurrency-probe.php",
+  "prototype/reproduction/compose.booking.yml",
+  "prototype/tests/extension/MobilityBookingCorrectnessTest.php"
+]

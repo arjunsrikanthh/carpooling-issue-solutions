@@ -1,0 +1,371 @@
+diff --git a/prototype/app/Repository/PassengersRepository.php b/prototype/app/Repository/PassengersRepository.php
+index 367b642..de2bbcd 100755
+--- a/prototype/app/Repository/PassengersRepository.php
++++ b/prototype/app/Repository/PassengersRepository.php
+@@ -92,6 +92,9 @@ public function getPendingPaymentRequests($tripId, $user, $data)
+ 
+     public function newRequest($tripId, $user, $data = [])
+     {
++        if (\STS\Mobility\Segments\SegmentBookingService::managed((int) $tripId)) {
++            return app(\STS\Mobility\Segments\SegmentBookingService::class)->newRequest((int) $tripId, $user, $data);
++        }
+         $newRequestData = [
+             'trip_id' => $tripId,
+             'user_id' => $user->id,
+@@ -106,6 +109,9 @@ public function newRequest($tripId, $user, $data = [])
+ 
+     private function changeRequestState($tripId, $userId, $newState, $criterias, $canceledState = null)
+     {
++        if (\STS\Mobility\Segments\SegmentBookingService::managed((int) $tripId)) {
++            return app(\STS\Mobility\Segments\SegmentBookingService::class)->changeState((int) $tripId, (int) $userId, (int) $newState, $criterias, $canceledState === null ? null : (int) $canceledState);
++        }
+         $updateData = [
+             'request_state' => $newState,
+             'canceled_state' => $canceledState,
+@@ -184,6 +190,9 @@ public function payRequest($tripId, $aprovalUserId, $user, $data)
+ 
+     public function acceptRequest($tripId, $acceptedUserId, $user, $data)
+     {
++        if (\STS\Mobility\Segments\SegmentBookingService::managed((int) $tripId)) {
++            return app(\STS\Mobility\Segments\SegmentBookingService::class)->acceptRequest((int) $tripId, (int) $acceptedUserId);
++        }
+         $criteria = [
+             'request_state' => Passenger::STATE_PENDING,
+         ];
+diff --git a/prototype/app/Repository/TripRepository.php b/prototype/app/Repository/TripRepository.php
+index e93d741..b4e2589 100755
+--- a/prototype/app/Repository/TripRepository.php
++++ b/prototype/app/Repository/TripRepository.php
+@@ -101,7 +101,9 @@ public function create(array $data)
+         // Get trip info for price calculations and route data
+         $tripInfo = $this->getTripInfo($points);
+ 
+-        $data = $this->capSeatPriceAtMaximum($data, $tripInfo, $data['rear_max_two_passengers'] ?? false);
++        if (! \STS\Mobility\Routing\TrustedRouteContext::active()) {
++            $data = $this->capSeatPriceAtMaximum($data, $tripInfo, $data['rear_max_two_passengers'] ?? false);
++        }
+ 
+         $trip = Trip::create($data);
+ 
+@@ -147,7 +149,11 @@ public function create(array $data)
+         $this->generateTripFriendVisibility($trip);
+ 
+         if (trim((string) $trip->description) !== '') {
+-            $this->dispatchContributionCheck($trip);
++            if (\STS\Mobility\Routing\TrustedRouteContext::active()) {
++                DB::afterCommit(fn () => $this->dispatchContributionCheck($trip));
++            } else {
++                $this->dispatchContributionCheck($trip);
++            }
+         }
+ 
+         // TODO: check if trip.needs_payment (temp flag), and if total_trips_created > 2, we need to pay
+@@ -788,6 +794,10 @@ public function simplePrice($distance)
+ 
+     public function getTripInfo($points)
+     {
++        if (\STS\Mobility\Routing\TrustedRouteContext::active()) {
++            return \STS\Mobility\Routing\TrustedRouteContext::tripInfoFor($points);
++        }
++
+         $hashedPoints = hash('sha256', json_encode($points));
+         $cacheBypass = (bool) config('carpoolear.trip_route_cache_bypass', false);
+ 
+diff --git a/prototype/app/Services/Logic/PassengersManager.php b/prototype/app/Services/Logic/PassengersManager.php
+index c37cf07..51f8118 100755
+--- a/prototype/app/Services/Logic/PassengersManager.php
++++ b/prototype/app/Services/Logic/PassengersManager.php
+@@ -108,7 +108,8 @@ public function newRequest($tripId, $user, $data = [])
+         if (! $this->isInputValid($input)) {
+             return;
+         }
+-        if ($this->passengerRepository->userHasActiveRequest($tripId, $userId)) {
++        if (! \STS\Mobility\Segments\SegmentBookingService::managed((int) $tripId)
++            && $this->passengerRepository->userHasActiveRequest($tripId, $userId)) {
+             return;
+         }
+ 
+@@ -238,7 +239,7 @@ public function acceptRequest($tripId, $acceptedUserId, $user, $data = [])
+         $acceptedUser = $this->uRepo->show($acceptedUserId);
+         $trip = $this->tripLogic->show($user, $tripId);
+         if ($this->isUserRequestPending($tripId, $acceptedUserId) && $this->tripLogic->tripOwner($user, $trip)) {
+-            if ((int) $trip->seats_available === 0) {
++            if (! app(\STS\Mobility\Segments\SegmentBookingService::class)->hasCapacity($trip, (int) $acceptedUserId)) {
+                 $this->setErrors(['error' => 'not_seat_available']);
+ 
+                 return;
+diff --git a/prototype/app/Services/Logic/TripsManager.php b/prototype/app/Services/Logic/TripsManager.php
+index 0a58b77..38d4e00 100755
+--- a/prototype/app/Services/Logic/TripsManager.php
++++ b/prototype/app/Services/Logic/TripsManager.php
+@@ -98,7 +98,12 @@ public function create($user, array $data)
+ 
+             return;
+         } else {
+-            if (! $this->userHasRequiredProfileFields($user)) {
++            // Approved CampusPool onboarding is the canonical profile for trusted
++            // route offers. Keep the legacy profile gate for ordinary trips.
++            $trustedDriverProfile = $this->isDriverTrip($data)
++                && \STS\Mobility\Routing\TrustedRouteContext::active()
++                && \STS\Mobility\Trust\DriverOnboardingPolicy::canonicalProfileComplete((int) $user->id, (int) ($data['car_id'] ?? 0));
++            if (! $this->userHasRequiredProfileFields($user) && ! $trustedDriverProfile) {
+                 $messageBag = new MessageBag;
+                 $messageBag->add('profile_required', 'The user profile must be complete.');
+                 $this->setErrors($messageBag);
+@@ -131,7 +136,8 @@ public function create($user, array $data)
+             }
+ 
+             // Check trip creation limits
+-            if (! config('carpoolear.disable_trip_creation_limits', false)) {
++            if (! config('carpoolear.disable_trip_creation_limits', false)
++                && ! \STS\Mobility\Recurrence\RecurrenceCreationContext::active()) {
+                 $maxTrips = config('carpoolear.trip_creation_limits.max_trips', 5);
+                 $timeWindow = config('carpoolear.trip_creation_limits.time_window_hours', 24);
+ 
+@@ -220,11 +226,17 @@ public function create($user, array $data)
+                     $parentTrip = $this->tripRepo->update($parentTrip, $parentData);
+                 }
+             }
+-            event(new CreateEvent($trip));
+-
+-            $friendTripAlertService = app(FriendTripAlertService::class);
+-            if ($friendTripAlertService->isImmediatelyVisible($trip)) {
+-                $friendTripAlertService->notifyIfVisible($trip);
++            $notifyCreated = static function () use ($trip): void {
++                event(new CreateEvent($trip));
++                $friendTripAlertService = app(FriendTripAlertService::class);
++                if ($friendTripAlertService->isImmediatelyVisible($trip)) {
++                    $friendTripAlertService->notifyIfVisible($trip);
++                }
++            };
++            if (\STS\Mobility\Routing\TrustedRouteContext::active()) {
++                \Illuminate\Support\Facades\DB::afterCommit($notifyCreated);
++            } else {
++                $notifyCreated();
+             }
+ 
+             return $trip;
+diff --git a/prototype/campuspool-extension/Mobility/Admission/DriverReservationPolicy.php b/prototype/campuspool-extension/Mobility/Admission/DriverReservationPolicy.php
+index a3b9d19..8629cde 100644
+--- a/prototype/campuspool-extension/Mobility/Admission/DriverReservationPolicy.php
++++ b/prototype/campuspool-extension/Mobility/Admission/DriverReservationPolicy.php
+@@ -22,7 +22,7 @@ public static function fence(int $driverId): void
+ 
+     public static function scheduled(Trip $trip, array $terms): void
+     {
+-        $start = CarbonImmutable::parse($trip->trip_date, 'Asia/Kolkata')->utc();
++        $start = CarbonImmutable::createFromFormat('Y-m-d H:i:s', (string) $trip->getRawOriginal('trip_date'), 'Asia/Kolkata')->utc();
+         self::check((int) $trip->user_id, (int) $trip->id, $start, self::duration($terms['snapshot']['duration_seconds'] ?? null));
+     }
+ 
+@@ -62,7 +62,7 @@ private static function check(int $driverId, ?int $ignoreTrip, CarbonImmutable $
+             $assignment = self::current(fn () => DB::table('mobility_dispatch_assignments')->where('trip_id', $id)->lock('for share nowait')->first());
+             // A running/overdue accepted obligation must be explicitly resolved;
+             // its estimated end is not evidence that the driver became free.
+-            $otherStart = CarbonImmutable::parse($row->trip_date, 'Asia/Kolkata')->utc();
++            $otherStart = CarbonImmutable::createFromFormat('Y-m-d H:i:s', (string) $row->trip_date, 'Asia/Kolkata')->utc();
+             if ($assignment || $row->lifecycle_state === 'in_progress' || $otherStart->lte(CarbonImmutable::now('UTC'))) throw new SegmentException('DRIVER_ACTIVE_TRIP');
+             $private = self::current(fn () => DB::table('mobility_private_scheduled_publications')->where('trip_id', $id)->lock('for share nowait')->first());
+             $commute = self::current(fn () => DB::table('mobility_commute_demo_trips')->where('trip_id', $id)->lock('for share nowait')->first());
+diff --git a/prototype/campuspool-extension/Mobility/Recurrence/ProgramService.php b/prototype/campuspool-extension/Mobility/Recurrence/ProgramService.php
+index 5dde930..a40f82c 100644
+--- a/prototype/campuspool-extension/Mobility/Recurrence/ProgramService.php
++++ b/prototype/campuspool-extension/Mobility/Recurrence/ProgramService.php
+@@ -233,7 +233,7 @@ private function eligibleDates(object $p, string $target): array
+ 
+     private function publish(User $owner, object $p, string $date, CarbonImmutable $departure, string $quoteId, int $fare): void
+     {
+-        $published = $this->offers->publish($owner, ['quote_id' => $quoteId, 'car_id' => (int) $p->car_id, 'total_seats' => (int) $p->total_seats, 'description' => $p->description], 'recurring-'.$p->id.'-'.$date, $departure);
++        $published = RecurrenceCreationContext::run(fn () => $this->offers->publish($owner, ['quote_id' => $quoteId, 'car_id' => (int) $p->car_id, 'total_seats' => (int) $p->total_seats, 'description' => $p->description], 'recurring-'.$p->id.'-'.$date, $departure));
+         // Link immediately: the next date must not count this dated inventory against the legacy single-offer abuse limit.
+         DB::table('mobility_recurring_occurrences')->insert(['program_id' => $p->id, 'service_date' => $date, 'trip_id' => (int) $published['data']['id'], 'quote_id' => $quoteId, 'program_version' => (int) $p->version,
+             'config_snapshot' => json_encode(['weekly_schedule' => (int) $p->weekly_schedule, 'departure_time' => $p->departure_time, 'total_seats' => (int) $p->total_seats, 'seat_price_minor' => $fare, 'max_fare_minor' => (int) $p->max_fare_minor, 'pricing_version' => $p->pricing_version], JSON_THROW_ON_ERROR), 'created_at' => now(), 'updated_at' => now()]);
+diff --git a/prototype/campuspool-extension/Mobility/Recurrence/RecurrenceCreationContext.php b/prototype/campuspool-extension/Mobility/Recurrence/RecurrenceCreationContext.php
+new file mode 100644
+index 0000000..6fad77c
+--- /dev/null
++++ b/prototype/campuspool-extension/Mobility/Recurrence/RecurrenceCreationContext.php
+@@ -0,0 +1,24 @@
++<?php
++
++namespace STS\Mobility\Recurrence;
++
++/** Server-only scope for the bounded batch of dated program occurrences. */
++final class RecurrenceCreationContext
++{
++    private static int $depth = 0;
++
++    public static function run(callable $work): mixed
++    {
++        self::$depth++;
++        try {
++            return $work();
++        } finally {
++            self::$depth--;
++        }
++    }
++
++    public static function active(): bool
++    {
++        return self::$depth > 0;
++    }
++}
+diff --git a/prototype/campuspool-extension/Mobility/Segments/MatchController.php b/prototype/campuspool-extension/Mobility/Segments/MatchController.php
+index 4e3a5a6..0acb5fb 100644
+--- a/prototype/campuspool-extension/Mobility/Segments/MatchController.php
++++ b/prototype/campuspool-extension/Mobility/Segments/MatchController.php
+@@ -60,7 +60,13 @@ public function search(Request $request): JsonResponse
+                         continue;
+                     }
+                     $fingerprint = RouteTerms::current($trip, $terms);
+-                    $arrival = [CarbonImmutable::parse($trip->trip_date, 'Asia/Kolkata')->timestamp];
++                    // Trip's Eloquent cast may carry the application's default timezone;
++                    // the persisted schedule is a campus-local wall clock value.
++                    $departure = CarbonImmutable::createFromFormat('Y-m-d H:i:s', (string) $trip->getRawOriginal('trip_date'), 'Asia/Kolkata');
++                    if (! $departure) {
++                        throw new SegmentException('MATCH_ROUTE_CHANGED');
++                    }
++                    $arrival = [$departure->timestamp];
+                     foreach ($terms['legs'] as $leg) {
+                         $arrival[] = $arrival[count($arrival) - 1] + $leg['duration_seconds'];
+                     }
+diff --git a/prototype/campuspool-extension/Mobility/Segments/SegmentBookingService.php b/prototype/campuspool-extension/Mobility/Segments/SegmentBookingService.php
+index 794a3f0..b653b2c 100644
+--- a/prototype/campuspool-extension/Mobility/Segments/SegmentBookingService.php
++++ b/prototype/campuspool-extension/Mobility/Segments/SegmentBookingService.php
+@@ -160,7 +160,8 @@ public function activity(Trip $trip, int $riderId, array $terms): string
+         if ($riderId === (int) $trip->user_id || ! CohortPolicy::approved($riderId)) {
+             throw new SegmentException('MEMBERSHIP_REQUIRED', 403);
+         }
+-        if ($trip->state !== Trip::STATE_READY || $trip->trashed() || (int) $trip->friendship_type_id !== Trip::PRIVACY_PUBLIC || $trip->is_passenger || CarbonImmutable::parse($trip->trip_date, 'Asia/Kolkata')->lte(CarbonImmutable::now('Asia/Kolkata'))) {
++        $departure = CarbonImmutable::createFromFormat('Y-m-d H:i:s', (string) $trip->getRawOriginal('trip_date'), 'Asia/Kolkata');
++        if ($trip->state !== Trip::STATE_READY || $trip->trashed() || (int) $trip->friendship_type_id !== Trip::PRIVACY_PUBLIC || $trip->is_passenger || ! $departure || $departure->lte(CarbonImmutable::now('Asia/Kolkata'))) {
+             throw new SegmentException('MATCH_TRIP_NOT_PLANNED');
+         }
+         $occ = DB::table('mobility_recurring_occurrences')->where('trip_id', $trip->id)->first();
+diff --git a/prototype/tests/extension/MobilitySearchRegressionTest.php b/prototype/tests/extension/MobilitySearchRegressionTest.php
+new file mode 100644
+index 0000000..c3942e8
+--- /dev/null
++++ b/prototype/tests/extension/MobilitySearchRegressionTest.php
+@@ -0,0 +1,120 @@
++<?php
++
++namespace Tests\Feature\Mobility;
++
++use Illuminate\Support\Facades\DB;
++use STS\Mobility\Pickup\PathProvider;
++use STS\Models\User;
++use STS\Models\Passenger;
++use Tests\TestCase;
++
++/**
++ * Issue #43 regression coverage for search filters and input boundaries.
++ *
++ * The broader product suite covers the happy path. These tests deliberately
++ * mutate publication/lifecycle state so search cannot accidentally expose a
++ * cancelled, unpublished, or exhausted offer.
++ */
++final class MobilitySearchRegressionTest extends TestCase
++{
++    protected function beforeRefreshingDatabase(): void
++    {
++        $name = DB::connection()->getDatabaseName();
++        if (! preg_match('/^testing[a-zA-Z0-9_-]*$/', $name)) {
++            throw new \RuntimeException('Refusing to refresh non-test database: '.$name);
++        }
++    }
++
++    protected function setUp(): void
++    {
++        parent::setUp();
++        putenv('MOBILITY_PILOT_UI_ENABLED=true');
++        putenv('MOBILITY_COLLEGE_CODE=CAMPUS-BLR');
++        foreach (['car', 'bike', 'foot'] as $mode) {
++            config(['mobility_routing.'.$mode.'_expected_data_version' => $mode.'|crop_sha256='.str_repeat('a', 64).'|profile_sha256='.str_repeat('b', 64)]);
++        }
++        app()->bind(PathProvider::class, fn () => new class implements PathProvider {
++            public function path(array $points, string $mode, float $timeoutSeconds = 5): array
++            {
++                $legs = [];
++                for ($i = 1; $i < count($points); $i++) {
++                    $distance = (int) round(hypot(($points[$i]['lat'] - $points[$i - 1]['lat']) * 111000, ($points[$i]['lng'] - $points[$i - 1]['lng']) * 100000));
++                    $legs[] = ['distance_meters' => $distance, 'duration_seconds' => $distance ? (int) ceil($distance / 8) : 0];
++                }
++                return ['provider' => 'osrm', 'profile' => $mode, 'data_version' => $mode.'|crop_sha256='.str_repeat('a', 64).'|profile_sha256='.str_repeat('b', 64), 'geometry' => array_map(fn ($point) => [$point['lng'], $point['lat']], $points), 'waypoints' => array_map(fn ($point) => ['location' => [$point['lng'], $point['lat']], 'distance_meters' => 0], $points), 'legs' => $legs, 'distance_meters' => array_sum(array_column($legs, 'distance_meters')), 'duration_seconds' => array_sum(array_column($legs, 'duration_seconds'))];
++            }
++        });
++    }
++
++    private function demo(string $role): User
++    {
++        return User::findOrFail($this->postJson('/api/mobility/commute/demo-session', ['role' => $role])->assertOk()->json('user.id'));
++    }
++
++    private function profile(string $role): array
++    {
++        return ['role' => $role, 'vehicle_preference' => 'both', 'schedule_mode' => 'fixed', 'home' => ['lat' => 12.9716, 'lng' => 77.5946, 'label' => 'Home'], 'campus' => ['lat' => 12.9352, 'lng' => 77.62, 'label' => 'Campus'], 'outbound_time' => '08:30', 'return_time' => '17:30', 'weekdays' => [1, 2, 3, 4, 5]];
++    }
++
++    public function test_search_rejects_missing_and_malformed_boundaries(): void
++    {
++        $rider = $this->demo('rider');
++        $this->actingAsApiUser($rider)->getJson('/api/mobility/commute/rides')->assertStatus(422);
++        $date = now('Asia/Kolkata')->addDay()->toDateString();
++        $this->actingAsApiUser($rider)->getJson('/api/mobility/commute/rides?direction=sideways&date='.$date.'&start_time=08:00&end_time=09:00&vehicle_type=car')->assertStatus(422);
++        $this->actingAsApiUser($rider)->getJson('/api/mobility/commute/rides?direction=outbound&date=2026-02-30&start_time=08:00&end_time=09:00&vehicle_type=car')->assertStatus(422);
++    }
++
++    public function test_search_excludes_cancelled_and_unpublished_offers(): void
++    {
++        $rider = $this->demo('rider');
++        $driver = $this->demo('driver');
++        foreach ([[$rider, 'rider'], [$driver, 'driver']] as [$user, $role]) {
++            $this->actingAsApiUser($user)->putJson('/api/mobility/commute/profile', $this->profile($role))->assertOk();
++        }
++        $date = now('Asia/Kolkata')->addDay()->toDateString();
++        $trip = $this->actingAsApiUser($driver)->postJson('/api/mobility/commute/offers', ['date' => $date, 'direction' => 'outbound', 'vehicle_type' => 'car', 'choice' => 'DIRECT_RIDER_PICKUP'], ['Idempotency-Key' => 'search-regression'])->assertOk()->json('data.trip_id');
++        $query = '/api/mobility/commute/rides?direction=outbound&date='.$date.'&start_time=08:00&end_time=09:00&vehicle_type=car';
++        $this->actingAsApiUser($rider)->getJson($query)->assertOk()->assertJsonCount(1, 'data');
++        DB::table('mobility_trip_lifecycles')->where('trip_id', $trip)->update(['state' => 'cancelled']);
++        $this->actingAsApiUser($rider)->getJson($query)->assertOk()->assertJsonCount(0, 'data');
++        DB::table('mobility_trip_lifecycles')->where('trip_id', $trip)->update(['state' => 'planned']);
++        DB::table('mobility_commute_demo_trips')->where('trip_id', $trip)->update(['is_publication' => false]);
++        $this->actingAsApiUser($rider)->getJson($query)->assertOk()->assertJsonCount(0, 'data');
++    }
++
++    public function test_search_window_is_inclusive_and_full_rides_are_hidden(): void
++    {
++        $rider = $this->demo('rider');
++        $driver = $this->demo('driver');
++        foreach ([[$rider, 'rider'], [$driver, 'driver']] as [$user, $role]) {
++            $this->actingAsApiUser($user)->putJson('/api/mobility/commute/profile', $this->profile($role))->assertOk();
++        }
++        $date = now('Asia/Kolkata')->addDay()->toDateString();
++        $trip = $this->actingAsApiUser($driver)->postJson('/api/mobility/commute/offers', ['date' => $date, 'direction' => 'outbound', 'vehicle_type' => 'car', 'choice' => 'DIRECT_RIDER_PICKUP'], ['Idempotency-Key' => 'inclusive-window'])->assertOk()->json('data.trip_id');
++        $query = '/api/mobility/commute/rides?direction=outbound&date='.$date.'&start_time=08:30&end_time=08:30&vehicle_type=car';
++        $this->actingAsApiUser($rider)->getJson($query)->assertOk()->assertJsonCount(1, 'data');
++        $seatHolder = $this->demo('rider');
++        Passenger::factory()->aceptado()->create(['trip_id' => $trip, 'user_id' => $seatHolder->id]);
++        $this->actingAsApiUser($rider)->getJson($query)->assertOk()->assertJsonCount(0, 'data');
++    }
++
++    public function test_provider_failure_fails_closed_and_reports_exclusion(): void
++    {
++        $rider = $this->demo('rider');
++        $driver = $this->demo('driver');
++        foreach ([[$rider, 'rider'], [$driver, 'driver']] as [$user, $role]) {
++            $this->actingAsApiUser($user)->putJson('/api/mobility/commute/profile', $this->profile($role))->assertOk();
++        }
++        $date = now('Asia/Kolkata')->addDay()->toDateString();
++        $this->actingAsApiUser($driver)->postJson('/api/mobility/commute/offers', ['date' => $date, 'direction' => 'outbound', 'vehicle_type' => 'car', 'choice' => 'DIRECT_RIDER_PICKUP'], ['Idempotency-Key' => 'provider-failure'])->assertOk();
++        app()->bind(PathProvider::class, fn () => new class implements PathProvider {
++            public function path(array $points, string $mode, float $timeoutSeconds = 5): array
++            {
++                throw new \STS\Mobility\Routing\RoutingException('ROUTE_PROVIDER_UNAVAILABLE');
++            }
++        });
++        $query = '/api/mobility/commute/rides?direction=outbound&date='.$date.'&start_time=08:00&end_time=09:00&vehicle_type=car';
++        $this->actingAsApiUser($rider)->getJson($query)->assertOk()->assertJsonCount(0, 'data')->assertJsonPath('excluded.0.reason', 'ROUTE_PROVIDER_UNAVAILABLE');
++    }
++}
