@@ -1,6 +1,6 @@
 diff --git a/docs/COURSE_REQUIREMENTS_RECONCILIATION.md b/docs/COURSE_REQUIREMENTS_RECONCILIATION.md
 new file mode 100644
-index 0000000..8e953c4
+index 0000000..36b9c93
 --- /dev/null
 +++ b/docs/COURSE_REQUIREMENTS_RECONCILIATION.md
 @@ -0,0 +1,56 @@
@@ -13,7 +13,7 @@ index 0000000..8e953c4
 +
 +## Evidence consulted
 +
-+- Faculty/course messages: Gmail message IDs `1a11041dddadf013`, `1a0571d4d8ca9e6e` and `1a11f5cf547b2f7e8` (saved extracts in the private evidence directory; no raw mail content is copied here).
++- Faculty/course messages: Gmail message IDs `1a11041dddadf013`, `1a0571d4d8ca9e6e` and `1a11f5cf547b2f7e` (saved extracts in the private evidence directory; no raw mail content is copied here).
 +- Faculty SRS, SAD and STP template extracts supplied through the connected course material.
 +- SE Mini-Project Deliverables Part-2 handout dated 6 October 2026.
 +- Drive SE+DBMS plan with ID beginning `1whLK4...`; it is treated as a proposal and planning source, not proof of submission or approval.
@@ -45,7 +45,7 @@ index 0000000..8e953c4
 +| Next.js web interface | Current interface is Laravel-served HTML/JavaScript; `prototype/package.json` has Vite configuration but no verified Next.js application | Build the required Next.js interface and API integration in Sprint 2 or obtain explicit instructor guidance. Do not label the current browser UI Next.js. |
 +| API integration and environment-managed secrets | Laravel API and environment examples exist; production deployment is not established | Document API contracts and secret handling; test with synthetic configuration only. |
 +| Authentication and at least two roles | Synthetic driver/rider sessions and authorization checks exist; production college identity is not verified | Implement/verify the required authentication model and role evidence. |
-+| Database-level validation and integrity | MySQL constraints, migrations, transaction tests and cancellation invariants are partially evidenced | Complete fresh-database migration, rollback and concurrency proof on disposable services. |
++| Database-level validation and integrity | Fresh MySQL migrations, populated rollback/reapply, integrity tests and sampled booking/cancellation races passed | Preserve the actual logs and JUnit evidence; production migration remains subject to separate review. |
 +| Documentation, screenshots, testing and conclusion | Runbook, drafts and test evidence package exist; actual video/screenshots and final academic documentation are pending | Capture genuine UI evidence and assemble final report after review. |
 +| Git/GitHub individual contributions | Official repository has branches/issues/Actions; this package is private proposed work | Preserve truthful authorship and obtain reviewed team PRs. Never fabricate teammate commits. |
 +| Final demonstration | Synthetic publication → search → request → accept → cancel path is documented and being strengthened | Demonstrate ERD, schema, SQL/second paradigm, Next.js interface and tests only after those components actually exist. |
@@ -336,7 +336,7 @@ index 0000000..8b240e0
 +For the final handoff, attach the exact baseline SHA, issue/PR links, focused test output, migration result and recording URL. Preserve contributor attribution and third-party notices. Never claim a recording, review, upload or faculty approval that has not actually occurred.
 diff --git a/docs/SRS_DRAFT.md b/docs/SRS_DRAFT.md
 new file mode 100644
-index 0000000..db6549b
+index 0000000..5bfe86d
 --- /dev/null
 +++ b/docs/SRS_DRAFT.md
 @@ -0,0 +1,146 @@
@@ -362,7 +362,7 @@ index 0000000..db6549b
 +
 +### 1.1 Purpose
 +
-+This draft specifies a campus commute application in which a verified or locally synthetic driver publishes a future car/bike ride and a rider searches, requests, confirms and cancels a seat.
++This draft proposes a campus commute application in which a verified student host publishes a future car/bike ride and a rider searches, requests, confirms and cancels a seat. The currently verified campus commute endpoint is limited to local synthetic demo actors; non-demo hosting is not complete.
 +
 +### 1.2 Scope
 +
@@ -488,10 +488,10 @@ index 0000000..db6549b
 +See [RTM_DRAFT.md](RTM_DRAFT.md). The mapping is new and provisional because no submitted SRS/STP was found in the available evidence.
 diff --git a/docs/TEST_PLAN_DRAFT.md b/docs/TEST_PLAN_DRAFT.md
 new file mode 100644
-index 0000000..3059182
+index 0000000..6d10aa7
 --- /dev/null
 +++ b/docs/TEST_PLAN_DRAFT.md
-@@ -0,0 +1,113 @@
+@@ -0,0 +1,124 @@
 +# Software Test Plan (STP) — CampusPool
 +
 +**Project:** CampusPool Sprint 1
@@ -537,7 +537,18 @@ index 0000000..3059182
 +- `prototype/reproduction/smoke-booking.py`
 +- `prototype/reproduction/verify-package.sh`
 +
-+The final integrated package must add each sibling issue worker's focused test file to this inventory after integration. Names and results must be updated from the actual checkout rather than invented here.
++Additional focused integrated files are:
++
++- `prototype/tests/extension/DriverOnboardingHttpTest.php`
++- `prototype/tests/extension/MobilityDriverProfileBridgeTest.php`
++- `prototype/tests/extension/MobilityBookingCorrectnessTest.php`
++- `prototype/tests/extension/MobilityCommuteIntegrityTest.php`
++- `prototype/tests/extension/MobilitySearchRegressionTest.php`
++- `prototype/tests/extension/MobilityCommuteCancellationTest.php`
++- `prototype/reproduction/booking-concurrency-probe.php`
++- `prototype/reproduction/cancellation-concurrency-probe.php`
++
++The distribution repository's final verification report and JUnit records are authoritative for the exact run revision and counts.
 +
 +## 4. Features Not to be Tested
 +
@@ -600,7 +611,7 @@ index 0000000..3059182
 +
 +## 14. Test Metrics & Reporting
 +
-+Record executed/passed/failed/skipped counts, assertions, migration status, package revision, environment and limitations. The previous local evidence recorded 10 backend tests/208 assertions and 25 frontend checks at prototype revision `faccb66`; that historical result is not a claim about every proposed patch or the missing academic submission.
++Record executed/passed/failed/skipped counts, assertions, migration status, package revision, environment and limitations. The fresh integrated proposal executed 121 selected backend tests with 1,083 assertions and 27 frontend tests, zero failures. Twelve sampled overlapping-client last-seat trials, six cancellation trials, fresh migrations and populated rollback/reapply passed. These are synthetic engineering results and do not establish academic approval. The previous 10 tests/208 assertions and 25 frontend checks at `faccb66` are historical baseline evidence. Actual private Actions run/commit details and per-issue counts are recorded in the distribution repository verification report.
 +
 +## 15. Approvals
 +
