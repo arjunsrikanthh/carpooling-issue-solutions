@@ -35,16 +35,6 @@ index a80f7e0..b3b078a 100644
            python3 reproduction/smoke-booking.py
 +          docker compose -f reproduction/compose.yml exec -T app php reproduction/booking-concurrency-probe.php
 +          docker compose -f reproduction/compose.yml exec -T app php reproduction/cancellation-concurrency-probe.php
-diff --git a/prototype/config/.env.example b/prototype/config/.env.example
-index a2280b4..f3910f0 100644
---- a/prototype/config/.env.example
-+++ b/prototype/config/.env.example
-@@ -1,4 +1,5 @@
- APP_NAME=CampusPool
-+APP_TIMEZONE=Asia/Kolkata
- APP_ENV=testing
- APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
- APP_DEBUG=false
 diff --git a/prototype/reproduction/smoke-booking.py b/prototype/reproduction/smoke-booking.py
 index ed1ec88..89db753 100644
 --- a/prototype/reproduction/smoke-booking.py

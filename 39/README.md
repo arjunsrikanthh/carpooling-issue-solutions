@@ -13,7 +13,6 @@ Adds JS/Python/PHP syntax checks without generated-file contamination, full Spri
 Official files changed:
 
 - `.github/workflows/application.yml`
-- `prototype/config/.env.example`
 - `prototype/reproduction/smoke-booking.py`
 - `prototype/reproduction/verify-package.sh`
 

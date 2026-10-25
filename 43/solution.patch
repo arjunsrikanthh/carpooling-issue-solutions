@@ -369,3 +369,13 @@ index 0000000..c3942e8
 +        $this->actingAsApiUser($rider)->getJson($query)->assertOk()->assertJsonCount(0, 'data')->assertJsonPath('excluded.0.reason', 'ROUTE_PROVIDER_UNAVAILABLE');
 +    }
 +}
+diff --git a/prototype/config/.env.example b/prototype/config/.env.example
+index a2280b4..f3910f0 100644
+--- a/prototype/config/.env.example
++++ b/prototype/config/.env.example
+@@ -1,4 +1,5 @@
+ APP_NAME=CampusPool
++APP_TIMEZONE=Asia/Kolkata
+ APP_ENV=testing
+ APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+ APP_DEBUG=false

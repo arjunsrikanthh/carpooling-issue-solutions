@@ -39,7 +39,7 @@ jobs:
     timeout-minutes: 35
     strategy:
       fail-fast: false
-      max-parallel: 2
+      max-parallel: 4
       matrix:
         issue: ['12', '21', '23', '24', '37', '39', '43', '44']
     steps:

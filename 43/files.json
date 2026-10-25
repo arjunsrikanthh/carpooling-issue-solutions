@@ -8,5 +8,6 @@
   "prototype/campuspool-extension/Mobility/Recurrence/RecurrenceCreationContext.php",
   "prototype/campuspool-extension/Mobility/Segments/MatchController.php",
   "prototype/campuspool-extension/Mobility/Segments/SegmentBookingService.php",
+  "prototype/config/.env.example",
   "prototype/tests/extension/MobilitySearchRegressionTest.php"
 ]

@@ -12,6 +12,8 @@ Adds malformed/state/boundary/provider regression coverage and reconciles truste
 
 Official files changed:
 
+- `prototype/config/.env.example` (campus timezone required by these regressions)
+
 - `prototype/app/Repository/PassengersRepository.php`
 - `prototype/app/Repository/TripRepository.php`
 - `prototype/app/Services/Logic/PassengersManager.php`
@@ -37,6 +39,10 @@ Direct prerequisite issue packages: 24. The application script resolves prerequi
 Tests/evidence: MobilitySearchRegressionTest; MobilityDriverProfileBridgeTest; MobilitySegmentBookingTest; all integrated Sprint 1 suites.
 
 Actual execution results are recorded in [verification.md](verification.md). Worker static inspection alone does not satisfy the runtime gate.
+
+## Independent setup correction
+
+The first private CI run exposed a dependency-order defect: this package parsed managed campus schedules in Asia/Kolkata, but the sample application timezone was only changed by later package 39. Its separate run therefore returned `DRIVER_ACTIVE_TRIP` where the regression correctly expected `DRIVER_ROUTE_OVERLAP`. The timezone configuration now belongs to 43, alongside the code that requires it. The assertion is unchanged; combined application bytes are unchanged.
 
 ## Limitations
 
