@@ -35,3 +35,5 @@ legacy application.
 3. Keep official PRs #47 and #51 separate from this Next.js work. #47 is old prototype booking evidence and is currently dirty; #51 has no net diff and includes commits authored under `noqtar`. Do not merge either into the new application.
 4. Review the official PRs one at a time after CI passes. Confirm the issue scope, tests, screenshots/evidence and reviewer comments before merging.
 5. Finish the course gates: compare these drafts with the submitted SRS/SAD/Test Plan, capture final UI/database screenshots, record the one-minute working-product video, and document any deviations. Engineering tests do not replace those gates.
+
+The completed feature handoff was verified against merged foundation commit `f1314b1656ba939eb603e67e97dc8f24e0a7de92`. See [reports/FEATURE_HANDOFF_VERIFICATION.md](reports/FEATURE_HANDOFF_VERIFICATION.md). Teammates do not need to implement missing feature code; they need to prepare the completed scoped patch, understand it, run verification, submit it from the assigned account, and request review.
