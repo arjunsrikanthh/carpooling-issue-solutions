@@ -9,7 +9,7 @@ RULES={
  '21':['src/server/offers.ts','src/app/api/offers/route.ts','src/app/offers/**','src/features/enabled/21.json','tests/issue-21.test.ts'],
  '23':['src/server/bookings.ts','src/app/api/bookings/route.ts','src/app/api/bookings/*/decision/**','src/app/bookings/**','src/features/enabled/23.json','tests/issue-23.test.ts'],
  '24':['src/server/cancellations.ts','src/app/api/cancellations/**','src/app/api/bookings/*/cancel/**','src/app/api/offers/*/cancel/**','src/app/cancellations/**','src/features/enabled/24.json','tests/issue-24.test.ts'],
- '37':['src/server/activity.ts','src/server/mongo.ts','src/server/outbox.ts','src/app/api/activity/**','src/app/api/admin/database-evidence/**','src/app/activity/**','src/app/admin/database-evidence/**','src/features/enabled/37.json','sql/migrations/002_evidence.sql','scripts/activity-worker.ts','tests/issue-37.test.ts','tests/database-evidence.ts','tests/outbox-recovery.ts'],
+ '37':['src/server/activity.ts','src/server/mongo.ts','src/server/outbox.ts','src/app/api/activity/**','src/app/api/admin/database-evidence/**','src/app/activity/**','src/app/admin/database-evidence/**','src/features/enabled/37.json','sql/migrations/002_evidence.sql','sql/migrations/003_course_evidence.sql','scripts/activity-worker.ts','tests/issue-37.test.ts','tests/database-evidence.ts','tests/outbox-recovery.ts'],
  '43':['tests/issue-43.test.ts','tests/http.e2e.test.ts','tests/http.ts','docs/TEST_TRACEABILITY.md']}
 SCOPES={
  '12':'Vehicle registration and administrator review; car/bike capacity validation. Public ride details use the shared masked vehicle projection.',

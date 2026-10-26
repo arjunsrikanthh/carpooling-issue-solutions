@@ -1,9 +1,9 @@
 diff --git a/campuspool/docs/COURSE_REQUIREMENTS_RECONCILIATION.md b/campuspool/docs/COURSE_REQUIREMENTS_RECONCILIATION.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..cb1c536437747c8d71e72e38b2803dfeedcf36dd
+index 0000000000000000000000000000000000000000..0c81dfa156f2c3312a0596b54afc768cebd20fa1
 --- /dev/null
 +++ b/campuspool/docs/COURSE_REQUIREMENTS_RECONCILIATION.md
-@@ -0,0 +1,49 @@
+@@ -0,0 +1,53 @@
 +# CampusPool course-requirements reconciliation
 +
 +Status: working draft for team review. This file maps the locally available DBMS requirements and the SE evidence found in the issue records to the new Next.js implementation. It is not an approval, submission, or originality decision.
@@ -18,18 +18,18 @@ index 0000000000000000000000000000000000000000..cb1c536437747c8d71e72e38b2803dfe
 +
 +| Requirement | Planned implementation or evidence location | Current status |
 +| --- | --- | --- |
-+| Meaningful non-trivial problem | Campus commute offer, search, booking, approval, cancellation, and activity audit | Planned in app contract; course acceptance pending |
++| Meaningful non-trivial problem | Campus commute offer, search, booking, approval, cancellation, and activity audit | Implemented in the app and tested; course acceptance pending |
 +| Two-member team and defined contribution | `docs/ORIGINALITY_AND_OWNERSHIP.md`; Git history/PRs | Ownership declarations are a process aid, not proof of authorship |
-+| SQL plus NoSQL | MySQL is transactional authority; MongoDB stores idempotent activity/outbox projections (`server/activity.ts`, `server/outbox.ts`) | Contracted; runtime evidence pending |
-+| ERD and relational schema | SRS/SAD table descriptions; SQL foundation migrations owned by issue #39 | ERD graphic and final migration evidence pending |
-+| DDL and constraints | MySQL tables, FKs, checks, indexes; #37 evidence view/procedure/guards | Contracted; actual execution pending |
-+| DML and meaningful queries | Auth, catalog, rides, bookings, cancellation, dashboard, activity APIs | Contracted; query/run evidence pending |
-+| Four SQL advanced concepts | Transactions, indexes, views, stored procedure, triggers/guards (foundation migration 001 plus evidence migration 002) | Contracted; do not mark demonstrated until captured |
-+| One NoSQL advanced concept | MongoDB unique event upsert, filtered activity projection, aggregation/summary | Contracted; worker and aggregation evidence pending |
-+| Next.js web interface | Next App Router, route handlers, feature pages | Foundation/feature implementation in progress; browser evidence pending |
-+| API integration and secrets | Node route handlers; `DATABASE_URL`/Mongo configuration via environment; no hard-coded credentials | Contracted; deployment/config review pending |
-+| Authentication and two roles | Opaque `cp_session`; RIDER, DRIVER, ADMIN; pending registration and admin approval | Contracted; runtime evidence pending |
-+| Validation and integrity | Zod request schemas, same-origin mutation guard, SQL checks/FKs, transactional seat/credit operations | Contracted; tests/evidence pending |
++| SQL plus NoSQL | MySQL is transactional authority; MongoDB stores idempotent activity/outbox projections (`server/activity.ts`, `server/outbox.ts`) | Implemented; auth and role boundaries exercised in integration/HTTP tests |
++| ERD and relational schema | SRS/SAD table descriptions; SQL foundation migrations owned by issue #39 | ERD/data dictionary committed; migrations and schema evidence verified in disposable database |
++| DDL and constraints | MySQL tables, FKs, checks, indexes; #37 evidence view/procedure/guards | Implemented; DDL and constraints executed in disposable database |
++| DML and meaningful queries | Auth, catalog, rides, bookings, cancellation, dashboard, activity APIs | Implemented; DML/API operations and query evidence exercised by integration/HTTP tests |
++| Four SQL advanced concepts | Transactions, indexes, views, stored procedure, triggers/guards (foundation migration 001 plus evidence migration 002) | Implemented; transactions, indexes, views, stored procedure and triggers exercised; course presentation evidence still needed |
++| One NoSQL advanced concept | MongoDB unique event upsert, filtered activity projection, aggregation/summary | Implemented; unique upsert, audience filtering and aggregation exercised in MongoDB recovery tests |
++| Next.js web interface | Next App Router, route handlers, feature pages | Implemented; production build and HTTP journey verified; screenshots still need to be captured for the final submission |
++| API integration and secrets | Node route handlers; `DATABASE_URL`/Mongo configuration via environment; no hard-coded credentials | Implemented with environment configuration; deployment review pending |
++| Authentication and two roles | Opaque `cp_session`; RIDER, DRIVER, ADMIN; pending registration and admin approval | Implemented; auth and role boundaries exercised in integration/HTTP tests |
++| Validation and integrity | Zod request schemas, same-origin mutation guard, SQL checks/FKs, transactional seat/credit operations | Implemented; checks and race tests passed; final course evidence package remains |
 +| Documentation and demonstration | This reconciliation, SRS, SAD, STP, RTM/test records, and later actual screenshots/video | Drafts only; no approval/video claim |
 +| Git/GitHub | Issue-scoped branches and PRs in `handoff.json`; CI is part of #39 | Planned workflow; review/merge not asserted |
 +| Originality | See `ORIGINALITY_AND_OWNERSHIP.md`; explain design choices and each member's own work | Declaration/evidence process pending |
@@ -52,13 +52,17 @@ index 0000000000000000000000000000000000000000..cb1c536437747c8d71e72e38b2803dfe
 +
 +## Known gaps
 +
-+The final ERD rendering, executed SQL/NoSQL evidence, actual Next.js browser screenshots, approved two-member eligibility, genuine teammate review, instructor-approved SRS/SAD/STP, originality acceptance, and working-product video must be added by the team when available. Do not fill these gaps with synthetic claims.
++The final ERD rendering, actual Next.js browser screenshots, approved two-member eligibility, genuine teammate review, instructor-approved SRS/SAD/STP, originality acceptance, and working-product video must be added by the team when available. Do not fill these gaps with synthetic claims.
++
++## Current engineering evidence
++
++At the verified personal-repository commit, the implementation checks passed locally and in GitHub Actions run `40379725305`: typecheck, lint, production build, disposable MySQL/Mongo migration and seed, 23 integration assertions, and the 9-case production HTTP journey. The HTTP suite includes twelve final-seat acceptance races and six cancellation/refund races. These are engineering results for this implementation; they do not substitute for instructor approval, genuine teammate review, or the required recorded demonstration.
 diff --git a/campuspool/docs/DATABASE_EVIDENCE_EXAMPLES.md b/campuspool/docs/DATABASE_EVIDENCE_EXAMPLES.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..cc01b8f1ea3bcb4a9b8446318cf1a3235b6adfe0
+index 0000000000000000000000000000000000000000..ce1078ff911c12f9ae8fa5c0fbf6b5d09b669219
 --- /dev/null
 +++ b/campuspool/docs/DATABASE_EVIDENCE_EXAMPLES.md
-@@ -0,0 +1,66 @@
+@@ -0,0 +1,70 @@
 +# Database evidence examples — draft
 +
 +These examples are taken from the new implementation's direct SQL and MongoDB source. They illustrate what the team should demonstrate; they are not recorded execution results.
@@ -102,7 +106,7 @@ index 0000000000000000000000000000000000000000..cc01b8f1ea3bcb4a9b8446318cf1a323
 +-- and guards active ride edits plus ledger UPDATE/DELETE.
 +```
 +
-+These demonstrate a view, stored procedure, indexes, and triggers in the planned DBMS evidence. Transactions and foreign-key/check enforcement are implemented through the application/schema contract and require an actual run record.
++These demonstrate a view, stored procedure, indexes, and triggers in the DBMS evidence. The verified disposable run also exercises transactions and foreign-key/check enforcement.
 +
 +## MongoDB: activity projection
 +
@@ -124,10 +128,14 @@ index 0000000000000000000000000000000000000000..cc01b8f1ea3bcb4a9b8446318cf1a323
 +]);
 +```
 +
-+The worker uses an `updateOne({eventId}, {$setOnInsert: event}, {upsert: true})` pattern, so retrying an outbox event does not duplicate the projection. MongoDB outage handling and actual index/aggregation output remain pending evidence.
++The worker uses an `updateOne({eventId}, {$setOnInsert: event}, {upsert: true})` pattern, so retrying an outbox event does not duplicate the projection. MongoDB outage handling, unique indexes, audience filtering and aggregation output are exercised by the verified outbox recovery test; final course screenshots remain pending.
++
++## Executed DDL coverage
++
++The disposable database run applies `001_schema.sql`, `002_evidence.sql`, and `003_course_evidence.sql`. The migrations demonstrate `CREATE TABLE/VIEW/PROCEDURE/TRIGGER`, `ALTER TABLE` for the ride price and outbox retry definitions, and `DROP PROCEDURE/TRIGGER` before recreating evidence objects. The run records the migration versions in `schema_migrations`; it does not use an existing application database.
 diff --git a/campuspool/docs/ERD_AND_DATA_DICTIONARY.md b/campuspool/docs/ERD_AND_DATA_DICTIONARY.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..5be576dab8eae054dee336d300ce2e1d54a70451
+index 0000000000000000000000000000000000000000..ae46461c710cab8eefc3554541ea159f4570ab75
 --- /dev/null
 +++ b/campuspool/docs/ERD_AND_DATA_DICTIONARY.md
 @@ -0,0 +1,48 @@
@@ -178,10 +186,10 @@ index 0000000000000000000000000000000000000000..5be576dab8eae054dee336d300ce2e1d
 +| `idempotency_records` | Actor/key/payload hashes and prior response | Unique actor/key; prevents repeated domain mutation |
 +| `outbox` | Transactional event awaiting Mongo projection | Unique event ID; retry attempts and published timestamp |
 +
-+Migration `002_evidence.sql` adds `driver_ride_summary`, `ride_capacity_report`, supporting indexes, and guards that prevent changing an active ride's core fields or updating/deleting ledger history. Actual execution output is still pending.
++Migration `002_evidence.sql` adds `driver_ride_summary`, `ride_capacity_report`, supporting indexes, and guards that prevent changing an active ride's core fields or updating/deleting ledger history. Migration execution and integrity output are recorded in the verified disposable database run; the final course screenshot/export still needs to be captured.
 diff --git a/campuspool/docs/ISSUE_44_HANDOFF.md b/campuspool/docs/ISSUE_44_HANDOFF.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..7b2cb649ea6ef2c1853f3c4f2cb4d412d683b69d
+index 0000000000000000000000000000000000000000..72805c040897444382bb5bf4b9de047e633c072e
 --- /dev/null
 +++ b/campuspool/docs/ISSUE_44_HANDOFF.md
 @@ -0,0 +1,23 @@
@@ -200,7 +208,7 @@ index 0000000000000000000000000000000000000000..7b2cb649ea6ef2c1853f3c4f2cb4d412
 +
 +## Honest status
 +
-+The team deferred course approval work. No SRS, SAD, or Test Plan in this package is marked approved. No working-product video, genuine teammate review, two-member instructor approval, originality acceptance, or executed test result is asserted. Replace `Not run`/`Pending` entries only with real dated artifacts and links. The #43 approved-Test-Plan gate and all #44 acceptance criteria remain pending.
++The team deferred course approval work. No SRS, SAD, or Test Plan in this package is marked approved. No working-product video, genuine teammate review, two-member instructor approval, or originality acceptance is asserted. Engineering test results are recorded in `reports/SPRINT1_VERIFICATION.md`; replace course `Pending` entries only with real dated artifacts and links. The #43 approved-Test-Plan gate and all #44 acceptance criteria remain pending.
 +
 +## Review checklist
 +
@@ -242,24 +250,24 @@ index 0000000000000000000000000000000000000000..492dacb06c703b07ac8e0d9359170b35
 +The final originality decision belongs to the team/instructor. These documents and an AI-assisted work packet do not establish originality by themselves.
 diff --git a/campuspool/docs/RTM_DRAFT.md b/campuspool/docs/RTM_DRAFT.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..4efabbebc91e06e2ec018a63d241ac757d0874be
+index 0000000000000000000000000000000000000000..6d8ff81363af09d24fa79103a659d138322be03f
 --- /dev/null
 +++ b/campuspool/docs/RTM_DRAFT.md
 @@ -0,0 +1,15 @@
 +# Requirements traceability matrix — draft
 +
-+This matrix is proposed for review. “Evidence” means a future linked artifact, not a claim that the artifact exists today.
++This matrix is proposed for review. Engineering evidence below is from the verified personal issue repository; course approval and official teammate PR evidence are separate gates.
 +
 +| Requirement | SRS | Architecture | Test | Evidence owner | Current state |
 +| --- | --- | --- | --- | --- | --- |
-+| Secure auth and role approval | FR-01/02 | Foundation | T39-01/02 | Arjun | Planned; test pending |
-+| Vehicle registration/review | FR-03 | Vehicle service | T12-01 | Zayaan | Planned; test pending |
-+| Ride publication | FR-04 | Offer service | T21-01 | Zayaan | Planned; test pending |
-+| Search and eligibility | FR-05 | Search service | T43-01 | Nikhil | Planned; test pending |
-+| Booking correctness | FR-06/07 | Booking service | T23-01/02 | Arjun | Planned; test pending |
-+| Cancellation/refund | FR-08 | Cancellation service | T24-01 | Nithesh | Planned; test pending |
-+| SQL/NoSQL activity evidence | FR-09/10 | Outbox/Mongo | T37-01 | Nithesh | Planned; test pending |
-+| Validation and idempotency | FR-11 | Shared core | T21-01/T39-03 | Arjun | Planned; test pending |
++| Secure auth and role approval | FR-01/02 | Foundation | T39-01/02 | Arjun | Engineering tests passed; official owner PR/review pending |
++| Vehicle registration/review | FR-03 | Vehicle service | T12-01 | Zayaan | Engineering tests passed; official owner PR/review pending |
++| Ride publication | FR-04 | Offer service | T21-01 | Zayaan | Engineering tests passed; official owner PR/review pending |
++| Search and eligibility | FR-05 | Search service | T43-01 | Nikhil | Engineering tests passed; official owner PR/review pending |
++| Booking correctness | FR-06/07 | Booking service | T23-01/02 | Arjun | Engineering tests passed; official owner PR/review pending |
++| Cancellation/refund | FR-08 | Cancellation service | T24-01 | Nithesh | Engineering tests passed; official owner PR/review pending |
++| SQL/NoSQL activity evidence | FR-09/10 | Outbox/Mongo | T37-01 | Nithesh | Engineering tests passed; official owner PR/review pending |
++| Validation and idempotency | FR-11 | Shared core | T21-01/T39-03 | Arjun | Engineering tests passed; official owner PR/review pending |
 +| SE documentation/review/video | SRS/SAD/STP | This docs package | ACC-01 | Team | Pending manual/course evidence |
 diff --git a/campuspool/docs/SAD_DRAFT.md b/campuspool/docs/SAD_DRAFT.md
 new file mode 100644
@@ -312,9 +320,33 @@ index 0000000000000000000000000000000000000000..c71dafc2eccd8dc5c0d94ef0470055d0
 +## 5. Decisions and constraints
 +
 +MySQL remains authoritative because seats, credits, and authorization require atomic transactions. MongoDB is intentionally asynchronous so its outage cannot reverse a committed booking. The fixed-route course model avoids claiming live routing. SQL capacity-decrement triggers are prohibited; the booking/cancellation services own capacity changes. Credentials are environment-only. The archived Laravel/native-JS implementation is behavioral reference, not a parity claim. Actual deployment, performance, threat, and browser evidence are pending.
+diff --git a/campuspool/docs/SPRINT1_VERIFICATION.md b/campuspool/docs/SPRINT1_VERIFICATION.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..fd37827f5dfa5a02f163dec321d7590d3871dc16
+--- /dev/null
++++ b/campuspool/docs/SPRINT1_VERIFICATION.md
+@@ -0,0 +1,18 @@
++# CampusPool Sprint 1 engineering verification
++
++This report records the new personal issue repository's implementation evidence. It is not faculty approval, a submitted Test Plan, a teammate review, or a video submission.
++
++- Application commit verified: `fc5bf525c1ca02d565691c12da565ae27121c594`
++- Handoff/status commit: `8b692cd716edb1a93a5ef50c29420d250ef8b8ff`
++- Official CampusPool main inspected: `5b8a06ae39f87297882bd92b869b2481114d860c`
++- GitHub Actions: [run 40379725305](https://github.com/arjunsrikanthh/carpooling-issue-solutions/actions/runs/40379725305), passed static checks, build, migrations, integration and HTTP E2E.
++- Local environment: disposable MySQL 8.4 and MongoDB 8.0; seeded `.test` identities only.
++- Integration: 23 tests passed. This includes SQL checks, view/procedure/index/trigger evidence, booking races, cancellation/refund races and Mongo outbox failure/recovery.
++- HTTP E2E: 9 tests passed, including twelve final-seat acceptance trials and six cancellation/refund trials.
++- Static: TypeScript typecheck, ESLint, production build and handoff fixture tests passed.
++
++## Requirement status
++
++The implementation covers the requested Next.js interface, MySQL + MongoDB design, ERD/data dictionary, DDL/DML, transactions, views, stored procedures, triggers, indexes, MongoDB upsert/aggregation, role-based authentication, validation and GitHub workflow.
++
++The following remain human/course gates: instructor-approved SRS/SAD/Test Plan, approved two-member eligibility, genuine teammate-authored/reviewed official PRs, application screenshots in the final submission, Sprint 1 working-product video, and originality acceptance. Waitlist/rematching remains Sprint 2 scope.
 diff --git a/campuspool/docs/SRS_DRAFT.md b/campuspool/docs/SRS_DRAFT.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..a13d58e07aa5f724eb58be4acbcf4a1fa7f2bdbb
+index 0000000000000000000000000000000000000000..f200d9fa94c154d6e83ab28d089ab54aaf28be7e
 --- /dev/null
 +++ b/campuspool/docs/SRS_DRAFT.md
 @@ -0,0 +1,38 @@
@@ -355,16 +387,16 @@ index 0000000000000000000000000000000000000000..a13d58e07aa5f724eb58be4acbcf4a1f
 +
 +## 5. Traceability and acceptance
 +
-+FR-01/02/11 map to #39; FR-03 to #12; FR-04 to #21; FR-05 is shared #39 baseline behavior with #43 test-plan traceability; FR-06/07 to #23; FR-08 to #24; FR-09/10 to #37. Test IDs are proposed in `TEST_PLAN_DRAFT.md`; no result is marked passed until an actual reproducible run is attached. Faculty approval, reviewed ownership, and the working-product video remain pending.
++FR-01/02/11 map to #39; FR-03 to #12; FR-04 to #21; FR-05 is shared #39 baseline behavior with #43 test-plan traceability; FR-06/07 to #23; FR-08 to #24; FR-09/10 to #37. Test IDs and the reproducible execution record are in `TEST_PLAN_DRAFT.md` and `reports/SPRINT1_VERIFICATION.md`; course approval and final screenshot/video evidence remain pending. Faculty approval, reviewed ownership, and the working-product video remain pending.
 diff --git a/campuspool/docs/TEST_PLAN_DRAFT.md b/campuspool/docs/TEST_PLAN_DRAFT.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..92b4cf2df13f0e17018b4834603a90676a427878
+index 0000000000000000000000000000000000000000..7f9f9e79bb03be10f509717e81db5fee8e55f013
 --- /dev/null
 +++ b/campuspool/docs/TEST_PLAN_DRAFT.md
-@@ -0,0 +1,35 @@
+@@ -0,0 +1,40 @@
 +# Sprint 1 test plan — CampusPool (draft)
 +
-+**Status:** Proposed test plan; not submitted or approved. The commands and results below are placeholders until the implementation and test fixtures exist. Do not report a pending row as passed.
++**Status:** Proposed test plan; not submitted or approved. The execution record below is now populated from the verified personal-repository commit; it is not a claim of faculty approval.
 +
 +## 1. Test levels
 +
@@ -378,21 +410,26 @@ index 0000000000000000000000000000000000000000..92b4cf2df13f0e17018b4834603a9067
 +
 +| ID | Requirement | Test | Expected result | Status |
 +| --- | --- | --- | --- | --- |
-+| T39-01 | FR-01 | Register, log in, inspect `/api/auth/me`, log out | Pending user/session lifecycle; no token leakage | Not run |
-+| T39-02 | FR-02 | Admin approves/suspends member; non-admin attempts same | Admin succeeds; unauthorized request rejected | Not run |
-+| T12-01 | FR-03 | Register BIKE capacity 2 and CAR capacity 6; review | Invalid capacities rejected; approved DTO is correct | Not run |
-+| T21-01 | FR-04 | Publish valid and invalid future offers; retry same idempotency key | One valid ride; invalid/overlap/duplicate requests rejected | Not run |
-+| T43-01 | FR-05 | Execute the approved Test Plan's search/matching cases against the shared baseline, including closed #22 regression boundaries | Actual traceability and deviations recorded; no new search implementation is implied | Not run |
-+| T23-01 | FR-06/07 | Request, duplicate request, stale quote, owner accept/reject | Correct status/authorization; one seat and one hold | Not run |
-+| T23-02 | FR-06/07 | Concurrent last-seat requests | At most one accepted request; no negative capacity/duplicate hold | Not run |
-+| T24-01 | FR-08 | Rider/driver cancellation, repeated cancellation, owner offer cancellation | Authorized one-time refund/history/capacity transition | Not run |
-+| T37-01 | FR-09/10 | Commit event, run worker twice, inspect Mongo and SQL evidence | Unique projection, safe retry, view/procedure/guard output | Not run |
-+| T39-03 | FR-11 | Cross-origin mutation, missing idempotency, malformed body | Rejected with safe error envelope | Not run |
++| T39-01 | FR-01 | Register, log in, inspect `/api/auth/me`, log out | Pending user/session lifecycle; no token leakage | Passed in integration/HTTP run |
++| T39-02 | FR-02 | Admin approves/suspends member; non-admin attempts same | Admin succeeds; unauthorized request rejected | Passed in HTTP run |
++| T12-01 | FR-03 | Register BIKE capacity 2 and CAR capacity 6; review | Invalid capacities rejected; approved DTO is correct | Passed in integration/HTTP run |
++| T21-01 | FR-04 | Publish valid and invalid future offers; retry same idempotency key | One valid ride; invalid/overlap/duplicate requests rejected | Passed in integration/HTTP run |
++| T43-01 | FR-05 | Execute the approved Test Plan's search/matching cases against the shared baseline, including closed #22 regression boundaries | Actual traceability and deviations recorded; no new search implementation is implied | Engineering regression passed; approval pending |
++| T23-01 | FR-06/07 | Request, duplicate request, stale quote, owner accept/reject | Correct status/authorization; one seat and one hold | Passed in integration/HTTP run |
++| T23-02 | FR-06/07 | Concurrent last-seat requests | At most one accepted request; no negative capacity/duplicate hold | Passed: 12 HTTP trials |
++| T24-01 | FR-08 | Rider/driver cancellation, repeated cancellation, owner offer cancellation | Authorized one-time refund/history/capacity transition | Passed: 6 race trials |
++| T37-01 | FR-09/10 | Commit event, run worker twice, inspect Mongo and SQL evidence | Unique projection, safe retry, view/procedure/guard output | Passed in disposable MySQL/Mongo run |
++| T39-03 | FR-11 | Cross-origin mutation, missing idempotency, malformed body | Rejected with safe error envelope | Passed in integration/HTTP run |
 +| ACC-01 | Course/SE | Run clean setup, capture real UI and link reviewed PRs | Evidence package complete | Pending manual evidence |
 +
 +## 3. Execution record
 +
-+When tests are run, record commit SHA, environment (disposable DB names only), exact command, timestamp, pass/fail count, and artifact path. A future CI run may attach output here; this draft intentionally invents no test result.
++- Commit: `fc5bf525c1ca02d565691c12da565ae27121c594` (application verification); handoff metadata was recorded afterward at `8b692cd`.
++- GitHub Actions: run `40379725305`, all static, build, migration, integration and HTTP jobs passed.
++- Local disposable services: MySQL 8.4 and MongoDB 8.0; 23 integration tests passed, including 12 final-seat and 6 cancellation/refund races.
++- Production HTTP journey: 9 tests passed.
++- Reproducible commands are in `campuspool/README.md` and `scripts/test-integration.py`.
++- This is engineering evidence only. The submitted/approved Test Plan, human review, screenshot package, and video remain pending.
 +
 +## 4. Exit criteria
 +

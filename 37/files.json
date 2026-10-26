@@ -1,6 +1,7 @@
 [
   "campuspool/scripts/activity-worker.ts",
   "campuspool/sql/migrations/002_evidence.sql",
+  "campuspool/sql/migrations/003_course_evidence.sql",
   "campuspool/src/app/activity/page.tsx",
   "campuspool/src/app/admin/database-evidence/page.tsx",
   "campuspool/src/app/api/activity/route.ts",

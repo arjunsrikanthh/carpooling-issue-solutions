@@ -45,4 +45,4 @@ erDiagram
 | `idempotency_records` | Actor/key/payload hashes and prior response | Unique actor/key; prevents repeated domain mutation |
 | `outbox` | Transactional event awaiting Mongo projection | Unique event ID; retry attempts and published timestamp |
 
-Migration `002_evidence.sql` adds `driver_ride_summary`, `ride_capacity_report`, supporting indexes, and guards that prevent changing an active ride's core fields or updating/deleting ledger history. Actual execution output is still pending.
+Migration `002_evidence.sql` adds `driver_ride_summary`, `ride_capacity_report`, supporting indexes, and guards that prevent changing an active ride's core fields or updating/deleting ledger history. Migration execution and integrity output are recorded in the verified disposable database run; the final course screenshot/export still needs to be captured.

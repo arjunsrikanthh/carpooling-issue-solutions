@@ -41,7 +41,7 @@ CALL ride_capacity_report('2026-10-26');
 -- and guards active ride edits plus ledger UPDATE/DELETE.
 ```
 
-These demonstrate a view, stored procedure, indexes, and triggers in the planned DBMS evidence. Transactions and foreign-key/check enforcement are implemented through the application/schema contract and require an actual run record.
+These demonstrate a view, stored procedure, indexes, and triggers in the DBMS evidence. The verified disposable run also exercises transactions and foreign-key/check enforcement.
 
 ## MongoDB: activity projection
 
@@ -63,4 +63,16 @@ db.activity_events.aggregate([
 ]);
 ```
 
-The worker uses an `updateOne({eventId}, {$setOnInsert: event}, {upsert: true})` pattern, so retrying an outbox event does not duplicate the projection. MongoDB outage handling and actual index/aggregation output remain pending evidence.
+The worker uses an `updateOne({eventId}, {$setOnInsert: event}, {upsert: true})` pattern, so retrying an outbox event does not duplicate the projection. MongoDB outage handling, unique indexes, audience filtering and aggregation output are exercised by the verified outbox recovery test; final course screenshots remain pending.
+
+## Executed DDL coverage
+
+The disposable database run applies `001_schema.sql`, `002_evidence.sql`, and `003_course_evidence.sql`. The migrations demonstrate `CREATE TABLE/VIEW/PROCEDURE/TRIGGER`, `ALTER TABLE` for the ride price and outbox retry definitions, and `DROP PROCEDURE/TRIGGER` before recreating evidence objects. The run records the migration versions in `schema_migrations`; it does not use an existing application database.
+
+## DML coverage
+
+- `INSERT`: registration, vehicle, ride, booking, ledger and outbox writes.
+- `SELECT`: catalog, route search, dashboards, joins, grouped activity summaries and evidence queries.
+- `UPDATE`: admin approval, seat decrement/restoration, booking lifecycle, credit balance and outbox publication.
+- `DELETE`: disposable fixture cleanup and session logout; booking history is deliberately preserved instead of deleted.
+- `JOIN`, `GROUP BY`, `ORDER BY`, aggregate counts and subqueries are used by dashboard, evidence and activity queries.

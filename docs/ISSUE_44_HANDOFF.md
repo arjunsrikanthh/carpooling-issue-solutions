@@ -13,7 +13,7 @@ This folder-level handoff is for the new Next.js v1 Sprint 1 implementation. It 
 
 ## Honest status
 
-The team deferred course approval work. No SRS, SAD, or Test Plan in this package is marked approved. No working-product video, genuine teammate review, two-member instructor approval, originality acceptance, or executed test result is asserted. Replace `Not run`/`Pending` entries only with real dated artifacts and links. The #43 approved-Test-Plan gate and all #44 acceptance criteria remain pending.
+The team deferred course approval work. No SRS, SAD, or Test Plan in this package is marked approved. No working-product video, genuine teammate review, two-member instructor approval, or originality acceptance is asserted. Engineering test results are recorded in `reports/SPRINT1_VERIFICATION.md`; replace course `Pending` entries only with real dated artifacts and links. The #43 approved-Test-Plan gate and all #44 acceptance criteria remain pending.
 
 ## Review checklist
 

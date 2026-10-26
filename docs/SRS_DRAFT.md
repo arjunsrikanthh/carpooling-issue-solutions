@@ -35,4 +35,4 @@ Security: validate strict JSON with Zod; never expose password hashes, session t
 
 ## 5. Traceability and acceptance
 
-FR-01/02/11 map to #39; FR-03 to #12; FR-04 to #21; FR-05 is shared #39 baseline behavior with #43 test-plan traceability; FR-06/07 to #23; FR-08 to #24; FR-09/10 to #37. Test IDs are proposed in `TEST_PLAN_DRAFT.md`; no result is marked passed until an actual reproducible run is attached. Faculty approval, reviewed ownership, and the working-product video remain pending.
+FR-01/02/11 map to #39; FR-03 to #12; FR-04 to #21; FR-05 is shared #39 baseline behavior with #43 test-plan traceability; FR-06/07 to #23; FR-08 to #24; FR-09/10 to #37. Test IDs and the reproducible execution record are in `TEST_PLAN_DRAFT.md` and `reports/SPRINT1_VERIFICATION.md`; course approval and final screenshot/video evidence remain pending. Faculty approval, reviewed ownership, and the working-product video remain pending.

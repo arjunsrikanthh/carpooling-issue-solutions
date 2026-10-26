@@ -27,3 +27,11 @@ Use only the GitHub account assigned in `handoff.json`. The helper is draft by
 default, uses `Refs #N`, and never merges, closes issues, force-pushes, or uses
 the `noqtar` account. Do not reuse a work directory or copy files from the
 legacy application.
+
+## Leader checklist after this audit
+
+1. Submit the shared #39 foundation PR first. It is the only branch that changes the official application baseline.
+2. Ask each owner to prepare one fresh official PR from this repository's helper. They must read the issue README, run the checks, explain their own diff, and request a teammate review.
+3. Keep official PRs #47 and #51 separate from this Next.js work. #47 is old prototype booking evidence and is currently dirty; #51 has no net diff and includes commits authored under `noqtar`. Do not merge either into the new application.
+4. Review the official PRs one at a time after CI passes. Confirm the issue scope, tests, screenshots/evidence and reviewer comments before merging.
+5. Finish the course gates: compare these drafts with the submitted SRS/SAD/Test Plan, capture final UI/database screenshots, record the one-minute working-product video, and document any deviations. Engineering tests do not replace those gates.
