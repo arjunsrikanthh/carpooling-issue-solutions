@@ -89,14 +89,14 @@
     "39": {
       "owner": "arjunsrikanthh",
       "files": 52,
-      "patch_sha256": "41e05009c9c0c4ba07d40f5a52685c7674e9c053cb6c5b4b5f3303a9c07116c5",
+      "patch_sha256": "479c7fdfc84fbd67cc784f40893c42c732665cd9e351ac8d2a3bc7d83cd380aa",
       "source_sha256": {
         "campuspool/.env.example": "8e9281aede099f428fad8c3f32310b4381607bb517c56c6c79c91c94b15ea97f",
         "campuspool/.foundation-version": "ebafa9dbe639e89a0c4e14cba9731e8e98796c1cc5616425cc85c0d76bf8bd99",
         "campuspool/.gitignore": "969b399c11cdecfe037c173d30218ff38a7b93933d35a9939a775c591800a26f",
         "campuspool/.npmrc": "f7dbda001b627b3a792fb6929303b517f047f03916f2c55227e81216d38a2008",
         "campuspool/README.md": "2e401d43c491e19420796f2d31ad69baffd712f27fc6cd5e2c9ee488c63eba8a",
-        "campuspool/ci/campuspool-next.yml": "bd7367d35dbbf3ea4140269ebf50736cd9158e12f72b3a5ca42202f5f45609ca",
+        "campuspool/ci/campuspool-next.yml": "35230978b138e6a9ec5fbc1098e66c1421606530b4b3e86843826745719312f8",
         "campuspool/compose.yml": "87dc369bd0c958b09ffeddbf6aa65f7a00c3e704ccce0d4a353fc13af4dbdd6b",
         "campuspool/eslint.config.mjs": "7542d50473d9df3d499ce897f565163893f2b3705451e510cc3377508fdef32d",
         "campuspool/next-env.d.ts": "1862ac4bbbc5192d4bf562161df66ea547ed3e67173100656ab606ae9797db2b",
@@ -118,7 +118,7 @@
         "campuspool/src/app/api/dashboard/route.ts": "06e80e23e348b19464d3a13d28963d0701a38219b15061d21f1666e0218db7ac",
         "campuspool/src/app/api/rides/[id]/route.ts": "bbe93eb2a9c3ee78b90efb81d63bbfd4be5637a5990850f1ce9126566f681394",
         "campuspool/src/app/api/rides/route.ts": "96c7ff1b6942458ac8f59177790270959912a86d4cd697630ccbc55665a1b743",
-        "campuspool/src/app/dashboard/page.tsx": "fc2cb3cf52cd224bcc7055c48ae8ee087a76956bfa3ad6bcedb90ad431eb5388",
+        "campuspool/src/app/dashboard/page.tsx": "9469de67e36332b500a005905ea285a8441732d431b488d1d22ac4187486d712",
         "campuspool/src/app/globals.css": "5f5399abfe71b766cc553364c43b864b29c2c1801a8e8ef24f12fc40f717702c",
         "campuspool/src/app/layout.tsx": "3ca8c23615d91d5d8f904bd9299917572960dc56ad0b0fed9874baea5bf4b7af",
         "campuspool/src/app/login/page.tsx": "257fcbe6b4bdef8d93f758552e2bb8e2935c4b321ed4c3adc75d1422f6b97422",
@@ -142,22 +142,22 @@
         "campuspool/tests/support.ts": "1cc08de8a39ecdb4a4d9b0822c75b15b4714b2dcf4c094975328aa32d9ebae89",
         "campuspool/tsconfig.json": "2b3ac9eae37da08f007642ea5330075af4438c95d6a35cc5e3a31cd7b1b441c9",
         "campuspool/vitest.config.ts": "38ce121480572373bbcb9faaa913c857fec1284d5163f46db0ce8b292e6143c2",
-        ".github/workflows/campuspool-next.yml": "bd7367d35dbbf3ea4140269ebf50736cd9158e12f72b3a5ca42202f5f45609ca"
+        ".github/workflows/campuspool-next.yml": "35230978b138e6a9ec5fbc1098e66c1421606530b4b3e86843826745719312f8"
       }
     },
     "44": {
       "owner": "arjunsrikanthh",
       "files": 10,
-      "patch_sha256": "e01f2026c8c4faa6214050dc319321a64656621561e6281c56acbd1457e0fe0e",
+      "patch_sha256": "9f9c24cb8194f03496b118d2d31eeb71808caf029ffce6e5f0695a8f4c253c37",
       "source_sha256": {
         "campuspool/docs/COURSE_REQUIREMENTS_RECONCILIATION.md": "33e26ed7cb4b3301ef77cc4c2d51a21389f032b749d38c7753c96e05687e307a",
-        "campuspool/docs/DATABASE_EVIDENCE_EXAMPLES.md": "6e7d279dd135ab097caec4b2098e6cbd11c043d3cf359ae4b86105f31b1efa74",
+        "campuspool/docs/DATABASE_EVIDENCE_EXAMPLES.md": "87c2f15a1fdc5ba67f7b3e08e661d3fbe76b929a35379ad5f5163773c9ea8917",
         "campuspool/docs/ERD_AND_DATA_DICTIONARY.md": "6eba9c531e3b8df317c32e41836e565c71943328f496a6377749d86cd6e5f42d",
         "campuspool/docs/ISSUE_44_HANDOFF.md": "2a4436bb3b9679eb275ce549c94210ef64bc128be6c931f183368e4a3eb88b6f",
         "campuspool/docs/ORIGINALITY_AND_OWNERSHIP.md": "2ba87ddae7052cd64f3b089b2d0e8ccbc9016dbc439a18cd3a1cd96288ee87fb",
         "campuspool/docs/RTM_DRAFT.md": "73a01b94ca74db639815e677dc15a551293a396abd4de8130b10c5d3b4e354bf",
         "campuspool/docs/SAD_DRAFT.md": "f779a42f4c26e535dd0363f1a2d608df783172ca0e0415b07051450e49ae32fd",
-        "campuspool/docs/SPRINT1_VERIFICATION.md": "173d05602b2935c640b5bf4b7bfa8530de89abf4dd72dcfb2947bbd307bcb9ac",
+        "campuspool/docs/SPRINT1_VERIFICATION.md": "62fcd593b628d5b596cb8a5063f58446f2da5a5f42e7827609c4566028e9b980",
         "campuspool/docs/SRS_DRAFT.md": "585bf5bbcc415739b6ad47cb95ab5bd3431abddcb9c1341dab64fb9138d327e9",
         "campuspool/docs/TEST_PLAN_DRAFT.md": "b87ca4c056ce0a935cc05b1f8c153183effc0e380f442a9e1aa90830e2070f02"
       }
