@@ -1,0 +1,21 @@
+{
+  "baseline": "5b8a06ae39f87297882bd92b869b2481114d860c",
+  "upstream": "https://github.com/CampusPool/carpooling.git",
+  "repository": "CampusPool/carpooling",
+  "foundation": {
+    "issue": "39",
+    "marker": "campuspool/.foundation-version",
+    "value": "next-v1",
+    "branch": "codex/issue-39"
+  },
+  "issues": {
+    "12": {"owner": "zayaan-06", "branch": "codex/issue-12", "patch": "12/solution.patch", "files": "12/files.json", "body": "12/PR.md", "title": "Issue #12: vehicle registration and review", "verify": "feature"},
+    "21": {"owner": "zayaan-06", "branch": "codex/issue-21", "patch": "21/solution.patch", "files": "21/files.json", "body": "21/PR.md", "title": "Issue #21: publish ride offers", "verify": "feature"},
+    "23": {"owner": "arjunsrikanthh", "branch": "codex/issue-23", "patch": "23/solution.patch", "files": "23/files.json", "body": "23/PR.md", "title": "Issue #23: booking workflow", "verify": "feature"},
+    "24": {"owner": "NitheshMogaveer777", "branch": "codex/issue-24", "patch": "24/solution.patch", "files": "24/files.json", "body": "24/PR.md", "title": "Issue #24: cancellation workflow", "verify": "feature"},
+    "37": {"owner": "NitheshMogaveer777", "branch": "codex/issue-37", "patch": "37/solution.patch", "files": "37/files.json", "body": "37/PR.md", "title": "Issue #37: activity and database evidence", "verify": "feature"},
+    "39": {"owner": "arjunsrikanthh", "branch": "codex/issue-39", "patch": "39/solution.patch", "files": "39/files.json", "body": "39/PR.md", "title": "Bootstrap Next.js TypeScript foundation and CI", "verify": "foundation"},
+    "43": {"owner": "NikhilJoshi441", "branch": "codex/issue-43", "patch": "43/solution.patch", "files": "43/files.json", "body": "43/PR.md", "title": "[N8] Testing against approved Test Plan", "verify": "testplan"},
+    "44": {"owner": "arjunsrikanthh", "branch": "codex/issue-44", "patch": "44/solution.patch", "files": "44/files.json", "body": "44/PR.md", "title": "Issue #44: Sprint 1 documentation", "verify": "docs"}
+  }
+}

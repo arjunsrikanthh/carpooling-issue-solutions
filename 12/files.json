@@ -1,12 +1,8 @@
 [
-  "prototype/campuspool-extension/Mobility/Commute/CommuteMatchingService.php",
-  "prototype/campuspool-extension/Mobility/Trust/DriverOnboardingController.php",
-  "prototype/campuspool-extension/migrations/2026_10_26_000100_add_passenger_capacity_to_driver_onboarding.php",
-  "prototype/campuspool-extension/tests/DriverOnboardingHttpTest.php",
-  "prototype/campuspool-extension/tests/MobilityCommuteProductTest.php",
-  "prototype/campuspool-extension/web/app.js",
-  "prototype/campuspool-extension/web/commute.mjs",
-  "prototype/campuspool-extension/web/driver-onboarding-ui.test.mjs",
-  "prototype/tests/extension/DriverOnboardingHttpTest.php",
-  "prototype/tests/extension/MobilityCommuteProductTest.php"
+  "campuspool/src/app/api/vehicles/[id]/review/route.ts",
+  "campuspool/src/app/api/vehicles/route.ts",
+  "campuspool/src/app/vehicles/page.tsx",
+  "campuspool/src/features/enabled/12.json",
+  "campuspool/src/server/vehicles.ts",
+  "campuspool/tests/issue-12.test.ts"
 ]

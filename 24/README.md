@@ -1,45 +1,20 @@
-# Issue #24 — Cancellation — Sprint 1 slice
+# Issue #24 — Issue #24: cancellation workflow
 
-## Requirement and existing implementation
+Assigned owner: `@NitheshMogaveer777`.
 
-Booking cancellation/refund service and cancelled history already exist; whole-ride commute cancellation was blocked.
+Sprint 1 booking and whole-ride cancellation, retained history, exact refunds and race coverage. Sprint 2 waitlist/rematching remains pending.
 
-Live upstream acceptance criteria were captured on 26 October 2026. See [AUDIT.md](../AUDIT.md) for the criterion-by-criterion gap analysis and [BASELINE.md](../BASELINE.md) for exact source revisions.
-
-## Proposed change
-
-Adds cancellation provenance and waiting-payment handling; atomically cancels an entire owned ride, refunds held demo credits once, updates canonical state/event and preserves history. Adds six sampled cancellation races.
-
-Official files changed:
-
-- `prototype/campuspool-extension/Mobility/Commute/CommuteController.php`
-- `prototype/campuspool-extension/Mobility/Commute/CommuteService.php`
-- `prototype/campuspool-extension/tests/MobilityCommuteProductTest.php`
-- `prototype/reproduction/cancellation-concurrency-probe.php`
-- `prototype/tests/extension/MobilityCommuteCancellationTest.php`
-- `prototype/tests/extension/MobilityCommuteProductTest.php`
-
-## Apply and verify
-
-Use a new disposable clone at the pinned official SHA. From this solutions repository:
+From a clone of the solutions repository:
 
 ```sh
-sh scripts/apply-issue.sh 24 /absolute/path/to/new-official-clone
-sh scripts/verify-issue.sh 24 /absolute/path/to/new-verification-directory
+python3 scripts/prepare-pr.py 24 --output work/issue24
+python3 scripts/verify-prepared.py 24 work/issue24
+# Read/edit the staged diff and PR body, then publish with your assigned account:
+python3 scripts/submit-pr.py 24 --path work/issue24 --publish
 ```
 
-Direct prerequisite issue packages: 23. The application script resolves prerequisites recursively. Patch: `solution.patch`. Source map and manifest regeneration is centralized in the application script.
+The helper creates a separate official-repository checkout. Do not push the solutions repository to the official repo. This patch contains only the paths listed in `files.json`; it adds no legacy application source. Required tools: Node.js 24, Python 3, Git, GitHub CLI and Docker.
 
-Tests/evidence: MobilityCommuteCancellationTest; cancellation case in MobilityCommuteProductTest; financial/lifecycle tests; cancellation HTTP race probe.
+The shared foundation must exist on official main or official codex/issue-39 before preparation. Feature branches can be prepared in parallel; retarget/retest after the foundation merge.
 
-Actual execution results are recorded in [verification.md](verification.md). Worker static inspection alone does not satisfy the runtime gate.
-
-## Limitations
-
-Synthetic routing/authentication/demo-credit evidence only; production identity, road routing, GPS and real payments are not verified. Human review and academic acceptance are not claimed. Waitlist/rematching remains Sprint 2.
-
-## Demonstration to the teacher
-
-Cancel a paid synthetic booking, inspect retained history, restored seat and one refund. Repeat cancellation. Demonstrate owner-only whole-ride cancellation through the commute transition endpoint and inspect the lifecycle event.
-
-Attribution is documented in [CONTRIBUTIONS.md](../CONTRIBUTIONS.md). This is an AI-assisted proposal for teammate review, not a claim that the assigned student authored this patch.
+Draft PRs and `Refs #N` preserve review and existing issue status. Teammates must explain their own changes and resolve review comments. The approved Test Plan, faculty acceptance and working-product video are separate outstanding deliverables.

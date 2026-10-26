@@ -1,45 +1,20 @@
-# Issue #44 — Documentation and demonstration evidence
+# Issue #44 — Issue #44: Sprint 1 documentation
 
-## Requirement and existing implementation
+Assigned owner: `@arjunsrikanthh`.
 
-Setup, requirements and attribution documents exist; no submitted/approved SRS/SAD/STP was found in inspected sources.
+Draft SRS/SAD/Test Plan/ERD, DBMS evidence instructions, course mapping and ownership guidance. Actual video, instructor approvals and genuine teammate reviews remain outstanding.
 
-Live upstream acceptance criteria were captured on 26 October 2026. See [AUDIT.md](../AUDIT.md) for the criterion-by-criterion gap analysis and [BASELINE.md](../BASELINE.md) for exact source revisions.
-
-## Proposed change
-
-Adds a reproducible one-minute runbook and recording checklist plus faculty-template-aligned SRS, SAD, Test Plan and RTM drafts with course-gap reconciliation.
-
-Official files changed:
-
-- `docs/COURSE_REQUIREMENTS_RECONCILIATION.md`
-- `docs/RTM_DRAFT.md`
-- `docs/SAD_DRAFT.md`
-- `docs/SPRINT1_DEMO_RUNBOOK.md`
-- `docs/SRS_DRAFT.md`
-- `docs/TEST_PLAN_DRAFT.md`
-
-## Apply and verify
-
-Use a new disposable clone at the pinned official SHA. From this solutions repository:
+From a clone of the solutions repository:
 
 ```sh
-sh scripts/apply-issue.sh 44 /absolute/path/to/new-official-clone
-sh scripts/verify-issue.sh 44 /absolute/path/to/new-verification-directory
+python3 scripts/prepare-pr.py 44 --output work/issue44
+python3 scripts/verify-prepared.py 44 work/issue44
+# Read/edit the staged diff and PR body, then publish with your assigned account:
+python3 scripts/submit-pr.py 44 --path work/issue44 --publish
 ```
 
-Direct prerequisite issue packages: 39. The application script resolves prerequisites recursively. Patch: `solution.patch`. Source map and manifest regeneration is centralized in the application script.
+The helper creates a separate official-repository checkout. Do not push the solutions repository to the official repo. This patch contains only the paths listed in `files.json`; it adds no legacy application source. Required tools: Node.js 24, Python 3, Git, GitHub CLI and Docker.
 
-Tests/evidence: Documentation/link/source checks and fresh-clone runbook verification.
+The shared foundation must exist on official main or official codex/issue-39 before preparation. Feature branches can be prepared in parallel; retarget/retest after the foundation merge.
 
-Actual execution results are recorded in [verification.md](verification.md). Worker static inspection alone does not satisfy the runtime gate.
-
-## Limitations
-
-Synthetic routing/authentication/demo-credit evidence only; production identity, road routing, GPS and real payments are not verified. Human review and academic acceptance are not claimed. The submitted/approved document versions are unconfirmed; all new document and test identifiers are proposed. Actual reviewed video upload, DBMS Next.js plus second database implementation, approved two-person eligibility and originality acceptance remain outstanding.
-
-## Demonstration to the teacher
-
-Use docs/SPRINT1_DEMO_RUNBOOK.md in the reconstructed application. Record a continuous real UI video after checking its actual verification labels. These drafts, logs and instructions do not establish video upload or faculty approval.
-
-Attribution is documented in [CONTRIBUTIONS.md](../CONTRIBUTIONS.md). This is an AI-assisted proposal for teammate review, not a claim that the assigned student authored this patch.
+Draft PRs and `Refs #N` preserve review and existing issue status. Teammates must explain their own changes and resolve review comments. The approved Test Plan, faculty acceptance and working-product video are separate outstanding deliverables.

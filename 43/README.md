@@ -1,55 +1,20 @@
-# Issue #43 — Testing and closed #22 regression
+# Issue #43 — [N8] Testing against approved Test Plan
 
-## Requirement and existing implementation
+Assigned owner: `@NikhilJoshi441`.
 
-Official matching already implements direction/vehicle/time windows and Nikhil ranking. Existing package contains integration patches that were missing from running source.
+Executable test-plan contribution, search regression and the cross-feature production HTTP journey. Approved Test Plan mapping remains provisional until human approval.
 
-Live upstream acceptance criteria were captured on 26 October 2026. See [AUDIT.md](../AUDIT.md) for the criterion-by-criterion gap analysis and [BASELINE.md](../BASELINE.md) for exact source revisions.
-
-## Proposed change
-
-Adds malformed/state/boundary/provider regression coverage and reconciles trusted approved-driver/profile/routing integration with the actual application. Preserves guards for ordinary untrusted trips.
-
-Official files changed:
-
-- `prototype/config/.env.example` (campus timezone required by these regressions)
-
-- `prototype/app/Repository/PassengersRepository.php`
-- `prototype/app/Repository/TripRepository.php`
-- `prototype/app/Services/Logic/PassengersManager.php`
-- `prototype/app/Services/Logic/TripsManager.php`
-- `prototype/campuspool-extension/Mobility/Admission/DriverReservationPolicy.php`
-- `prototype/campuspool-extension/Mobility/Recurrence/ProgramService.php`
-- `prototype/campuspool-extension/Mobility/Recurrence/RecurrenceCreationContext.php`
-- `prototype/campuspool-extension/Mobility/Segments/MatchController.php`
-- `prototype/campuspool-extension/Mobility/Segments/SegmentBookingService.php`
-- `prototype/tests/extension/MobilitySearchRegressionTest.php`
-
-## Apply and verify
-
-Use a new disposable clone at the pinned official SHA. From this solutions repository:
+From a clone of the solutions repository:
 
 ```sh
-sh scripts/apply-issue.sh 43 /absolute/path/to/new-official-clone
-sh scripts/verify-issue.sh 43 /absolute/path/to/new-verification-directory
+python3 scripts/prepare-pr.py 43 --output work/issue43
+python3 scripts/verify-prepared.py 43 work/issue43
+# Read/edit the staged diff and PR body, then publish with your assigned account:
+python3 scripts/submit-pr.py 43 --path work/issue43 --publish
 ```
 
-Direct prerequisite issue packages: 24. The application script resolves prerequisites recursively. Patch: `solution.patch`. Source map and manifest regeneration is centralized in the application script.
+The helper creates a separate official-repository checkout. Do not push the solutions repository to the official repo. This patch contains only the paths listed in `files.json`; it adds no legacy application source. Required tools: Node.js 24, Python 3, Git, GitHub CLI and Docker.
 
-Tests/evidence: MobilitySearchRegressionTest; MobilityDriverProfileBridgeTest; MobilitySegmentBookingTest; all integrated Sprint 1 suites.
+The shared foundation must exist on official main or official codex/issue-39 before preparation. Feature branches can be prepared in parallel; retarget/retest after the foundation merge.
 
-Actual execution results are recorded in [verification.md](verification.md). Worker static inspection alone does not satisfy the runtime gate.
-
-## Independent setup correction
-
-The first private CI run exposed a dependency-order defect: this package parsed managed campus schedules in Asia/Kolkata, but the sample application timezone was only changed by later package 39. Its separate run therefore returned `DRIVER_ACTIVE_TRIP` where the regression correctly expected `DRIVER_ROUTE_OVERLAP`. The timezone configuration now belongs to 43, alongside the code that requires it. The assertion is unchanged; combined application bytes are unchanged.
-
-## Limitations
-
-Synthetic routing/authentication/demo-credit evidence only; production identity, road routing, GPS and real payments are not verified. Human review and academic acceptance are not claimed. The submitted/approved document versions are unconfirmed; all new document and test identifiers are proposed.
-
-## Demonstration to the teacher
-
-Run the focused search and canonical booking suites; demonstrate inclusive windows, unavailable/full/cancelled rides and fail-closed provider behavior. Compare the proposed RTM with the faculty template. #22 stays closed and is not duplicated.
-
-Attribution is documented in [CONTRIBUTIONS.md](../CONTRIBUTIONS.md). This is an AI-assisted proposal for teammate review, not a claim that the assigned student authored this patch.
+Draft PRs and `Refs #N` preserve review and existing issue status. Teammates must explain their own changes and resolve review comments. The approved Test Plan, faculty acceptance and working-product video are separate outstanding deliverables.

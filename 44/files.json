@@ -1,8 +1,11 @@
 [
-  "docs/COURSE_REQUIREMENTS_RECONCILIATION.md",
-  "docs/RTM_DRAFT.md",
-  "docs/SAD_DRAFT.md",
-  "docs/SPRINT1_DEMO_RUNBOOK.md",
-  "docs/SRS_DRAFT.md",
-  "docs/TEST_PLAN_DRAFT.md"
+  "campuspool/docs/COURSE_REQUIREMENTS_RECONCILIATION.md",
+  "campuspool/docs/DATABASE_EVIDENCE_EXAMPLES.md",
+  "campuspool/docs/ERD_AND_DATA_DICTIONARY.md",
+  "campuspool/docs/ISSUE_44_HANDOFF.md",
+  "campuspool/docs/ORIGINALITY_AND_OWNERSHIP.md",
+  "campuspool/docs/RTM_DRAFT.md",
+  "campuspool/docs/SAD_DRAFT.md",
+  "campuspool/docs/SRS_DRAFT.md",
+  "campuspool/docs/TEST_PLAN_DRAFT.md"
 ]

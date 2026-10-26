@@ -1,13 +1,6 @@
 [
-  "prototype/app/Repository/PassengersRepository.php",
-  "prototype/app/Repository/TripRepository.php",
-  "prototype/app/Services/Logic/PassengersManager.php",
-  "prototype/app/Services/Logic/TripsManager.php",
-  "prototype/campuspool-extension/Mobility/Admission/DriverReservationPolicy.php",
-  "prototype/campuspool-extension/Mobility/Recurrence/ProgramService.php",
-  "prototype/campuspool-extension/Mobility/Recurrence/RecurrenceCreationContext.php",
-  "prototype/campuspool-extension/Mobility/Segments/MatchController.php",
-  "prototype/campuspool-extension/Mobility/Segments/SegmentBookingService.php",
-  "prototype/config/.env.example",
-  "prototype/tests/extension/MobilitySearchRegressionTest.php"
+  "campuspool/docs/TEST_TRACEABILITY.md",
+  "campuspool/tests/http.e2e.test.ts",
+  "campuspool/tests/http.ts",
+  "campuspool/tests/issue-43.test.ts"
 ]

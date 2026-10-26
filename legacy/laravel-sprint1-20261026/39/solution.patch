@@ -1,0 +1,129 @@
+diff --git a/.github/workflows/application.yml b/.github/workflows/application.yml
+index a80f7e0..b3b078a 100644
+--- a/.github/workflows/application.yml
++++ b/.github/workflows/application.yml
+@@ -11,6 +11,21 @@ jobs:
+     timeout-minutes: 25
+     steps:
+       - uses: actions/checkout@v4
++      - name: Validate tracked source syntax
++        working-directory: prototype
++        run: |
++          set -eu
++          git diff --check
++          find campuspool-extension tests -type f \( -name '*.js' -o -name '*.mjs' \) -print0 |
++            xargs -0 -n1 node --check
++          python3 - <<'PY_SYNTAX'
++          from pathlib import Path
++          for folder in ('reproduction', 'tests'):
++              for path in Path(folder).rglob('*.py'):
++                  compile(path.read_bytes(), str(path), 'exec')
++          print('Python syntax passed without generated package files')
++          PY_SYNTAX
++          python3 scripts/check-package.py
+       - name: Verify attributed package and isolated application
+         working-directory: prototype
+         run: sh reproduction/verify-package.sh
+@@ -19,5 +34,10 @@ jobs:
+         run: |
+           set -eu
+           sh reproduction/start-local.sh
++          export COMPOSE_PROJECT_NAME="$(cat reproduction/.local-project)"
+           trap 'sh reproduction/stop-local.sh' EXIT
++          docker compose -f reproduction/compose.yml -f reproduction/compose.local.yml -f reproduction/compose.demo.yml -f reproduction/compose.booking.yml up -d app
++          docker compose -f reproduction/compose.yml exec -T -e DB_DATABASE=testing -e DB_USERNAME=root -e DB_PASSWORD=smoke-root-password app php artisan test --compact tests/extension/MobilityCommuteProductTest.php tests/extension/DriverOnboardingHttpTest.php tests/extension/MobilityDriverProfileBridgeTest.php tests/extension/MobilityLifecycleTest.php tests/extension/MobilityFinancialInvariantsTest.php tests/extension/MobilitySegmentBookingTest.php tests/extension/MobilityBookingCorrectnessTest.php tests/extension/MobilityCommuteIntegrityTest.php tests/extension/MobilitySearchRegressionTest.php tests/extension/MobilityCommuteCancellationTest.php
+           python3 reproduction/smoke-booking.py
++          docker compose -f reproduction/compose.yml exec -T app php reproduction/booking-concurrency-probe.php
++          docker compose -f reproduction/compose.yml exec -T app php reproduction/cancellation-concurrency-probe.php
+diff --git a/prototype/reproduction/smoke-booking.py b/prototype/reproduction/smoke-booking.py
+index ed1ec88..89db753 100644
+--- a/prototype/reproduction/smoke-booking.py
++++ b/prototype/reproduction/smoke-booking.py
+@@ -1,5 +1,7 @@
+ import urllib.request,urllib.parse,json,uuid,datetime,zoneinfo
+ base='http://127.0.0.1:18180'
++def expect(condition,message):
++ if not condition: raise AssertionError(message)
+ def api(path, method='GET', data=None, token=None):
+  headers={'Accept':'application/json'}
+  if token:headers['Authorization']='Bearer '+token
+@@ -10,7 +12,8 @@ def api(path, method='GET', data=None, token=None):
+   with urllib.request.urlopen(urllib.request.Request(base+path,data=raw,method=method,headers=headers),timeout=20) as f:
+    return json.load(f)
+  except urllib.error.HTTPError as e:
+-  print('HTTP ERROR',method,path,e.code,e.read().decode()[:1300]);raise
++  # Never print response bodies: local error payloads can contain bearer tokens.
++  raise RuntimeError(f'HTTP {e.code} for {method} {path}') from e
+ driver=api('/api/mobility/commute/demo-session','POST',{'role':'driver','scenario':'campus-route'})
+ rider=api('/api/mobility/commute/demo-session','POST',{'role':'rider','scenario':'campus-route'})
+ print('SYNTHETIC_SESSIONS_STARTED')
+@@ -18,24 +21,52 @@ campus={'lat':12.9352,'lng':77.62,'label':'Campus synthetic'}
+ dp={'lat':13.01,'lng':77.53,'label':'Yeshwanthpur simulated'}
+ rp={'lat':13.0093,'lng':77.529,'label':'Laggere synthetic'}
+ def pref(role,home):return {'role':role,'vehicle_preference':'car','schedule_mode':'fixed','home':home,'campus':campus,'outbound_time':'08:30','return_time':'17:30','weekdays':[1,2,3,4,5],'max_walk_meters':999,'name':role.title()+' Demo'}
+-api('/api/mobility/commute/profile','PUT',pref('driver',dp),driver['token'])
+-api('/api/mobility/commute/profile','PUT',pref('rider',rp),rider['token'])
++expect(api('/api/mobility/commute/profile','PUT',pref('driver',dp),driver['token']).get('profile',{}).get('role')=='driver','driver profile was not saved')
++expect(api('/api/mobility/commute/profile','PUT',pref('rider',rp),rider['token']).get('profile',{}).get('role')=='rider','rider profile was not saved')
+ date=(datetime.datetime.now(zoneinfo.ZoneInfo('Asia/Kolkata'))+datetime.timedelta(days=2)).strftime('%Y-%m-%d')
+ print('DEMO_DATE',date)
+ offer=api('/api/mobility/commute/offers','POST',{'direction':'outbound','date':date,'vehicle_type':'car','choice':'ON_ROUTE_MEETING_POINT','max_detour_meters':3000,'max_detour_seconds':600},driver['token'])
++expect(isinstance(offer.get('data',{}).get('trip_id'),int),'publish response did not include trip id')
++trip_id=offer['data']['trip_id']
+ print('OFFER_PUBLISHED',offer['data']['trip_id'])
+ q=urllib.parse.urlencode({'direction':'outbound','date':date,'vehicle_type':'car','pickup_choice':'both','start_time':'08:00','end_time':'09:00'})
+ rides=api('/api/mobility/commute/rides?'+q,token=rider['token'])
+ print('RIDE_COUNT',len(rides.get('data',[])))
+ if not rides['data']:raise RuntimeError('no matching rides')
+ ride=rides['data'][0]
++expect(ride['trip_id']==trip_id and ride.get('seats_available',1)>=1,'search returned an unexpected or unavailable ride')
+ print('QUOTE_RECEIVED',ride.get('trip_id'))
+ booking=api('/api/mobility/commute/rides/'+str(ride['trip_id'])+'/request','POST',{'quote_token':ride['quote_token']},rider['token'])
+ id=booking['data']['booking_id']
++expect(booking['data']['request_state']==0,'request was not pending')
++pending=api('/api/mobility/commute/bookings',token=rider['token'])['data']
++expect(any(b['booking_id']==id and b['request_state']==0 for b in pending),'rider cannot see pending request')
+ print('REQUEST',id)
+ accepted=api('/api/mobility/commute/bookings/'+str(id)+'/accept','POST',{},driver['token'])
++expect(accepted['data']['request_state']==1,'driver acceptance did not confirm booking')
++confirmed=api('/api/mobility/commute/bookings',token=rider['token'])['data']
++expect(any(b['booking_id']==id and b['request_state']==1 for b in confirmed),'rider cannot see confirmed booking')
++offers=api('/api/mobility/commute/offers',token=driver['token'])['data']
++offer_row=next((x for x in offers if x['trip_id']==trip_id),None)
++expect(offer_row is not None and offer_row['seats_available']==0,'accepted booking did not consume the last seat')
+ print('ACCEPT',accepted['data']['request_state'])
++topup=api('/api/mobility/commute/wallet/top-up','POST',{'amount_minor':50000},rider['token'])
++expect(topup.get('available_minor')==50000,'wallet top-up did not return the credited balance')
++paid=api('/api/mobility/commute/bookings/'+str(id)+'/pay','POST',{},rider['token'])
++expect(paid['data']['wallet_state']=='held','accepted booking was not charged into a hold')
++held=api('/api/mobility/commute/wallet',token=rider['token'])
++held_minor=held['available_minor']
+ cancelled=api('/api/mobility/commute/bookings/'+str(id)+'/cancel','POST',{},rider['token'])
+ print('CANCEL',cancelled['data']['request_state'])
+-assert cancelled['data']['request_state']==3
+-print('PORTABLE_INTERACTIVE_BOOKING_PASS')
++expect(cancelled['data']['request_state']==3,'cancellation did not retain cancelled state')
++history=api('/api/mobility/commute/bookings',token=rider['token'])['data']
++expect(any(b['booking_id']==id and b['request_state']==3 for b in history),'cancelled booking history was not retained')
++offers=api('/api/mobility/commute/offers',token=driver['token'])['data']
++offer_row=next((x for x in offers if x['trip_id']==trip_id),None)
++expect(offer_row is not None and offer_row['seats_available']==1,'cancellation did not restore capacity')
++repeat=api('/api/mobility/commute/bookings/'+str(id)+'/cancel','POST',{},rider['token'])
++expect(repeat['data']['request_state']==3,'repeated cancellation was not idempotent')
++refunded=api('/api/mobility/commute/wallet',token=rider['token'])
++expect(refunded['available_minor']==50000,'cancellation did not restore wallet credit exactly once')
++expect(refunded['available_minor']>held_minor,'refund did not increase available wallet balance')
++print('RIDER_CONFIRMATION_HISTORY_CAPACITY_REFUND_PASS')
+diff --git a/prototype/reproduction/verify-package.sh b/prototype/reproduction/verify-package.sh
+index a896ca9..f02c703 100755
+--- a/prototype/reproduction/verify-package.sh
++++ b/prototype/reproduction/verify-package.sh
+@@ -37,6 +37,8 @@ trap cleanup EXIT INT TERM
+ if command -v docker >/dev/null && docker compose version >/dev/null 2>&1; then
+   docker compose -f reproduction/compose.yml config --quiet
+   docker compose -f reproduction/compose.yml build deps
++  docker compose -f reproduction/compose.yml run --rm --no-deps deps sh -c \
++    "find . -type f -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 php -l"
+   docker compose -f reproduction/compose.yml run --rm --no-deps deps composer install --no-interaction --prefer-dist --no-progress
+   docker compose -f reproduction/compose.yml up -d app
+   docker compose -f reproduction/compose.yml exec -T app php artisan --version

@@ -1,6 +1,16 @@
 [
-  "prototype/campuspool-extension/Mobility/Commute/CommuteMatchingService.php",
-  "prototype/campuspool-extension/migrations/2026_10_26_000100_harden_commute_integrity.php",
-  "prototype/reproduction/compose.yml",
-  "prototype/tests/extension/MobilityCommuteIntegrityTest.php"
+  "campuspool/scripts/activity-worker.ts",
+  "campuspool/sql/migrations/002_evidence.sql",
+  "campuspool/src/app/activity/page.tsx",
+  "campuspool/src/app/admin/database-evidence/page.tsx",
+  "campuspool/src/app/api/activity/route.ts",
+  "campuspool/src/app/api/activity/sync/route.ts",
+  "campuspool/src/app/api/admin/database-evidence/route.ts",
+  "campuspool/src/features/enabled/37.json",
+  "campuspool/src/server/activity.ts",
+  "campuspool/src/server/mongo.ts",
+  "campuspool/src/server/outbox.ts",
+  "campuspool/tests/database-evidence.ts",
+  "campuspool/tests/issue-37.test.ts",
+  "campuspool/tests/outbox-recovery.ts"
 ]

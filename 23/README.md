@@ -1,43 +1,20 @@
-# Issue #23 — Request and confirm a seat
+# Issue #23 — Issue #23: booking workflow
 
-## Requirement and existing implementation
+Assigned owner: `@arjunsrikanthh`.
 
-Quote-bound requests, authorization, row locks and owner accept/reject already exist. PR #47 contains genuine proposed booking verification.
+Quote-bound requests and host decisions, atomic final-seat confirmation and synthetic credit holds.
 
-Live upstream acceptance criteria were captured on 26 October 2026. See [AUDIT.md](../AUDIT.md) for the criterion-by-criterion gap analysis and [BASELINE.md](../BASELINE.md) for exact source revisions.
-
-## Proposed change
-
-Adapts attributed PR #47 tests/probe to the current time-window contract and adds confirmed-duplicate verification. No redundant rewrite of working application code.
-
-Official files changed:
-
-- `prototype/campuspool-extension/tests/MobilityBookingCorrectnessTest.php`
-- `prototype/reproduction/booking-concurrency-probe.php`
-- `prototype/reproduction/compose.booking.yml`
-- `prototype/tests/extension/MobilityBookingCorrectnessTest.php`
-
-## Apply and verify
-
-Use a new disposable clone at the pinned official SHA. From this solutions repository:
+From a clone of the solutions repository:
 
 ```sh
-sh scripts/apply-issue.sh 23 /absolute/path/to/new-official-clone
-sh scripts/verify-issue.sh 23 /absolute/path/to/new-verification-directory
+python3 scripts/prepare-pr.py 23 --output work/issue23
+python3 scripts/verify-prepared.py 23 work/issue23
+# Read/edit the staged diff and PR body, then publish with your assigned account:
+python3 scripts/submit-pr.py 23 --path work/issue23 --publish
 ```
 
-Direct prerequisite issue packages: 21. The application script resolves prerequisites recursively. Patch: `solution.patch`. Source map and manifest regeneration is centralized in the application script.
+The helper creates a separate official-repository checkout. Do not push the solutions repository to the official repo. This patch contains only the paths listed in `files.json`; it adds no legacy application source. Required tools: Node.js 24, Python 3, Git, GitHub CLI and Docker.
 
-Tests/evidence: MobilityBookingCorrectnessTest; MobilityCommuteProductTest; 12-trial HTTP/MySQL last-seat probe.
+The shared foundation must exist on official main or official codex/issue-39 before preparation. Feature branches can be prepared in parallel; retarget/retest after the foundation merge.
 
-Actual execution results are recorded in [verification.md](verification.md). Worker static inspection alone does not satisfy the runtime gate.
-
-## Limitations
-
-Synthetic routing/authentication/demo-credit evidence only; production identity, road routing, GPS and real payments are not verified. Human review and academic acceptance are not claimed.
-
-## Demonstration to the teacher
-
-Use separate synthetic accounts: search with an explicit departure window, request a quote-bound seat, accept as the owner, inspect the rider confirmation, and show the concurrency report. No real identity or payment verification is implied.
-
-Attribution is documented in [CONTRIBUTIONS.md](../CONTRIBUTIONS.md). This is an AI-assisted proposal for teammate review, not a claim that the assigned student authored this patch.
+Draft PRs and `Refs #N` preserve review and existing issue status. Teammates must explain their own changes and resolve review comments. The approved Test Plan, faculty acceptance and working-product video are separate outstanding deliverables.

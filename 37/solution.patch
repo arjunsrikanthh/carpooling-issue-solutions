@@ -1,304 +1,932 @@
-diff --git a/prototype/campuspool-extension/Mobility/Commute/CommuteMatchingService.php b/prototype/campuspool-extension/Mobility/Commute/CommuteMatchingService.php
-index 3457633..9ba06d8 100644
---- a/prototype/campuspool-extension/Mobility/Commute/CommuteMatchingService.php
-+++ b/prototype/campuspool-extension/Mobility/Commute/CommuteMatchingService.php
-@@ -56,7 +56,7 @@ public function publish(User$driver,array$v):array {
-    $trip=Trip::factory()->create(['user_id'=>$driver->id,'trip_date'=>$at->format('Y-m-d H:i:s'),'total_seats'=>1,'state'=>Trip::STATE_READY,'from_town'=>$from['label'],'to_town'=>$to['label'],'description'=>'Driver-published local demo commute; nonredeemable credits only','distance'=>$path['distance_meters']/1000,'estimated_time'=>gmdate('H:i:s',$path['duration_seconds'])]);
-    DB::table('mobility_trip_lifecycles')->insert(['trip_id'=>$trip->id,'state'=>'planned','version'=>0,'created_at'=>now(),'updated_at'=>now()]);
-    $snapshot=['driver_origin'=>$from,'driver_destination'=>$to,'driver_path'=>$path,'choice'=>$v['choice'],'max_walk_meters'=>999,'max_detour_meters'=>$v['max_detour_meters']??3000,'max_detour_seconds'=>$v['max_detour_seconds']??600];
--   DB::table('mobility_commute_demo_trips')->insert(['trip_id'=>$trip->id,'audience_id'=>0,'fixture_key'=>$key,'vehicle_type'=>$v['vehicle_type'],'is_publication'=>true,'direction'=>$v['direction'],'fare_minor'=>0,'base_fare_minor'=>0,'surcharge_minor'=>0,'journey'=>json_encode($snapshot,JSON_THROW_ON_ERROR),'created_at'=>now(),'updated_at'=>now()]);
-+   DB::table('mobility_commute_demo_trips')->insert(['trip_id'=>$trip->id,'audience_id'=>null,'fixture_key'=>$key,'vehicle_type'=>$v['vehicle_type'],'is_publication'=>true,'direction'=>$v['direction'],'fare_minor'=>0,'base_fare_minor'=>0,'surcharge_minor'=>0,'journey'=>json_encode($snapshot,JSON_THROW_ON_ERROR),'created_at'=>now(),'updated_at'=>now()]);
-    return['data'=>$this->offerDto(DB::table('mobility_commute_demo_trips')->where('trip_id',$trip->id)->first())];
-   });
-  }
-diff --git a/prototype/campuspool-extension/migrations/2026_10_26_000100_harden_commute_integrity.php b/prototype/campuspool-extension/migrations/2026_10_26_000100_harden_commute_integrity.php
+diff --git a/campuspool/scripts/activity-worker.ts b/campuspool/scripts/activity-worker.ts
 new file mode 100644
-index 0000000..7d2c6db
+index 0000000000000000000000000000000000000000..1c54a4d02a4a86f0bff3142762dd83e09a7ae6a2
 --- /dev/null
-+++ b/prototype/campuspool-extension/migrations/2026_10_26_000100_harden_commute_integrity.php
-@@ -0,0 +1,133 @@
-+<?php
++++ b/campuspool/scripts/activity-worker.ts
+@@ -0,0 +1,55 @@
++import { pool } from '@/server/db';
++import { publishOutboxBatch } from '@/server/outbox';
++import { closeMongo } from '@/server/mongo';
 +
-+use Illuminate\Database\Migrations\Migration;
-+use Illuminate\Database\Schema\Blueprint;
-+use Illuminate\Support\Facades\DB;
-+use Illuminate\Support\Facades\Schema;
++const batchSize = Number(process.env.ACTIVITY_BATCH_SIZE || 25);
++const intervalMs = Number(process.env.ACTIVITY_WORKER_INTERVAL_MS || 5_000);
++let stopping = false;
++let timer: NodeJS.Timeout | undefined;
++let wake: (() => void) | undefined;
 +
-+return new class extends Migration
-+{
-+    public function up(): void
-+    {
-+        // Publications are intentionally visible to every eligible rider. The
-+        // old sentinel 0 represented that audience and cannot satisfy a user FK.
-+        // Make the relationship nullable before normalizing legacy sentinel rows.
-+        if (DB::getDriverName() === 'mysql') {
-+            DB::statement('ALTER TABLE mobility_commute_demo_trips MODIFY audience_id INT UNSIGNED NULL');
-+            DB::statement('UPDATE mobility_commute_demo_trips SET audience_id = NULL WHERE audience_id = 0');
-+        } else {
-+            Schema::table('mobility_commute_demo_trips', fn (Blueprint $table) => $table->unsignedInteger('audience_id')->nullable()->change());
-+        }
-+        Schema::table('mobility_commute_profiles', function (Blueprint $table): void {
-+            $table->foreign('user_id', 'commute_profiles_user_fk')->references('id')->on('users')->restrictOnDelete();
-+        });
-+        Schema::table('mobility_commute_demo_actors', function (Blueprint $table): void {
-+            $table->foreign('user_id', 'commute_demo_actors_user_fk')->references('id')->on('users')->cascadeOnDelete();
-+        });
-+        Schema::table('mobility_commute_demo_trips', function (Blueprint $table): void {
-+            $table->foreign('trip_id', 'commute_demo_trips_trip_fk')->references('id')->on('trips')->cascadeOnDelete();
-+            $table->foreign('audience_id', 'commute_demo_trips_audience_fk')->references('id')->on('users')->restrictOnDelete();
-+            $table->index(['audience_id', 'vehicle_type'], 'commute_demo_trips_audience_vehicle_idx');
-+        });
-+        Schema::table('mobility_commute_demo_wallets', function (Blueprint $table): void {
-+            $table->foreign('user_id', 'commute_demo_wallets_user_fk')->references('id')->on('users')->cascadeOnDelete();
-+        });
-+        Schema::table('mobility_commute_demo_holds', function (Blueprint $table): void {
-+            $table->foreign('booking_id', 'commute_demo_holds_booking_fk')->references('id')->on('trip_passengers')->restrictOnDelete();
-+            $table->foreign('rider_id', 'commute_demo_holds_rider_fk')->references('id')->on('users')->restrictOnDelete();
-+            $table->foreign('driver_id', 'commute_demo_holds_driver_fk')->references('id')->on('users')->restrictOnDelete();
-+            $table->index(['rider_id', 'state'], 'commute_demo_holds_rider_state_idx');
-+            $table->index(['driver_id', 'state'], 'commute_demo_holds_driver_state_idx');
-+        });
-+        Schema::table('mobility_commute_demo_entries', function (Blueprint $table): void {
-+            $table->foreign('user_id', 'commute_demo_entries_user_fk')->references('id')->on('users')->restrictOnDelete();
-+            $table->foreign('booking_id', 'commute_demo_entries_booking_fk')->references('id')->on('trip_passengers')->restrictOnDelete();
-+            $table->index(['user_id', 'booking_id', 'kind'], 'commute_demo_entries_lookup_idx');
-+            $table->unique(['booking_id', 'kind'], 'commute_demo_entries_booking_kind_unique');
-+        });
-+        Schema::table('mobility_commute_receipts', function (Blueprint $table): void {
-+            $table->foreign('user_id', 'commute_receipts_user_fk')->references('id')->on('users')->cascadeOnDelete();
-+        });
-+        Schema::table('mobility_commute_matches', function (Blueprint $table): void {
-+            $table->foreign('trip_id', 'commute_matches_trip_fk')->references('id')->on('trips')->restrictOnDelete();
-+            $table->foreign('rider_id', 'commute_matches_rider_fk')->references('id')->on('users')->restrictOnDelete();
-+            $table->index(['trip_id', 'expires_at'], 'commute_matches_trip_expiry_idx');
-+        });
-+        Schema::table('mobility_commute_booking_terms', function (Blueprint $table): void {
-+            $table->foreign('booking_id', 'commute_booking_terms_booking_fk')->references('id')->on('trip_passengers')->restrictOnDelete();
-+            $table->foreign('match_key', 'commute_booking_terms_match_fk')->references('match_key')->on('mobility_commute_matches')->restrictOnDelete();
-+        });
-+
-+        // MySQL 8 is the supported integrity-verification database. Keep the
-+        // driver-specific checks out of SQLite's schema rebuild path.
-+        if (DB::getDriverName() === 'mysql') {
-+            DB::statement("ALTER TABLE mobility_commute_demo_trips ADD CONSTRAINT commute_demo_trips_vehicle_ck CHECK (vehicle_type IN ('car','bike'))");
-+            DB::statement('ALTER TABLE mobility_commute_demo_trips ADD CONSTRAINT commute_demo_trips_amount_ck CHECK (fare_minor >= 0 AND base_fare_minor >= 0 AND surcharge_minor >= 0)');
-+            DB::statement("ALTER TABLE mobility_commute_demo_trips ADD CONSTRAINT commute_demo_trips_direction_ck CHECK (direction IS NULL OR direction IN ('outbound','return'))");
-+            DB::statement('ALTER TABLE mobility_commute_demo_wallets ADD CONSTRAINT commute_demo_wallets_balance_ck CHECK (available_minor >= 0)');
-+            DB::statement("ALTER TABLE mobility_commute_demo_holds ADD CONSTRAINT commute_demo_holds_state_ck CHECK (state IN ('held','refunded','released'))");
-+            DB::statement('ALTER TABLE mobility_commute_demo_holds ADD CONSTRAINT commute_demo_holds_amount_ck CHECK (amount_minor > 0)');
-+            DB::statement("ALTER TABLE mobility_commute_demo_entries ADD CONSTRAINT commute_demo_entries_kind_ck CHECK (kind IN ('demo_credit','ride_hold','refund','driver_release'))");
-+            DB::statement("ALTER TABLE mobility_commute_receipts ADD CONSTRAINT commute_receipts_hash_ck CHECK (CHAR_LENGTH(key_hash) = 64 AND CHAR_LENGTH(request_hash) = 64)");
-+            DB::unprepared("CREATE TRIGGER commute_trip_passengers_insert_guard BEFORE INSERT ON trip_passengers FOR EACH ROW BEGIN IF EXISTS (SELECT 1 FROM mobility_commute_demo_trips m WHERE m.trip_id = NEW.trip_id) THEN IF NEW.passenger_type = 1 AND NEW.user_id = (SELECT t.user_id FROM trips t WHERE t.id = NEW.trip_id) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'COMMUTE_SELF_BOOKING'; END IF; IF NEW.request_state NOT IN (0,1,2,3,4) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'COMMUTE_INVALID_BOOKING_STATE'; END IF; END IF; END");
-+            DB::unprepared("CREATE TRIGGER commute_trip_passengers_update_guard BEFORE UPDATE ON trip_passengers FOR EACH ROW BEGIN IF EXISTS (SELECT 1 FROM mobility_commute_demo_trips m WHERE m.trip_id = NEW.trip_id) THEN IF NEW.passenger_type = 1 AND NEW.user_id = (SELECT t.user_id FROM trips t WHERE t.id = NEW.trip_id) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'COMMUTE_SELF_BOOKING'; END IF; IF NEW.request_state NOT IN (0,1,2,3,4) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'COMMUTE_INVALID_BOOKING_STATE'; END IF; END IF; END");
-+        }
-+    }
-+
-+    public function down(): void
-+    {
-+        if (DB::getDriverName() === 'mysql') {
-+            DB::unprepared('DROP TRIGGER IF EXISTS commute_trip_passengers_update_guard');
-+            DB::unprepared('DROP TRIGGER IF EXISTS commute_trip_passengers_insert_guard');
-+            foreach ([
-+                'commute_receipts_hash_ck' => 'mobility_commute_receipts',
-+                'commute_demo_entries_kind_ck' => 'mobility_commute_demo_entries',
-+                'commute_demo_holds_amount_ck' => 'mobility_commute_demo_holds',
-+                'commute_demo_holds_state_ck' => 'mobility_commute_demo_holds',
-+                'commute_demo_trips_amount_ck' => 'mobility_commute_demo_trips',
-+                'commute_demo_trips_vehicle_ck' => 'mobility_commute_demo_trips',
-+                'commute_demo_trips_direction_ck' => 'mobility_commute_demo_trips',
-+                'commute_demo_wallets_balance_ck' => 'mobility_commute_demo_wallets',
-+            ] as $constraint => $table) {
-+                DB::statement("ALTER TABLE {$table} DROP CHECK {$constraint}");
-+            }
-+        }
-+        Schema::table('mobility_commute_receipts', fn (Blueprint $table) => $table->dropForeign('commute_receipts_user_fk'));
-+        Schema::table('mobility_commute_demo_entries', function (Blueprint $table): void {
-+            $table->dropForeign('commute_demo_entries_booking_fk');
-+            $table->dropForeign('commute_demo_entries_user_fk');
-+            $table->dropUnique('commute_demo_entries_booking_kind_unique');
-+            $table->dropIndex('commute_demo_entries_lookup_idx');
-+        });
-+        Schema::table('mobility_commute_booking_terms', function (Blueprint $table): void {
-+            $table->dropForeign('commute_booking_terms_match_fk');
-+            $table->dropForeign('commute_booking_terms_booking_fk');
-+        });
-+        Schema::table('mobility_commute_matches', function (Blueprint $table): void {
-+            $table->dropForeign('commute_matches_rider_fk');
-+            $table->dropForeign('commute_matches_trip_fk');
-+            $table->dropIndex('commute_matches_trip_expiry_idx');
-+        });
-+        Schema::table('mobility_commute_demo_holds', function (Blueprint $table): void {
-+            $table->dropForeign('commute_demo_holds_driver_fk');
-+            $table->dropForeign('commute_demo_holds_rider_fk');
-+            $table->dropForeign('commute_demo_holds_booking_fk');
-+            $table->dropIndex('commute_demo_holds_driver_state_idx');
-+            $table->dropIndex('commute_demo_holds_rider_state_idx');
-+        });
-+        Schema::table('mobility_commute_demo_wallets', fn (Blueprint $table) => $table->dropForeign('commute_demo_wallets_user_fk'));
-+        Schema::table('mobility_commute_demo_trips', function (Blueprint $table): void {
-+            $table->dropForeign('commute_demo_trips_audience_fk');
-+            $table->dropForeign('commute_demo_trips_trip_fk');
-+            $table->dropIndex('commute_demo_trips_audience_vehicle_idx');
-+        });
-+        if (DB::getDriverName() === 'mysql') {
-+            DB::statement('UPDATE mobility_commute_demo_trips SET audience_id = 0 WHERE audience_id IS NULL');
-+            DB::statement('ALTER TABLE mobility_commute_demo_trips MODIFY audience_id INT UNSIGNED NOT NULL');
-+        } else {
-+            Schema::table('mobility_commute_demo_trips', fn (Blueprint $table) => $table->unsignedInteger('audience_id')->default(0)->nullable(false)->change());
-+        }
-+        Schema::table('mobility_commute_demo_actors', fn (Blueprint $table) => $table->dropForeign('commute_demo_actors_user_fk'));
-+        Schema::table('mobility_commute_profiles', fn (Blueprint $table) => $table->dropForeign('commute_profiles_user_fk'));
-+    }
-+};
-diff --git a/prototype/reproduction/compose.yml b/prototype/reproduction/compose.yml
-index a0c3bca..65854b1 100644
---- a/prototype/reproduction/compose.yml
-+++ b/prototype/reproduction/compose.yml
-@@ -42,6 +42,10 @@ services:
-     env_file: ./package.env
-     environment:
-       MOBILITY_EXTENSION_ROOT: /opt/mobility-extension
-+      # Disposable DDL uses the migration administrator; the app keeps its
-+      # restricted carpoolear account. Do not relax MySQL binary-log checks.
-+      DB_USERNAME: root
-+      DB_PASSWORD: smoke-root-password
-     depends_on:
-       deps: {condition: service_completed_successfully}
-       mysql: {condition: service_healthy}
-diff --git a/prototype/tests/extension/MobilityCommuteIntegrityTest.php b/prototype/tests/extension/MobilityCommuteIntegrityTest.php
-new file mode 100644
-index 0000000..59740ab
---- /dev/null
-+++ b/prototype/tests/extension/MobilityCommuteIntegrityTest.php
-@@ -0,0 +1,131 @@
-+<?php
-+
-+namespace Tests\Feature\Mobility;
-+
-+use Illuminate\Database\QueryException;
-+use Illuminate\Support\Facades\DB;
-+use STS\Models\Passenger;
-+use STS\Models\Trip;
-+use STS\Models\User;
-+use Tests\TestCase;
-+
-+final class MobilityCommuteIntegrityTest extends TestCase
-+{
-+    public function test_commute_tables_have_foreign_keys_and_unique_receipt_identity(): void
-+    {
-+        if (DB::getDriverName() !== 'mysql') {
-+            $this->markTestSkipped('MySQL constraint proof is intentionally run against the disposable MySQL test database.');
-+        }
-+
-+        $database = DB::connection()->getDatabaseName();
-+        $foreignKeys = DB::table('information_schema.TABLE_CONSTRAINTS')
-+            ->where('CONSTRAINT_SCHEMA', $database)
-+            ->where('CONSTRAINT_TYPE', 'FOREIGN KEY')
-+            ->whereIn('TABLE_NAME', [
-+                'mobility_commute_profiles', 'mobility_commute_demo_actors', 'mobility_commute_demo_trips',
-+                'mobility_commute_demo_wallets', 'mobility_commute_demo_holds', 'mobility_commute_demo_entries',
-+                'mobility_commute_receipts',
-+            ])->pluck('CONSTRAINT_NAME')->all();
-+
-+        $this->assertNotEmpty($foreignKeys);
-+        $this->assertContains('commute_profiles_user_fk', $foreignKeys);
-+        $this->assertContains('commute_demo_holds_booking_fk', $foreignKeys);
-+        $this->assertContains('commute_demo_entries_booking_fk', $foreignKeys);
-+
-+        $this->assertGreaterThanOrEqual(2, DB::table('information_schema.STATISTICS')
-+            ->where('TABLE_SCHEMA', $database)->where('TABLE_NAME', 'mobility_commute_receipts')
-+            ->where('INDEX_NAME', 'mobility_commute_receipts_user_id_key_hash_unique')->count());
-+        $checks = DB::table('information_schema.TABLE_CONSTRAINTS')
-+            ->where('CONSTRAINT_SCHEMA', $database)->where('CONSTRAINT_TYPE', 'CHECK')
-+            ->pluck('CONSTRAINT_NAME')->all();
-+        $this->assertContains('commute_demo_trips_vehicle_ck', $checks);
-+        $this->assertContains('commute_demo_holds_state_ck', $checks);
-+        $this->assertContains('commute_demo_entries_kind_ck', $checks);
-+        $this->assertSame('YES', DB::table('information_schema.COLUMNS')->where('TABLE_SCHEMA', $database)
-+            ->where('TABLE_NAME', 'mobility_commute_demo_trips')->where('COLUMN_NAME', 'audience_id')->value('IS_NULLABLE'));
-+    }
-+
-+    public function test_orphan_demo_wallet_and_negative_hold_are_rejected_by_mysql(): void
-+    {
-+        if (DB::getDriverName() !== 'mysql') {
-+            $this->markTestSkipped('MySQL constraint proof is intentionally run against the disposable MySQL test database.');
-+        }
-+
-+        $this->expectException(QueryException::class);
-+        DB::table('mobility_commute_demo_wallets')->insert([
-+            'user_id' => 2147483000,
-+            'available_minor' => 0,
-+            'created_at' => now(),
-+            'updated_at' => now(),
-+        ]);
-+    }
-+
-+    public function test_valid_hold_cannot_use_negative_amount_or_unknown_state(): void
-+    {
-+        if (DB::getDriverName() !== 'mysql') {
-+            $this->markTestSkipped('MySQL constraint proof is intentionally run against the disposable MySQL test database.');
-+        }
-+        $driver = User::factory()->create();
-+        $rider = User::factory()->create();
-+        $trip = Trip::factory()->create(['user_id' => $driver->id]);
-+        $booking = Passenger::factory()->create(['trip_id' => $trip->id, 'user_id' => $rider->id]);
-+        $this->expectException(QueryException::class);
-+        DB::table('mobility_commute_demo_holds')->insert([
-+            'booking_id' => $booking->id,
-+            'rider_id' => $rider->id,
-+            'driver_id' => $driver->id,
-+            'amount_minor' => -1,
-+            'state' => 'held',
-+            'created_at' => now(),
-+            'updated_at' => now(),
-+        ]);
-+    }
-+
-+    public function test_commute_trigger_accepts_rider_and_rejects_self_booking_and_invalid_state(): void
-+    {
-+        if (DB::getDriverName() !== 'mysql') {
-+            $this->markTestSkipped('MySQL trigger proof is intentionally run against the disposable MySQL test database.');
-+        }
-+        $driver = User::factory()->create();
-+        $rider = User::factory()->create();
-+        $trip = Trip::factory()->create(['user_id' => $driver->id]);
-+        DB::table('mobility_commute_demo_trips')->insert(['trip_id' => $trip->id, 'audience_id' => null, 'fixture_key' => hash('sha256', 'trigger-'.$trip->id), 'vehicle_type' => 'car', 'is_publication' => true, 'direction' => 'outbound', 'fare_minor' => 0, 'base_fare_minor' => 0, 'surcharge_minor' => 0, 'journey' => '{}', 'created_at' => now(), 'updated_at' => now()]);
-+        $valid = DB::table('trip_passengers')->insertGetId(['trip_id' => $trip->id, 'user_id' => $rider->id, 'passenger_type' => Passenger::TYPE_PASAJERO, 'request_state' => Passenger::STATE_PENDING]);
-+        $this->assertDatabaseHas('trip_passengers', ['id' => $valid, 'request_state' => Passenger::STATE_PENDING]);
-+        $conductor = DB::table('trip_passengers')->insertGetId(['trip_id' => $trip->id, 'user_id' => $driver->id, 'passenger_type' => Passenger::TYPE_CONDUCTOR, 'request_state' => Passenger::STATE_PENDING]);
-+        $this->assertDatabaseHas('trip_passengers', ['id' => $conductor, 'passenger_type' => Passenger::TYPE_CONDUCTOR]);
-+        try {
-+            DB::table('trip_passengers')->insertGetId(['trip_id' => $trip->id, 'user_id' => $driver->id, 'passenger_type' => Passenger::TYPE_PASAJERO, 'request_state' => Passenger::STATE_PENDING]);
-+            $this->fail('self-booking trigger did not reject the insert');
-+        } catch (QueryException $e) {
-+            $this->assertStringContainsString('COMMUTE_SELF_BOOKING', $e->getMessage());
-+            $this->assertSame('45000', $e->errorInfo[0]);
-+        }
-+        try {
-+            DB::table('trip_passengers')->insertGetId(['trip_id' => $trip->id, 'user_id' => User::factory()->create()->id, 'passenger_type' => Passenger::TYPE_PASAJERO, 'request_state' => 99]);
-+            $this->fail('invalid booking state trigger did not reject the insert');
-+        } catch (QueryException $e) {
-+            $this->assertStringContainsString('COMMUTE_INVALID_BOOKING_STATE', $e->getMessage());
-+            $this->assertSame('45000', $e->errorInfo[0]);
-+        }
-+        foreach ([['request_state' => 99], ['user_id' => $driver->id]] as $invalidUpdate) {
-+            try {
-+                DB::table('trip_passengers')->where('id', $valid)->update($invalidUpdate);
-+                $this->fail('commute update trigger did not reject invalid data');
-+            } catch (QueryException $e) {
-+                $this->assertSame('45000', $e->errorInfo[0]);
-+            }
-+            $this->assertDatabaseHas('trip_passengers', ['id' => $valid, 'user_id' => $rider->id, 'request_state' => Passenger::STATE_PENDING]);
-+        }
-+    }
-+
-+    public function test_commute_wallet_balance_check_rejects_negative_balance(): void
-+    {
-+        if (DB::getDriverName() !== 'mysql') {
-+            $this->markTestSkipped('MySQL check proof is intentionally run against the disposable MySQL test database.');
-+        }
-+        $user = User::factory()->create();
-+        $this->expectException(QueryException::class);
-+        DB::table('mobility_commute_demo_wallets')->insert(['user_id' => $user->id, 'available_minor' => -1, 'created_at' => now(), 'updated_at' => now()]);
-+    }
++async function runBatch(): Promise<{ published: number; failed: number }> {
++  const connection = await pool().getConnection();
++  try {
++    await connection.beginTransaction();
++    const result = await publishOutboxBatch(connection, batchSize);
++    await connection.commit();
++    return result;
++  } catch (error) {
++    await connection.rollback();
++    // Do not print connection strings or row payloads.
++    console.error('activity worker batch failed', error instanceof Error && error.name === 'MongoServerSelectionError' ? 'MongoDB unavailable' : 'activity publish failed');
++    return { published: 0, failed: 1 };
++  } finally {
++    connection.release();
++  }
 +}
++
++async function main(): Promise<void> {
++  const once = process.env.ACTIVITY_WORKER_ONCE === '1';
++  do {
++    const result = await runBatch();
++    console.log(`activity worker: published=${result.published} failed=${result.failed}`);
++    if (once || stopping) { process.exitCode = result.failed > 0 ? 1 : 0; break; }
++    await new Promise<void>((resolve) => {
++      wake = resolve;
++      timer = setTimeout(() => { timer = undefined; wake = undefined; resolve(); }, result.failed > 0 ? Math.min(intervalMs * 2, 60_000) : intervalMs);
++    });
++  } while (true);
++  await closeMongo();
++  await pool().end();
++  process.exitCode = 0;
++}
++
++function stop(): void {
++  stopping = true;
++  if (timer) { clearTimeout(timer); timer = undefined; }
++  const resume = wake; wake = undefined; resume?.();
++}
++process.once('SIGINT', stop);
++process.once('SIGTERM', stop);
++
++main().catch((error) => {
++  console.error('activity worker stopped', error instanceof Error ? error.message : 'unknown error');
++  process.exitCode = 1;
++});
+diff --git a/campuspool/sql/migrations/002_evidence.sql b/campuspool/sql/migrations/002_evidence.sql
+new file mode 100644
+index 0000000000000000000000000000000000000000..1931c762e57fe49b9b5e915207fb62f68e3af7d0
+--- /dev/null
++++ b/campuspool/sql/migrations/002_evidence.sql
+@@ -0,0 +1,160 @@
++-- Sprint 1 DBMS evidence: view, stored procedure, indexes, and integrity guards.
++-- The migration runner supports DELIMITER directives for the compound routines/triggers.
++CREATE OR REPLACE VIEW driver_ride_summary AS
++SELECT
++  r.id AS ride_id,
++  r.driver_id,
++  u.name AS driver_name,
++  r.departure_at,
++  r.status,
++  r.total_seats,
++  r.seats_available,
++  (r.total_seats - r.seats_available) AS seats_committed,
++  COUNT(CASE WHEN b.status IN ('REQUESTED', 'ACCEPTED') THEN 1 END) AS active_bookings
++FROM rides r
++JOIN users u ON u.id = r.driver_id
++LEFT JOIN bookings b ON b.ride_id = r.id
++GROUP BY r.id, r.driver_id, u.name, r.departure_at, r.status,
++         r.total_seats, r.seats_available;
++
++CREATE INDEX idx_rides_driver_departure_status
++  ON rides (driver_id, departure_at, status);
++CREATE INDEX idx_bookings_ride_status
++  ON bookings (ride_id, status);
++CREATE INDEX idx_outbox_pending_created
++  ON outbox (published_at, attempts, created_at);
++
++DROP TRIGGER IF EXISTS rides_consistency_before_insert;
++DROP TRIGGER IF EXISTS rides_consistency_before_update;
++DROP TRIGGER IF EXISTS bookings_consistency_before_insert;
++DROP TRIGGER IF EXISTS bookings_consistency_before_update;
++DROP PROCEDURE IF EXISTS ride_capacity_report;
++DROP TRIGGER IF EXISTS rides_immutable_after_booking;
++DROP TRIGGER IF EXISTS ledger_append_only_update;
++DROP TRIGGER IF EXISTS ledger_append_only_delete;
++DELIMITER $$
++CREATE TRIGGER rides_consistency_before_insert
++BEFORE INSERT ON rides
++FOR EACH ROW
++BEGIN
++  DECLARE owner_id BIGINT UNSIGNED;
++  DECLARE vehicle_capacity INT;
++  SELECT v.owner_id, v.passenger_capacity INTO owner_id, vehicle_capacity
++    FROM vehicles v WHERE v.id = NEW.vehicle_id;
++  IF owner_id IS NULL OR owner_id <> NEW.driver_id OR NEW.total_seats > vehicle_capacity THEN
++    SIGNAL SQLSTATE '45000' SET MYSQL_ERRNO = 1644, MESSAGE_TEXT = 'ride driver, vehicle owner, and capacity must agree';
++  END IF;
++END$$
++
++CREATE TRIGGER rides_consistency_before_update
++BEFORE UPDATE ON rides
++FOR EACH ROW
++BEGIN
++  DECLARE owner_id BIGINT UNSIGNED;
++  DECLARE vehicle_capacity INT;
++  SELECT v.owner_id, v.passenger_capacity INTO owner_id, vehicle_capacity
++    FROM vehicles v WHERE v.id = NEW.vehicle_id;
++  IF owner_id IS NULL OR owner_id <> NEW.driver_id OR NEW.total_seats > vehicle_capacity THEN
++    SIGNAL SQLSTATE '45000' SET MYSQL_ERRNO = 1644, MESSAGE_TEXT = 'ride driver, vehicle owner, and capacity must agree';
++  END IF;
++  IF NEW.status = 'CANCELLED' AND EXISTS (
++    SELECT 1 FROM bookings b WHERE b.ride_id = OLD.id AND b.status IN ('REQUESTED', 'ACCEPTED')
++  ) THEN
++    SIGNAL SQLSTATE '45000' SET MYSQL_ERRNO = 1644, MESSAGE_TEXT = 'cancel ride after closing active bookings';
++  END IF;
++END$$
++
++CREATE TRIGGER bookings_consistency_before_insert
++BEFORE INSERT ON bookings
++FOR EACH ROW
++BEGIN
++  DECLARE ride_driver BIGINT UNSIGNED;
++  DECLARE ride_status VARCHAR(10);
++  SELECT r.driver_id, r.status INTO ride_driver, ride_status FROM rides r WHERE r.id = NEW.ride_id;
++  IF ride_driver IS NULL OR NEW.rider_id = ride_driver THEN
++    SIGNAL SQLSTATE '45000' SET MYSQL_ERRNO = 1644, MESSAGE_TEXT = 'driver cannot book own ride';
++  END IF;
++  IF NEW.status IN ('REQUESTED', 'ACCEPTED') AND ride_status <> 'PUBLISHED' THEN
++    SIGNAL SQLSTATE '45000' SET MYSQL_ERRNO = 1644, MESSAGE_TEXT = 'active booking requires a published ride';
++  END IF;
++END$$
++
++CREATE TRIGGER bookings_consistency_before_update
++BEFORE UPDATE ON bookings
++FOR EACH ROW
++BEGIN
++  DECLARE ride_driver BIGINT UNSIGNED;
++  DECLARE ride_status VARCHAR(10);
++  IF NEW.ride_id <> OLD.ride_id OR NEW.rider_id <> OLD.rider_id THEN
++    SIGNAL SQLSTATE '45000' SET MYSQL_ERRNO = 1644, MESSAGE_TEXT = 'booking identity is immutable';
++  END IF;
++  SELECT r.driver_id, r.status INTO ride_driver, ride_status FROM rides r WHERE r.id = NEW.ride_id;
++  IF NEW.status IN ('REQUESTED', 'ACCEPTED') AND (NEW.rider_id = ride_driver OR ride_status <> 'PUBLISHED') THEN
++    SIGNAL SQLSTATE '45000' SET MYSQL_ERRNO = 1644, MESSAGE_TEXT = 'active booking requires a distinct rider and published ride';
++  END IF;
++END$$
++
++CREATE PROCEDURE ride_capacity_report(IN p_report_date DATE)
++BEGIN
++  SELECT
++    r.id AS ride_id,
++    r.driver_id,
++    r.departure_at,
++    r.total_seats,
++    r.seats_available,
++    (r.total_seats - r.seats_available) AS seats_committed,
++    CASE WHEN r.seats_available = 0 THEN 'FULL'
++         WHEN r.seats_available < r.total_seats THEN 'PARTIAL'
++         ELSE 'OPEN' END AS capacity_state
++  FROM rides r
++  WHERE DATE(r.departure_at) = p_report_date
++  ORDER BY r.departure_at, r.id;
++END$$
++
++CREATE TRIGGER rides_immutable_after_booking
++BEFORE UPDATE ON rides
++FOR EACH ROW
++BEGIN
++  DECLARE owner_id BIGINT UNSIGNED;
++  DECLARE vehicle_capacity INT;
++  SELECT v.owner_id, v.passenger_capacity INTO owner_id, vehicle_capacity
++    FROM vehicles v WHERE v.id = NEW.vehicle_id;
++  IF owner_id IS NULL OR owner_id <> NEW.driver_id OR NEW.total_seats > vehicle_capacity THEN
++    SIGNAL SQLSTATE '45000' SET MYSQL_ERRNO = 1644, MESSAGE_TEXT = 'ride driver, vehicle owner, and capacity must agree';
++  END IF;
++  IF NEW.status = 'CANCELLED' AND EXISTS (
++    SELECT 1 FROM bookings b WHERE b.ride_id = OLD.id AND b.status IN ('REQUESTED', 'ACCEPTED')
++  ) THEN
++    SIGNAL SQLSTATE '45000' SET MYSQL_ERRNO = 1644, MESSAGE_TEXT = 'cancel ride after closing active bookings';
++  END IF;
++  IF EXISTS (
++    SELECT 1 FROM bookings b
++    WHERE b.ride_id = OLD.id AND b.status IN ('REQUESTED', 'ACCEPTED')
++  ) AND (
++    NOT (NEW.driver_id <=> OLD.driver_id) OR
++    NOT (NEW.vehicle_id <=> OLD.vehicle_id) OR
++    NOT (NEW.origin_stop_id <=> OLD.origin_stop_id) OR
++    NOT (NEW.destination_stop_id <=> OLD.destination_stop_id) OR
++    NOT (NEW.departure_at <=> OLD.departure_at) OR
++    NOT (NEW.total_seats <=> OLD.total_seats) OR
++    NOT (NEW.credit_price <=> OLD.credit_price)
++  ) THEN
++    SIGNAL SQLSTATE '45000'
++      SET MESSAGE_TEXT = 'ride is immutable while it has active bookings';
++  END IF;
++END$$
++
++CREATE TRIGGER ledger_append_only_update
++BEFORE UPDATE ON ledger
++FOR EACH ROW
++BEGIN
++  SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'ledger is append-only';
++END$$
++
++CREATE TRIGGER ledger_append_only_delete
++BEFORE DELETE ON ledger
++FOR EACH ROW
++BEGIN
++  SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'ledger is append-only';
++END$$
++DELIMITER ;
+diff --git a/campuspool/src/app/activity/page.tsx b/campuspool/src/app/activity/page.tsx
+new file mode 100644
+index 0000000000000000000000000000000000000000..1719ac334db259f92faffbf43ddbd2db890d457e
+--- /dev/null
++++ b/campuspool/src/app/activity/page.tsx
+@@ -0,0 +1,9 @@
++"use client";
++/* eslint-disable react-hooks/set-state-in-effect */
++import Link from "next/link";
++import {useEffect,useState} from "react";
++import {apiFetch} from "@/lib/client";
++import {useSession} from "@/components/AppShell";
++import {Empty,ErrorState,Loading} from "@/components/ui";
++type Feed={events:{eventId:string;type:string;createdAt:string}[];summary:{type:string;count:number}[];pendingCount:number};
++export default function Activity(){const {user}=useSession();const [feed,setFeed]=useState<Feed>({events:[],summary:[],pendingCount:0}),[error,setError]=useState(""),[loading,setLoading]=useState(true),[syncing,setSyncing]=useState(false);const load=async()=>{setError("");try{setFeed(await apiFetch<Feed>("/api/activity"))}catch(e){setError(e instanceof Error?e.message:"Activity is temporarily unavailable.")}finally{setLoading(false)}};useEffect(()=>{void load()},[]);async function sync(){setSyncing(true);try{await apiFetch("/api/activity/sync",{method:"POST",body:"{}"});await load()}catch(e){setError(e instanceof Error?e.message:"Activity synchronization failed.")}finally{setSyncing(false)}}return <><div className="section-head"><div><div className="eyebrow">YOUR ACTIVITY</div><h1 className="page-title">Activity trail</h1><p className="lede">Your ride requests, decisions, and cancellations stay visible here.</p></div><div className="actions"><button className="button ghost" onClick={()=>void load()}>Refresh</button>{user?.role==="ADMIN"&&<button className="button" disabled={syncing} onClick={()=>void sync()}>{syncing?"Updating…":"Update activity"}</button>}</div></div>{error&&<ErrorState message={error}/>} {feed.pendingCount>0&&<p className="notice">{feed.pendingCount} recent changes are waiting to appear. Booking status and balances are already saved.</p>}<div className="grid">{feed.summary.map(item=><div className="card" key={item.type}><div className="muted">{item.type.replaceAll("_"," ").replaceAll("."," ")}</div><div className="stat">{item.count}</div></div>)}</div><div className="section-head"><h2>Recent events</h2>{user?.role==="ADMIN"&&<Link className="button ghost" href="/admin/database-evidence">Database evidence</Link>}</div>{loading?<Loading/>:feed.events.length===0?<Empty>No activity has appeared for this account yet.</Empty>:<div className="list">{feed.events.map(event=><div className="list-row" key={event.eventId}><div><strong>{event.type.replaceAll("_"," ").replaceAll("."," ")}</strong><div className="muted">{new Date(event.createdAt).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})}</div></div><span className="tag">recorded</span></div>)}</div>}</>}
+diff --git a/campuspool/src/app/admin/database-evidence/page.tsx b/campuspool/src/app/admin/database-evidence/page.tsx
+new file mode 100644
+index 0000000000000000000000000000000000000000..a8e904091d8b155e462d84e517d18db06a42cb22
+--- /dev/null
++++ b/campuspool/src/app/admin/database-evidence/page.tsx
+@@ -0,0 +1,3 @@
++"use client";
++import { useEffect,useState } from "react"; import { apiFetch } from "@/lib/client"; import { ErrorState,Loading } from "@/components/ui";
++export default function Evidence(){const [data,setData]=useState<Record<string,unknown>|null>(null);const [error,setError]=useState("");useEffect(()=>{apiFetch<Record<string,unknown>>("/api/admin/database-evidence").then(setData).catch(e=>setError(e.message))},[]);return <><div className="eyebrow">ADMIN · DATABASE EVIDENCE</div><h1 className="page-title">Evidence, not decoration.</h1><p className="lede">The service exposes safe aggregate evidence for SQL and Mongo projections without leaking SQL text or credentials.</p>{error?<ErrorState message={error}/>:!data?<Loading/>:<div className="card"><pre style={{whiteSpace:"pre-wrap",overflow:"auto"}}>{JSON.stringify(data,null,2)}</pre></div>}<div className="card" style={{marginTop:20}}><p className="muted">Evidence is available only to approved administrators. Empty results mean the database has not produced that evidence yet.</p></div></>}
+diff --git a/campuspool/src/app/api/activity/route.ts b/campuspool/src/app/api/activity/route.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..94b661737e47621d5481ebcf88fb471d6874e601
+--- /dev/null
++++ b/campuspool/src/app/api/activity/route.ts
+@@ -0,0 +1,15 @@
++import { api, HttpError, json, requireUser } from '@/server/core';
++import { getActivity } from '@/server/activity';
++import { isMongoUnavailable } from '@/server/mongo';
++
++export const runtime = 'nodejs';
++
++export async function GET(request: Request): Promise<Response> {
++  return api(request, async () => {
++    const user = await requireUser(request, true);
++    const rawLimit = Number(new URL(request.url).searchParams.get('limit') || 50);
++    const limit = Number.isFinite(rawLimit) ? Math.max(1, Math.min(100, Math.trunc(rawLimit))) : 50;
++    try { return json(await getActivity(user.id, limit)); }
++    catch (error) { if (isMongoUnavailable(error)) throw new HttpError(503, 'ACTIVITY_UNAVAILABLE', 'Activity is temporarily unavailable.'); throw error; }
++  });
++}
+diff --git a/campuspool/src/app/api/activity/sync/route.ts b/campuspool/src/app/api/activity/sync/route.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..0b2cb27bb120de1d3642ee7e9ab0e983dbfaddfc
+--- /dev/null
++++ b/campuspool/src/app/api/activity/sync/route.ts
+@@ -0,0 +1,32 @@
++import { api, HttpError, json, requireUser } from '@/server/core';
++import { pool } from '@/server/db';
++import { getActivity, syncActivity } from '@/server/activity';
++import { isMongoUnavailable } from '@/server/mongo';
++
++export const runtime = 'nodejs';
++
++export async function POST(request: Request): Promise<Response> {
++  return api(request, async () => {
++    const user = await requireUser(request, true);
++    if (user.role !== 'ADMIN') throw new HttpError(403, 'FORBIDDEN', 'Admin access required');
++    const connection = await pool().getConnection();
++    try {
++      await connection.beginTransaction();
++      let sync;
++      try { sync = await syncActivity(connection); }
++      catch (error) {
++        await connection.rollback();
++        if (isMongoUnavailable(error)) throw new HttpError(503, 'ACTIVITY_UNAVAILABLE', 'Activity is temporarily unavailable.');
++        throw error;
++      }
++      await connection.commit();
++      if (sync.failed > 0) throw new HttpError(503, 'ACTIVITY_UNAVAILABLE', 'Activity is temporarily unavailable.');
++      return json({ ...(await getActivity(user.id)), sync });
++    } catch (error) {
++      await connection.rollback();
++      throw error;
++    } finally {
++      connection.release();
++    }
++  });
++}
+diff --git a/campuspool/src/app/api/admin/database-evidence/route.ts b/campuspool/src/app/api/admin/database-evidence/route.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..380f5934c287686a71157260431f128795a1d694
+--- /dev/null
++++ b/campuspool/src/app/api/admin/database-evidence/route.ts
+@@ -0,0 +1,41 @@
++import { api, HttpError, json, requireUser } from '@/server/core';
++import { pool, rows } from '@/server/db';
++import { databaseEvidence } from '@/server/mongo';
++
++export const runtime = 'nodejs';
++
++export async function GET(request: Request): Promise<Response> {
++  return api(request, async () => {
++    const user = await requireUser(request, true);
++    if (user.role !== 'ADMIN') throw new HttpError(403, 'FORBIDDEN', 'Admin access required');
++    const connection = await pool().getConnection();
++    try {
++      const [views, routines, triggers, indexes] = await Promise.all([
++        rows<{ table_name: string }>(connection,
++          `SELECT TABLE_NAME AS table_name FROM information_schema.VIEWS
++            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'driver_ride_summary'`),
++        rows<{ routine_name: string; routine_type: string }>(connection,
++          `SELECT ROUTINE_NAME AS routine_name, ROUTINE_TYPE AS routine_type
++             FROM information_schema.ROUTINES
++            WHERE ROUTINE_SCHEMA = DATABASE() AND ROUTINE_NAME = 'ride_capacity_report'`),
++        rows<{ trigger_name: string; event_manipulation: string; event_object_table: string }>(connection,
++          `SELECT TRIGGER_NAME AS trigger_name, EVENT_MANIPULATION AS event_manipulation,
++                  EVENT_OBJECT_TABLE AS event_object_table
++             FROM information_schema.TRIGGERS
++            WHERE TRIGGER_SCHEMA = DATABASE()
++              AND (TRIGGER_NAME LIKE 'rides_%' OR TRIGGER_NAME LIKE 'ledger_%' OR TRIGGER_NAME LIKE 'bookings_%')`),
++        rows<{ table_name: string; index_name: string; column_name: string }>(connection,
++          `SELECT TABLE_NAME AS table_name, INDEX_NAME AS index_name, COLUMN_NAME AS column_name
++             FROM information_schema.STATISTICS
++            WHERE TABLE_SCHEMA = DATABASE()
++              AND TABLE_NAME IN ('rides','bookings','outbox')
++              AND INDEX_NAME NOT IN ('PRIMARY')
++            ORDER BY TABLE_NAME, INDEX_NAME, SEQ_IN_INDEX`),
++      ]);
++      const mongo = await databaseEvidence();
++      return json({ sql: { views, routines, triggers, indexes }, mongo });
++    } finally {
++      connection.release();
++    }
++  });
++}
+diff --git a/campuspool/src/features/enabled/37.json b/campuspool/src/features/enabled/37.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..da677dbecad80d2c4fed8a72dafff3c830cf54cb
+--- /dev/null
++++ b/campuspool/src/features/enabled/37.json
+@@ -0,0 +1 @@
++{"issue":37,"enabled":true,"key":"activity"}
+diff --git a/campuspool/src/server/activity.ts b/campuspool/src/server/activity.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..b225ae41bf4fa2c8844154aeef461583f5e4733c
+--- /dev/null
++++ b/campuspool/src/server/activity.ts
+@@ -0,0 +1,54 @@
++import { pool, rows } from '@/server/db';
++import { readActivityFeed } from '@/server/mongo';
++import { publishOutboxBatch } from '@/server/outbox';
++import type { PoolConnection } from 'mysql2/promise';
++
++export type ActivityDto = {
++  events: Array<{
++    eventId: string;
++    type: string;
++    actorId: number;
++    rideId?: number;
++    bookingId?: number;
++    data: Record<string, unknown>;
++    createdAt: string;
++  }>;
++  summary: Array<{ type: string; count: number }>;
++  pendingCount: number;
++};
++
++export async function pendingActivityCount(userId: number): Promise<number> {
++  const [row] = await rows<{ pending_count: number }>(
++    // The audience array is the access-control boundary; do not return another user's events.
++    pool(),
++    `SELECT COUNT(*) AS pending_count FROM outbox
++      WHERE published_at IS NULL
++        AND (actor_id = ? OR JSON_CONTAINS(audience_ids, JSON_ARRAY(?)))`,
++    [userId, userId],
++  );
++  return Number(row?.pending_count ?? 0);
++}
++
++export async function getActivity(userId: number, limit = 50): Promise<ActivityDto> {
++  const [feed, pendingCount] = await Promise.all([
++    readActivityFeed(userId, limit),
++    pendingActivityCount(userId),
++  ]);
++  return {
++    events: feed.events.map((event) => ({
++      eventId: event.eventId,
++      type: event.type,
++      actorId: event.actorId,
++      ...(event.rideId == null ? {} : { rideId: event.rideId }),
++      ...(event.bookingId == null ? {} : { bookingId: event.bookingId }),
++      data: event.data,
++      createdAt: event.createdAt.toISOString(),
++    })),
++    summary: feed.summary,
++    pendingCount,
++  };
++}
++
++export async function syncActivity(cx: PoolConnection, limit = 25): Promise<{ published: number; failed: number }> {
++  return publishOutboxBatch(cx, limit);
++}
+diff --git a/campuspool/src/server/mongo.ts b/campuspool/src/server/mongo.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..8b3d52b5f22a8500af15067916ef86c3cc5888e5
+--- /dev/null
++++ b/campuspool/src/server/mongo.ts
+@@ -0,0 +1,155 @@
++import { MongoClient, type Collection, type Db } from 'mongodb';
++
++export type ActivityEventDocument = {
++  eventId: string;
++  type: string;
++  actorId: number;
++  audienceIds: number[];
++  rideId?: number;
++  bookingId?: number;
++  data: Record<string, unknown>;
++  createdAt: Date;
++};
++
++type ActivitySummary = { type: string; count: number };
++
++let clientPromise: Promise<MongoClient> | undefined;
++let indexesPromise: Promise<void> | undefined;
++
++export class MongoUnavailableError extends Error {
++  constructor() { super('MongoDB unavailable'); this.name = 'MongoUnavailableError'; }
++}
++
++function safeMongoError(): Error {
++  // Never expose a Mongo URI, host, or credentials in request/worker logs.
++  return new MongoUnavailableError();
++}
++
++export function isMongoUnavailable(error: unknown): boolean {
++  return error instanceof MongoUnavailableError || (error instanceof Error && error.name === 'MongoServerSelectionError');
++}
++
++/** Test/worker lifecycle hook; production callers normally keep the pool warm. */
++export async function closeMongo(): Promise<void> {
++  const pending = clientPromise;
++  clientPromise = undefined;
++  indexesPromise = undefined;
++  if (pending) {
++    try { (await pending).close(); } catch { /* already closed or failed to connect */ }
++  }
++}
++
++function mongoConfig(): { uri: string; database: string } {
++  const uri = process.env.MONGODB_URI;
++  const database = process.env.MONGODB_DB || 'campuspool';
++  if (!uri) throw new Error('MONGODB_URI is not configured');
++  return { uri, database };
++}
++
++async function client(): Promise<MongoClient> {
++  if (!clientPromise) {
++    const { uri } = mongoConfig();
++    clientPromise = new MongoClient(uri, {
++      appName: 'campuspool-activity',
++      maxPoolSize: 5,
++      serverSelectionTimeoutMS: 2_000,
++      connectTimeoutMS: 2_000,
++    }).connect().catch(() => {
++      clientPromise = undefined;
++      throw safeMongoError();
++    });
++  }
++  return clientPromise;
++}
++
++export async function mongoDb(): Promise<Db> {
++  const { database } = mongoConfig();
++  return (await client()).db(database);
++}
++
++export async function activityCollection(): Promise<Collection<ActivityEventDocument>> {
++  const collection = (await mongoDb()).collection<ActivityEventDocument>('activity_events');
++  if (!indexesPromise) {
++    indexesPromise = Promise.all([
++      collection.createIndex({ eventId: 1 }, { name: 'activity_event_id_unique', unique: true }),
++      collection.createIndex({ audienceIds: 1, createdAt: -1 }, { name: 'activity_audience_created' }),
++      collection.createIndex({ type: 1, createdAt: -1 }, { name: 'activity_type_created' }),
++    ]).then(() => undefined).catch(() => {
++      indexesPromise = undefined;
++      throw safeMongoError();
++    });
++  }
++  await indexesPromise;
++  return collection;
++}
++
++const UNSAFE_KEY = /(password|pass_hash|token|secret|credential|api.?key|email|phone|address)/i;
++
++/** Activity data is deliberately a small, non-sensitive projection. */
++export function assertSafeActivityData(value: unknown, path = 'data'): asserts value is Record<string, unknown> {
++  if (!value || typeof value !== 'object' || Array.isArray(value)) {
++    throw new Error(`${path} must be an object`);
++  }
++  for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
++    if (UNSAFE_KEY.test(key)) throw new Error(`sensitive activity field: ${key}`);
++    if (child && typeof child === 'object') {
++      if (Array.isArray(child)) child.forEach((item, index) => {
++        if (item && typeof item === 'object') assertSafeActivityData(item, `${path}.${key}[${index}]`);
++      });
++      else assertSafeActivityData(child, `${path}.${key}`);
++    }
++  }
++}
++
++export async function upsertActivityEvent(event: ActivityEventDocument): Promise<void> {
++  assertSafeActivityData(event.data);
++  const collection = await activityCollection();
++  try {
++    await collection.updateOne(
++      { eventId: event.eventId },
++      { $setOnInsert: event },
++      { upsert: true },
++    );
++  } catch { throw new MongoUnavailableError(); }
++}
++
++export async function readActivityFeed(userId: number, limit = 50): Promise<{
++  events: ActivityEventDocument[];
++  summary: ActivitySummary[];
++}> {
++  const collection = await activityCollection();
++  const safeLimit = Math.max(1, Math.min(100, Math.trunc(limit)));
++  try {
++    const [result] = await collection.aggregate<{
++      events: ActivityEventDocument[];
++      summary: ActivitySummary[];
++    }>([
++      { $match: { audienceIds: userId } },
++      {
++        $facet: {
++          events: [
++            { $sort: { createdAt: -1, eventId: -1 } },
++            { $limit: safeLimit },
++          ],
++          summary: [
++            { $group: { _id: '$type', count: { $sum: 1 } } },
++            { $project: { _id: 0, type: '$_id', count: 1 } },
++            { $sort: { count: -1, type: 1 } },
++          ],
++        },
++      },
++    ]).toArray();
++    return { events: result?.events ?? [], summary: result?.summary ?? [] };
++  } catch { throw new MongoUnavailableError(); }
++}
++
++export async function databaseEvidence(): Promise<Record<string, unknown>> {
++  const db = await mongoDb();
++  const collection = await activityCollection();
++  const indexes = await collection.listIndexes().toArray();
++  return {
++    database: db.databaseName,
++    collection: 'activity_events',
++    indexes: indexes.map((index) => ({ name: index.name, key: index.key, unique: index.unique === true })),
++  };
++}
+diff --git a/campuspool/src/server/outbox.ts b/campuspool/src/server/outbox.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..ed41851f97071530947c367b49caf430a3753c22
+--- /dev/null
++++ b/campuspool/src/server/outbox.ts
+@@ -0,0 +1,119 @@
++import type { PoolConnection, RowDataPacket } from 'mysql2/promise';
++import { randomUUID } from 'node:crypto';
++import { rows } from '@/server/db';
++import { upsertActivityEvent, type ActivityEventDocument, assertSafeActivityData } from '@/server/mongo';
++
++export type EventInput = {
++  type: string;
++  actorId: number;
++  audienceIds: number[];
++  rideId?: number;
++  bookingId?: number;
++  data: Record<string, unknown>;
++};
++
++export type OutboxRow = RowDataPacket & {
++  event_id: string;
++  type: string;
++  actor_id: number;
++  audience_ids: string | number[];
++  ride_id: number | null;
++  booking_id: number | null;
++  data: string | Record<string, unknown>;
++  created_at: Date | string;
++  attempts: number;
++};
++
++function json(value: unknown): string {
++  return JSON.stringify(value ?? {});
++}
++
++function safeErrorMessage(error: unknown): string {
++  if (error instanceof Error && error.name === 'MongoServerSelectionError') return 'MongoDB unavailable';
++  return 'MongoDB publish failed';
++}
++
++export function validateEvent(event: EventInput): void {
++  if (!event.type || !Number.isInteger(event.actorId) || !Array.isArray(event.audienceIds)) {
++    throw new Error('invalid activity event');
++  }
++  assertSafeActivityData(event.data);
++}
++
++export async function insertOutboxEvent(cx: PoolConnection, event: EventInput): Promise<string> {
++  validateEvent(event);
++  const eventId = randomUUID();
++  await cx.execute(
++    `INSERT INTO outbox
++      (event_id, type, actor_id, audience_ids, ride_id, booking_id, data, created_at, published_at, attempts)
++     VALUES (?, ?, ?, ?, ?, ?, ?, UTC_TIMESTAMP(), NULL, 0)`,
++    [eventId, event.type, event.actorId, json(event.audienceIds), event.rideId ?? null,
++      event.bookingId ?? null, json(event.data)],
++  );
++  return eventId;
++}
++
++function parseJson<T>(value: string | T): T {
++  return typeof value === 'string' ? JSON.parse(value) as T : value;
++}
++
++function utcDate(value: Date | string): Date {
++  if (value instanceof Date) return value;
++  // db.ts intentionally uses dateStrings:true. MySQL's UTC datetime has no offset,
++  // so append Z rather than letting Node interpret it in the host timezone.
++  return new Date(value.includes('T') ? `${value}Z` : `${value.replace(' ', 'T')}Z`);
++}
++
++export function eventDocument(row: OutboxRow): ActivityEventDocument {
++  const audienceIds = parseJson<number[]>(row.audience_ids);
++  const data = parseJson<Record<string, unknown>>(row.data);
++  return {
++    eventId: row.event_id,
++    type: row.type,
++    actorId: Number(row.actor_id),
++    audienceIds: audienceIds.map(Number),
++    ...(row.ride_id == null ? {} : { rideId: Number(row.ride_id) }),
++    ...(row.booking_id == null ? {} : { bookingId: Number(row.booking_id) }),
++    data,
++    createdAt: utcDate(row.created_at),
++  };
++}
++
++export async function pendingOutbox(cx: PoolConnection, limit: number): Promise<OutboxRow[]> {
++  const bounded = Math.max(1, Math.min(100, Math.trunc(limit)));
++  return rows<OutboxRow>(cx,
++    `SELECT event_id,type,actor_id,audience_ids,ride_id,booking_id,data,created_at,attempts
++       FROM outbox
++      WHERE published_at IS NULL
++      ORDER BY created_at,event_id
++      LIMIT ? FOR UPDATE SKIP LOCKED`, [bounded]);
++}
++
++export async function markPublished(cx: PoolConnection, eventId: string): Promise<void> {
++  await cx.execute('UPDATE outbox SET published_at = UTC_TIMESTAMP() WHERE event_id = ? AND published_at IS NULL', [eventId]);
++}
++
++export async function markAttemptFailed(cx: PoolConnection, eventId: string): Promise<void> {
++  await cx.execute('UPDATE outbox SET attempts = attempts + 1 WHERE event_id = ? AND published_at IS NULL', [eventId]);
++}
++
++export async function publishOutboxBatch(cx: PoolConnection, limit = 25): Promise<{ published: number; failed: number }> {
++  const pending = await pendingOutbox(cx, limit);
++  let published = 0;
++  let failed = 0;
++  for (const row of pending) {
++    try {
++      await upsertActivityEvent(eventDocument(row));
++      await markPublished(cx, row.event_id);
++      published += 1;
++    } catch (error) {
++      await markAttemptFailed(cx, row.event_id);
++      failed += 1;
++      console.error(`activity event ${row.event_id} was not published`, safeErrorMessage(error));
++      // Do not hold a batch lock while waiting through repeated Mongo server
++      // selection timeouts. The next worker pass will retry this and the rest.
++      break;
++    }
++  }
++  return { published, failed };
++}
+diff --git a/campuspool/tests/database-evidence.ts b/campuspool/tests/database-evidence.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..d434cc92761e6a70d0f7e68703b959f8f352e2a2
+--- /dev/null
++++ b/campuspool/tests/database-evidence.ts
+@@ -0,0 +1,102 @@
++import { afterAll, beforeAll, describe, expect, it } from 'vitest';
++import mysql, { type Pool, type PoolConnection, type ResultSetHeader, type RowDataPacket } from 'mysql2/promise';
++import { existsSync } from 'node:fs';
++
++if (!process.env.DATABASE_URL && existsSync('.env')) process.loadEnvFile('.env');
++const enabled = process.env.RUN_CAMPUSPOOL_INTEGRATION === '1';
++type IdRow = RowDataPacket & { id: number };
++
++describe.skipIf(!enabled)('CampusPool direct SQL DBMS evidence', () => {
++  let db: Pool;
++  beforeAll(() => {
++    const value = process.env.DATABASE_URL;
++    if (!value) throw new Error('DATABASE_URL is required for direct SQL evidence');
++    const url = new URL(value);
++    db = mysql.createPool({ host: url.hostname, port: Number(url.port || 3306),
++      user: decodeURIComponent(url.username), password: decodeURIComponent(url.password),
++      database: url.pathname.slice(1), timezone: 'Z', dateStrings: true });
++  });
++  afterAll(async () => { await db?.end(); });
++
++  async function fixtureIds(cx: PoolConnection): Promise<{ driverId: number; riderId: number; vehicleId: number; originId: number; destinationId: number }> {
++    const [drivers] = await cx.query<Array<IdRow>>("SELECT id FROM users WHERE email='driver@campuspool.test' AND role='DRIVER' AND status='APPROVED'");
++    const [riders] = await cx.query<Array<IdRow>>("SELECT id FROM users WHERE email='rider@campuspool.test' AND role='RIDER' AND status='APPROVED'");
++    const [vehicles] = await cx.query<Array<IdRow>>("SELECT id FROM vehicles WHERE owner_id=? AND status='APPROVED' ORDER BY id LIMIT 1", [drivers[0]?.id]);
++    const [stops] = await cx.query<Array<IdRow>>('SELECT id FROM stops ORDER BY id LIMIT 2');
++    expect(drivers[0]?.id).toBeDefined();
++    expect(riders[0]?.id).toBeDefined();
++    expect(vehicles[0]?.id).toBeDefined();
++    expect(stops).toHaveLength(2);
++    return { driverId: drivers[0].id, riderId: riders[0].id, vehicleId: vehicles[0].id, originId: stops[0].id, destinationId: stops[1].id };
++  }
++
++  it('enforces the named bike capacity check', async () => {
++    const cx = await db.getConnection();
++    try {
++      const ids = await fixtureIds(cx);
++      const registration = `DBMS-${Date.now().toString(36).slice(-10)}`.slice(0, 32);
++      try {
++        await cx.query(`INSERT INTO vehicles(owner_id,kind,registration,model,passenger_capacity,status)
++          VALUES(?,'BIKE',?,'Invalid Bike',2,'PENDING')`, [ids.driverId, registration]);
++        throw new Error('invalid bike insert unexpectedly succeeded');
++      } catch (error) {
++        const sqlError = error as { errno?: number; sqlMessage?: string };
++        expect(sqlError.errno).toBe(3819);
++        expect(sqlError.sqlMessage).toContain('ck_vehicles_capacity');
++      }
++    } finally { cx.release(); }
++  });
++
++  it('exposes the view and stored procedure evidence', async () => {
++    const cx = await db.getConnection();
++    try {
++      const [view] = await cx.query<RowDataPacket[]>('SELECT ride_id, seats_committed FROM driver_ride_summary LIMIT 1');
++      expect(Array.isArray(view)).toBe(true);
++      const [procedure] = await cx.query<RowDataPacket[]>('CALL ride_capacity_report(CURDATE())');
++      expect(Array.isArray(procedure)).toBe(true);
++    } finally { cx.release(); }
++  });
++
++  it('keeps ledger rows append-only and permits service seat updates', async () => {
++    const cx = await db.getConnection();
++    try {
++      await cx.beginTransaction();
++      const ids = await fixtureIds(cx);
++      const [ride] = await cx.query<ResultSetHeader>(
++        `INSERT INTO rides(driver_id,vehicle_id,origin_stop_id,destination_stop_id,departure_at,total_seats,seats_available,credit_price,status)
++         VALUES(?,?,?, ?,DATE_ADD(UTC_TIMESTAMP(3),INTERVAL 2 HOUR),1,1,1,'PUBLISHED')`,
++        [ids.driverId, ids.vehicleId, ids.originId, ids.destinationId]);
++      let selfBookingError: { errno?: number } | undefined;
++      try {
++        await cx.query(`INSERT INTO bookings(ride_id,rider_id,status) VALUES(?,?,'REQUESTED')`, [ride.insertId, ids.driverId]);
++      } catch (error) { selfBookingError = error as { errno?: number }; }
++      expect(selfBookingError?.errno).toBe(1644);
++      const [booking] = await cx.query<ResultSetHeader>(
++        `INSERT INTO bookings(ride_id,rider_id,status) VALUES(?,?,'REQUESTED')`, [ride.insertId, ids.riderId]);
++      await expect(cx.query('UPDATE rides SET seats_available=0 WHERE id=?', [ride.insertId])).resolves.toBeDefined();
++      let immutableError: { errno?: number } | undefined;
++      try {
++        await cx.query('UPDATE rides SET departure_at=DATE_ADD(departure_at, INTERVAL 1 DAY) WHERE id=?', [ride.insertId]);
++      } catch (error) { immutableError = error as { errno?: number }; }
++      expect(immutableError?.errno).toBe(1644);
++      let cancelError: { errno?: number } | undefined;
++      try { await cx.query("UPDATE rides SET status='CANCELLED' WHERE id=?", [ride.insertId]); }
++      catch (error) { cancelError = error as { errno?: number }; }
++      expect(cancelError?.errno).toBe(1644);
++      await cx.query("INSERT INTO ledger(user_id,booking_id,kind,amount) VALUES(?,?, 'HOLD',1)", [ids.riderId, booking.insertId]);
++      await expect(cx.query('UPDATE ledger SET amount=2 WHERE booking_id=?', [booking.insertId])).rejects.toThrow();
++      await expect(cx.query('DELETE FROM ledger WHERE booking_id=?', [booking.insertId])).rejects.toThrow();
++    } finally { await cx.rollback(); cx.release(); }
++  });
++
++  it('shows the route index through both possible_keys and the chosen key', async () => {
++    const [normal] = await db.query<Array<RowDataPacket & { possible_keys: string | null }>>(
++      `EXPLAIN SELECT * FROM rides
++        WHERE origin_stop_id=1 AND destination_stop_id=2 AND departure_at>=UTC_TIMESTAMP() AND status='PUBLISHED'`);
++    expect(normal[0]?.possible_keys ?? '').toContain('idx_rides_route_time');
++    const [forced] = await db.query<Array<RowDataPacket & { key: string | null }>>(
++      `EXPLAIN SELECT * FROM rides FORCE INDEX (idx_rides_route_time)
++        WHERE origin_stop_id=1 AND destination_stop_id=2 AND departure_at>=UTC_TIMESTAMP() AND status='PUBLISHED'`);
++    expect(forced[0]?.key).toBe('idx_rides_route_time');
++  });
++});
+diff --git a/campuspool/tests/issue-37.test.ts b/campuspool/tests/issue-37.test.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..b9e0d9e340f4edab83ab4b41531fe6c4588c9a79
+--- /dev/null
++++ b/campuspool/tests/issue-37.test.ts
+@@ -0,0 +1,2 @@
++import './database-evidence';
++import './outbox-recovery';
+diff --git a/campuspool/tests/outbox-recovery.ts b/campuspool/tests/outbox-recovery.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..cd8b51857f0d0b8997e9f9a65b0517f42be2b812
+--- /dev/null
++++ b/campuspool/tests/outbox-recovery.ts
+@@ -0,0 +1,100 @@
++import { afterAll, beforeAll, describe, expect, it } from 'vitest';
++import mysql, { type Pool, type PoolConnection, type RowDataPacket } from 'mysql2/promise';
++import { randomUUID } from 'node:crypto';
++import { existsSync } from 'node:fs';
++import { activityCollection, closeMongo, readActivityFeed, upsertActivityEvent } from '../src/server/mongo';
++import { publishOutboxBatch } from '../src/server/outbox';
++
++if (!process.env.DATABASE_URL && existsSync('.env')) process.loadEnvFile('.env');
++const enabled = process.env.RUN_CAMPUSPOOL_INTEGRATION === '1';
++
++describe.skipIf(!enabled)('CampusPool outbox worker recovery evidence', () => {
++  let db: Pool;
++  beforeAll(() => {
++    const value = process.env.DATABASE_URL;
++    if (!value) throw new Error('DATABASE_URL is required for outbox evidence');
++    const url = new URL(value);
++    db = mysql.createPool({ host: url.hostname, port: Number(url.port || 3306),
++      user: decodeURIComponent(url.username), password: decodeURIComponent(url.password),
++      database: url.pathname.slice(1), timezone: 'Z', dateStrings: true });
++  });
++  afterAll(async () => { await closeMongo(); await db?.end(); });
++
++  async function users(cx: PoolConnection): Promise<{ actor: number; audience: number; actorEmail: string; audienceEmail: string }> {
++    const suffix = randomUUID().slice(0, 8);
++    const actorEmail = `outbox-actor-${suffix}@campuspool.test`;
++    const audienceEmail = `outbox-audience-${suffix}@campuspool.test`;
++    for (const [name, email] of [['Outbox Actor', actorEmail], ['Outbox Audience', audienceEmail]]) {
++      await cx.query(`INSERT INTO users(name,email,password_hash,role,status,credits) VALUES(?,?, 'test', 'RIDER','APPROVED',0)`, [name, email]);
++    }
++    const [rows] = await cx.query<Array<RowDataPacket & { id: number; email: string }>>(
++      'SELECT id,email FROM users WHERE email IN (?,?)', [actorEmail, audienceEmail]);
++    const actor = rows.find((row) => row.email === actorEmail)?.id ?? 0;
++    const audience = rows.find((row) => row.email === audienceEmail)?.id ?? 0;
++    expect(actor).toBeGreaterThan(0); expect(audience).toBeGreaterThan(0);
++    return { actor, audience, actorEmail, audienceEmail };
++  }
++
++  async function worker(cx: PoolConnection, limit = 1): Promise<{ published: number; failed: number }> {
++    await cx.beginTransaction();
++    try { const result = await publishOutboxBatch(cx, limit); await cx.commit(); return result; }
++    catch (error) { await cx.rollback(); throw error; }
++  }
++
++  it('uses the real worker path for failure, recovery, replay, and audience isolation', async () => {
++    const cx = await db.getConnection();
++    const originalUri = process.env.MONGODB_URI;
++    const failedEventId = randomUUID();
++    const replayEventId = randomUUID();
++    const highAttemptEventId = randomUUID();
++    let actor = 0;
++    let audience = 0;
++    let actorEmail = '';
++    let audienceEmail = '';
++    try {
++      ({ actor, audience, actorEmail, audienceEmail } = await users(cx));
++      const event = (eventId: string) => ({ eventId, type: 'DBMS_OUTBOX_TEST', actorId: actor,
++        audienceIds: [audience], data: { testId: eventId }, createdAt: new Date('2000-01-01T00:00:00.000Z') });
++      const fixtureRows = [[failedEventId, '1970-01-01 00:00:00.000', 0], [replayEventId, '1970-01-01 00:00:01.000', 0], [highAttemptEventId, '1970-01-01 00:00:02.000', 9]] as const;
++      for (const [eventId, createdAt, attempts] of fixtureRows) {
++        await cx.query(`INSERT INTO outbox(event_id,type,actor_id,audience_ids,data,created_at,attempts)
++          VALUES(?,?,?,?,?,?,?)`, [eventId, 'DBMS_OUTBOX_TEST', actor, JSON.stringify([audience]), JSON.stringify({ testId: eventId }), createdAt, attempts]);
++      }
++
++      await closeMongo();
++      process.env.MONGODB_URI = 'mongodb://127.0.0.1:1';
++      const failed = await worker(cx, 1);
++      expect(failed.failed).toBe(1);
++      const [failedRow] = await cx.query<Array<RowDataPacket & { attempts: number; published_at: string | null }>>(
++        'SELECT attempts,published_at FROM outbox WHERE event_id=?', [failedEventId]);
++      expect(Number(failedRow[0]?.attempts)).toBe(1);
++      expect(failedRow[0]?.published_at).toBeNull();
++
++      await closeMongo();
++      process.env.MONGODB_URI = originalUri;
++      // Simulate a crash after Mongo accepted the event but before SQL publish.
++      await upsertActivityEvent(event(replayEventId));
++      const recovered = await worker(cx, 100);
++      expect(recovered.published).toBeGreaterThanOrEqual(3);
++      const [published] = await cx.query<Array<RowDataPacket & { published_at: string | null; attempts: number }>>(
++        'SELECT published_at,attempts FROM outbox WHERE event_id IN (?,?,?)', [failedEventId, replayEventId, highAttemptEventId]);
++      expect(published).toHaveLength(3);
++      expect(published.every((row) => row.published_at !== null)).toBe(true);
++      expect(Number(published.find((row) => Number(row.attempts) > 8)?.attempts ?? 0)).toBeGreaterThan(8);
++
++      const collection = await activityCollection();
++      expect(await collection.countDocuments({ eventId: replayEventId })).toBe(1);
++      const audienceFeed = await readActivityFeed(audience);
++      const eventIds: string[] = [failedEventId, replayEventId, highAttemptEventId];
++      expect(audienceFeed.events.filter((item) => eventIds.includes(item.eventId))).toHaveLength(3);
++      const actorFeed = await readActivityFeed(actor);
++      expect(actorFeed.events.some((item) => item.eventId === failedEventId)).toBe(false);
++      await collection.deleteMany({ eventId: { $in: [failedEventId, replayEventId, highAttemptEventId] } });
++    } finally {
++      process.env.MONGODB_URI = originalUri;
++      await cx.query('DELETE FROM outbox WHERE event_id IN (?,?,?)', [failedEventId, replayEventId, highAttemptEventId]);
++      if (actorEmail && audienceEmail) await cx.query('DELETE FROM users WHERE email IN (?,?)', [actorEmail, audienceEmail]);
++      cx.release();
++    }
++  });
++});

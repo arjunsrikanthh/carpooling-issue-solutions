@@ -1,0 +1,1 @@
+1foundation contracts/auth/schema;2vehicles12,rides21,booking23,cancel24,DB/Mongo37,search/tests43,docs44;3workingUI+actualDBtests/races/outbox;4build/security/HTTP/visualwhereavailable;5scopedhandoff39foundation;6newrepoActionsgreenandreport.

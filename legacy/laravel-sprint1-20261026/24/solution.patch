@@ -1,0 +1,334 @@
+diff --git a/prototype/campuspool-extension/Mobility/Commute/CommuteController.php b/prototype/campuspool-extension/Mobility/Commute/CommuteController.php
+index ce65cc5..a517615 100644
+--- a/prototype/campuspool-extension/Mobility/Commute/CommuteController.php
++++ b/prototype/campuspool-extension/Mobility/Commute/CommuteController.php
+@@ -24,9 +24,9 @@ public function transition(Request$r,int$trip,CommuteService$s){
+   if(!CommuteService::demoActor($r->user()->id))throw new SegmentException('DEMO_SESSION_REQUIRED',403);
+   if(!DB::table('mobility_commute_demo_trips')->where('trip_id',$trip)->exists())throw new SegmentException('DEMO_TRIP_REQUIRED',403);
+   // Delegate state/event/idempotency ownership to the existing canonical controller.
+-  return DB::transaction(function()use($r,$trip){$t=Trip::whereKey($trip)->lockForUpdate()->firstOrFail();if((int)$t->user_id!==$r->user()->id)throw new SegmentException('TRIP_OWNER_REQUIRED',403);
++  return DB::transaction(function()use($r,$trip,$s){$t=Trip::whereKey($trip)->lockForUpdate()->firstOrFail();if((int)$t->user_id!==$r->user()->id)throw new SegmentException('TRIP_OWNER_REQUIRED',403);
+    if(in_array($r->input('action'),['start','board'],true)&&Passenger::where('trip_id',$trip)->where('request_state',1)->whereNotExists(fn($q)=>$q->selectRaw('1')->from('mobility_commute_demo_holds')->whereColumn('booking_id','trip_passengers.id')->where('state','held'))->exists())throw new SegmentException('RIDER_PAYMENT_CONFIRMATION_REQUIRED',409);
+-   if($r->input('action')==='cancel')throw new SegmentException('CANCEL_BOOKINGS_FIRST',409);
++   if($r->input('action')==='cancel')return $this->response($s->receipt($r->user(),$r->header('Idempotency-Key',''),['trip-cancel',$trip],fn()=>$s->cancelTrip($r->user(),$trip,(string)$r->header('Idempotency-Key',''))));
+    $r->attributes->set('commute.canonical_transition',true);return app(\STS\Mobility\MobilityController::class)->transition($r,$t);
+   });
+  }
+diff --git a/prototype/campuspool-extension/Mobility/Commute/CommuteService.php b/prototype/campuspool-extension/Mobility/Commute/CommuteService.php
+index c64b815..e3f76e6 100644
+--- a/prototype/campuspool-extension/Mobility/Commute/CommuteService.php
++++ b/prototype/campuspool-extension/Mobility/Commute/CommuteService.php
+@@ -62,12 +62,33 @@ public function action(User$u,int$id,string$action):array{
+   $this->requireDemo($u);return DB::transaction(function()use($u,$id,$action){$pre=Passenger::findOrFail($id);$trip=Trip::whereKey($pre->trip_id)->lock('for update nowait')->firstOrFail();$b=Passenger::whereKey($id)->lockForUpdate()->firstOrFail();$this->bookingDto($b,$u);$this->planned($trip);$owner=(int)$trip->user_id===$u->id;
+    if($action!=='cancel'&&!$owner)throw new SegmentException('TRIP_OWNER_REQUIRED',403);
+    $target=['accept'=>1,'reject'=>2,'cancel'=>3][$action];if((int)$b->request_state===$target)return['data'=>$this->bookingDto($b,$u)];
+-   if(($target!==3&&(int)$b->request_state!==0)||($target===3&&!in_array((int)$b->request_state,[0,1])))throw new SegmentException('BOOKING_STATE_CHANGED',409);
++   if(($target!==3&&(int)$b->request_state!==0)||($target===3&&!in_array((int)$b->request_state,[0,1,4],true)))throw new SegmentException('BOOKING_STATE_CHANGED',409);
+    if($target===1){$published=DB::table('mobility_commute_demo_trips')->where('trip_id',$trip->id)->value('is_publication');if($published)app(CommuteMatchingService::class)->accept($trip,$b);User::whereKey($u->id)->lock('for update nowait')->first();if(Passenger::where('trip_id',$trip->id)->where('request_state',1)->count()>=$trip->total_seats)throw new SegmentException('NOT_SEAT_AVAILABLE',422);
+     // Demo driver still cannot accept simultaneous obligations on another trip.
+     $conflict=Passenger::where('request_state',1)->where('trip_id','<>',$trip->id)->whereExists(function($q)use($trip,$u){$q->selectRaw('1')->from('trips as occupied')->join('mobility_trip_lifecycles as l','l.trip_id','=','occupied.id')->whereColumn('occupied.id','trip_passengers.trip_id')->where('occupied.user_id',$u->id)->whereIn('l.state',['planned','in_progress'])->whereBetween('occupied.trip_date',[CarbonImmutable::parse($trip->trip_date)->subHour(),CarbonImmutable::parse($trip->trip_date)->addHour()]);})->lockForUpdate()->first();if($conflict)throw new SegmentException('DRIVER_ROUTE_OVERLAP',409);
+    }
+-   if($target===3)$this->refund($b);$b->request_state=$target;$b->save();return['data'=>$this->bookingDto($b,$u)];});
++   if($target===3){$this->refund($b);$b->canceled_state=(int)$b->request_state===0?Passenger::CANCELED_REQUEST:((int)$trip->user_id===$u->id?Passenger::CANCELED_DRIVER:((int)$b->request_state===4?Passenger::CANCELED_PASSENGER_WHILE_PAYING:Passenger::CANCELED_PASSENGER));}
++   $b->request_state=$target;$b->save();return['data'=>$this->bookingDto($b,$u)];});
++ }
++ public function cancelTrip(User$u,int$tripId,string$key):array{
++  $this->requireDemo($u);
++  return DB::transaction(function()use($u,$tripId,$key){
++   $trip=Trip::whereKey($tripId)->lock('for update nowait')->firstOrFail();
++   if((int)$trip->user_id!==$u->id)throw new SegmentException('TRIP_OWNER_REQUIRED',403);
++   $life=DB::table('mobility_trip_lifecycles')->where('trip_id',$tripId)->lockForUpdate()->first();
++   if(!$life)throw new SegmentException('COMMUTE_LIFECYCLE_REQUIRED',409);
++   if($life->state==='cancelled')return['trip_id'=>$tripId,'state'=>'cancelled','cancelled_booking_ids'=>[]];
++   if($life->state!=='planned')throw new SegmentException('COMMUTE_TRIP_CLOSED',409);
++   $cancelled=[];
++   $bookings=Passenger::where('trip_id',$tripId)->whereIn('request_state',[Passenger::STATE_PENDING,Passenger::STATE_ACCEPTED,Passenger::STATE_WAITING_PAYMENT])->lockForUpdate()->get();
++   foreach($bookings as $booking){$this->refund($booking);$booking->request_state=Passenger::STATE_CANCELED;$booking->canceled_state=Passenger::CANCELED_DRIVER;$booking->save();$cancelled[]=(int)$booking->id;}
++   $version=(int)$life->version+1;
++   DB::table('mobility_trip_lifecycles')->where('trip_id',$tripId)->update(['state'=>'cancelled','version'=>$version,'updated_at'=>now()]);
++   $trip->newQuery()->whereKey($tripId)->update(['state'=>Trip::STATE_CANCELED]);
++   $body=['trip_id'=>$tripId,'state'=>'cancelled','version'=>$version,'action'=>'cancel','cancelled_booking_ids'=>$cancelled];
++   DB::table('mobility_trip_events')->insert(['trip_id'=>$tripId,'actor_id'=>$u->id,'action'=>'cancel','passenger_id'=>null,'idempotency_key'=>$key,'request_fingerprint'=>hash('sha256',json_encode(['action'=>'cancel','trip_id'=>$tripId],JSON_THROW_ON_ERROR)),'version'=>$version,'response_status'=>200,'response_body'=>json_encode($body,JSON_THROW_ON_ERROR),'created_at'=>now(),'updated_at'=>now()]);
++   return $body;
++  });
+  }
+  private function walletLock(int$id):object{DB::table('mobility_commute_demo_wallets')->insertOrIgnore(['user_id'=>$id,'available_minor'=>0,'created_at'=>now(),'updated_at'=>now()]);return DB::table('mobility_commute_demo_wallets')->where('user_id',$id)->lockForUpdate()->first();}
+  private function entry(int$id,string$kind,int$amount,?int$booking=null):void{DB::table('mobility_commute_demo_entries')->insert(['user_id'=>$id,'kind'=>$kind,'amount_minor'=>$amount,'booking_id'=>$booking,'created_at'=>now(),'updated_at'=>now()]);}
+diff --git a/prototype/campuspool-extension/tests/MobilityCommuteProductTest.php b/prototype/campuspool-extension/tests/MobilityCommuteProductTest.php
+index 8027aad..c5ab46b 100644
+--- a/prototype/campuspool-extension/tests/MobilityCommuteProductTest.php
++++ b/prototype/campuspool-extension/tests/MobilityCommuteProductTest.php
+@@ -4,7 +4,7 @@
+ use STS\Mobility\Pickup\PathProvider;
+ use Illuminate\Support\Facades\DB;
+ use Illuminate\Support\Str;
+-use STS\Models\{User,Car};
++use STS\Models\{User,Car,Passenger};
+ final class MobilityCommuteProductTest extends TestCase {
+  // PHPUnit XML can differ from Laravel's inherited Docker environment.
+  // Check Laravel's actual connection before RefreshDatabase can migrate:fresh.
+@@ -58,7 +58,7 @@ public function test_offer_seat_contract_rejects_invalid_values_and_keeps_one_pa
+  }
+  public function test_vehicle_summary_uses_current_approved_application_and_capacity():void{
+   $driver=$this->demo('driver');$car=Car::factory()->withCatalog()->create(['user_id'=>$driver->id,'patente'=>'KA01AB1234']);$application=DB::table('mobility_host_applications')->insertGetId(['user_id'=>$driver->id,'car_id'=>$car->id,'vehicle_type'=>'car','vehicle_fingerprint'=>\STS\Mobility\Trust\CohortPolicy::vehicleFingerprint($car),'status'=>'approved','version'=>1,'created_at'=>now(),'updated_at'=>now()]);$onboarding=DB::table('mobility_driver_onboardings')->insertGetId(['user_id'=>$driver->id,'host_application_id'=>$application,'car_id'=>$car->id,'vehicle_type'=>'car','passenger_capacity'=>4,'vehicle_fingerprint'=>\STS\Mobility\Trust\CohortPolicy::vehicleFingerprint($car),'profile_display_name'=>'Approved synthetic driver','status'=>'approved','version'=>1,'created_at'=>now(),'updated_at'=>now()]);
+-  foreach(['driver_license','profile_photo','rc','insurance'] as$type)DB::table('mobility_driver_documents')->insert(['onboarding_id'=>$onboarding,'document_type'=>$type,'version'=>1,'storage_path'=>'synthetic/'.$type.'.pdf','mime_type'=>'application/pdf','byte_size'=>16,'expires_at'=>now()->addYear()->toDateString(),'status'=>'accepted','submitted_by'=>$driver->id,'created_at'=>now(),'updated_at'=>now()]);
++  foreach(['driver_license','profile_photo','rc','insurance']as$type)DB::table('mobility_driver_documents')->insert(['onboarding_id'=>$onboarding,'document_type'=>$type,'version'=>1,'storage_path'=>'synthetic/'.$type.'.pdf','mime_type'=>'application/pdf','byte_size'=>16,'expires_at'=>now()->addYear()->toDateString(),'status'=>'accepted','submitted_by'=>$driver->id,'created_at'=>now(),'updated_at'=>now()]);
+   $method=new \ReflectionMethod(\STS\Mobility\Commute\CommuteMatchingService::class,'vehicleDisplay');$method->setAccessible(true);$summary=$method->invoke(null,$driver->id,'car');$this->assertTrue($summary['approved']);$this->assertSame(4,$summary['passenger_capacity']);$this->assertSame('••••••1234',$summary['registration']);$this->assertNotEmpty($summary['model']);$this->assertSame($car->load('carModel')->model_name,$summary['model']);
+  }
+  public function test_college_otp_wrong_attempts_persist_and_correct_code_is_single_use():void{
+@@ -183,4 +183,23 @@ public function test_driver_overlap_is_fenced_and_cancel_refunds_matched_hold_on
+   $this->actingAsApiUser($d)->postJson('/api/mobility/commute/bookings/'.$otherId.'/accept',[],['Idempotency-Key'=>'accept-after-cancel'])->assertOk();
+  }
+ 
++ public function test_cancellation_retains_history_restores_capacity_and_records_actor_once():void{
++  $r=$this->demo('rider');$d=$this->demo('driver');$date=now('Asia/Kolkata')->addDay()->toDateString();
++  foreach([[$r,'rider'],[$d,'driver']]as[$u,$role])$this->actingAsApiUser($u)->putJson('/api/mobility/commute/profile',$this->prefs($role))->assertOk();
++  $this->actingAsApiUser($d)->postJson('/api/mobility/commute/offers',['date'=>$date,'direction'=>'outbound','vehicle_type'=>'car','choice'=>'DIRECT_RIDER_PICKUP'],['Idempotency-Key'=>'cancel-capacity-publish'])->assertOk();
++  $url='/api/mobility/commute/rides?date='.$date.'&start_time=08:00&end_time=09:00&direction=outbound&vehicle_type=car';
++  $card=$this->actingAsApiUser($r)->getJson($url)->assertOk()->json('data.0');
++  $id=$this->actingAsApiUser($r)->postJson('/api/mobility/commute/rides/'.$card['trip_id'].'/request',['quote_token'=>$card['quote_token']],['Idempotency-Key'=>'cancel-capacity-request'])->assertOk()->json('data.booking_id');
++  $this->actingAsApiUser($d)->postJson('/api/mobility/commute/bookings/'.$id.'/accept',[],['Idempotency-Key'=>'cancel-capacity-accept'])->assertOk();
++  $this->actingAsApiUser($r)->postJson('/api/mobility/commute/wallet/top-up',['amount_minor'=>50000],['Idempotency-Key'=>'cancel-capacity-topup'])->assertOk();
++  $this->actingAsApiUser($r)->postJson('/api/mobility/commute/bookings/'.$id.'/pay',[],['Idempotency-Key'=>'cancel-capacity-pay'])->assertOk();
++  $this->actingAsApiUser($r)->postJson('/api/mobility/commute/bookings/'.$id.'/cancel',[],['Idempotency-Key'=>'cancel-capacity-cancel'])->assertOk()->assertJsonPath('data.request_state',3);
++  $this->assertDatabaseHas('trip_passengers',['id'=>$id,'request_state'=>3,'canceled_state'=>Passenger::CANCELED_PASSENGER]);
++  $this->assertSame(1,DB::table('mobility_commute_demo_entries')->where('booking_id',$id)->where('kind','refund')->count());
++  $this->actingAsApiUser($d)->postJson('/api/mobility/commute/bookings/'.$id.'/cancel',[],['Idempotency-Key'=>'cancel-capacity-repeat'])->assertOk()->assertJsonPath('data.request_state',3);
++  $this->assertSame(1,DB::table('mobility_commute_demo_entries')->where('booking_id',$id)->where('kind','refund')->count());
++  $replacement=$this->actingAsApiUser($r)->getJson($url)->assertOk()->json('data');
++  $this->assertCount(1,$replacement,'the cancelled booking no longer consumes the only seat');
++ }
++
+ }
+diff --git a/prototype/reproduction/cancellation-concurrency-probe.php b/prototype/reproduction/cancellation-concurrency-probe.php
+new file mode 100644
+index 0000000..2119b72
+--- /dev/null
++++ b/prototype/reproduction/cancellation-concurrency-probe.php
+@@ -0,0 +1,107 @@
++<?php
++declare(strict_types=1);
++
++// Issue #24 evidence: two HTTP cancellation requests for one paid booking.
++// Runs only against the disposable MySQL/demo stack and never prints tokens.
++require '/var/www/vendor/autoload.php';
++$app = require '/var/www/bootstrap/app.php';
++$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
++
++use Illuminate\Support\Facades\DB;
++use STS\Models\Passenger;
++
++function api(string $method, string $path, array $data = [], ?string $token = null, ?string $key = null): array
++{
++    $headers = ['Accept: application/json', 'Content-Type: application/json'];
++    if ($token !== null) $headers[] = 'Authorization: Bearer '.$token;
++    if ($key !== null) $headers[] = 'Idempotency-Key: '.$key;
++    $opts = ['http' => ['method' => $method, 'header' => implode("\r\n", $headers), 'ignore_errors' => true, 'timeout' => 30]];
++    if ($method !== 'GET') $opts['http']['content'] = json_encode($data, JSON_THROW_ON_ERROR);
++    $body = @file_get_contents('http://127.0.0.1:8000/api/mobility/commute/'.$path, false, stream_context_create($opts));
++    $status = 0;
++    foreach ($http_response_header ?? [] as $line) if (preg_match('/^HTTP\/\S+ (\d+)/', $line, $m)) $status = (int) $m[1];
++    return ['status' => $status, 'json' => json_decode($body ?: '', true)];
++}
++
++function ok(array $response, string $label): array
++{
++    if ($response['status'] !== 200) throw new RuntimeException($label.' HTTP '.$response['status']);
++    return $response['json'] ?? [];
++}
++
++function concurrentCancel(int $booking, string $token, string $trial): array
++{
++    // Do not let the parent PDO connection be inherited by forked children.
++    DB::disconnect();
++    $start = microtime(true) + 0.2;
++    $children = [];
++    foreach (['a', 'b'] as $suffix) {
++        $pair = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
++        if ($pair === false) throw new RuntimeException('cannot create result pipe');
++        $pid = pcntl_fork();
++        if ($pid === -1) throw new RuntimeException('pcntl_fork failed');
++        if ($pid === 0) {
++            fclose($pair[0]);
++            while (microtime(true) < $start) usleep(500);
++            $started = microtime(true);
++            $response = api('POST', 'bookings/'.$booking.'/cancel', [], $token, 'cancel-race-'.$trial.'-'.$suffix);
++            fwrite($pair[1], json_encode(['status' => $response['status'], 'code' => $response['json']['error']['code'] ?? null, 'started' => $started, 'finished' => microtime(true)], JSON_THROW_ON_ERROR));
++            fclose($pair[1]);
++            exit(0);
++        }
++        fclose($pair[1]);
++        $children[] = [$pid, $pair[0]];
++    }
++    $responses = [];
++    foreach ($children as [$pid, $socket]) {
++        $responses[] = json_decode(stream_get_contents($socket), true, 512, JSON_THROW_ON_ERROR);
++        fclose($socket);
++        pcntl_waitpid($pid, $status);
++        if (!pcntl_wifexited($status) || pcntl_wexitstatus($status) !== 0) throw new RuntimeException('cancellation child failed');
++    }
++    return $responses;
++}
++
++$report = ['probe' => 'cancellation-concurrency-probe', 'trials' => [], 'completed' => false];
++try {
++    if (DB::connection()->getDriverName() !== 'mysql' || getenv('PHP_CLI_SERVER_WORKERS') !== '4') throw new RuntimeException('requires disposable MySQL and four HTTP workers');
++    $driver = ok(api('POST', 'demo-session', ['role' => 'driver']), 'driver session');
++    $rider = ok(api('POST', 'demo-session', ['role' => 'rider']), 'rider session');
++    $driverToken = $driver['token']; $riderToken = $rider['token'];
++    $prefs = static fn (string $role, string $time): array => ['role' => $role, 'vehicle_preference' => 'both', 'schedule_mode' => 'fixed', 'home' => ['lat' => 12.9716, 'lng' => 77.5946, 'label' => 'Demo home'], 'campus' => ['lat' => 12.9352, 'lng' => 77.62, 'label' => 'Demo campus'], 'outbound_time' => $time, 'return_time' => '17:30', 'weekdays' => [1, 2, 3, 4, 5, 6, 7]];
++    for ($i = 0; $i < 6; $i++) {
++        $date = (new DateTimeImmutable('now', new DateTimeZone('Asia/Kolkata')))->modify('+'.(20 + $i).' day')->format('Y-m-d');
++        $time = sprintf('09:%02d', $i);
++        ok(api('PUT', 'profile', $prefs('driver', $time), $driverToken, 'cancel-profile-d-'.$i), 'driver profile');
++        ok(api('PUT', 'profile', $prefs('rider', $time), $riderToken, 'cancel-profile-r-'.$i), 'rider profile');
++        ok(api('POST', 'offers', ['date' => $date, 'direction' => 'outbound', 'vehicle_type' => 'car', 'choice' => 'DIRECT_RIDER_PICKUP'], $driverToken, 'cancel-publish-'.$i), 'publish');
++        $url = 'rides?direction=outbound&date='.$date.'&start_time=08:00&end_time=10:00&vehicle_type=car';
++        $cards = ok(api('GET', $url, [], $riderToken), 'search')['data'];
++        if (!$cards) throw new RuntimeException('published ride not discoverable');
++        $card = $cards[0]; $booking = (int) ok(api('POST', 'rides/'.$card['trip_id'].'/request', ['quote_token' => $card['quote_token']], $riderToken, 'cancel-request-'.$i), 'request')['data']['booking_id'];
++        ok(api('POST', 'bookings/'.$booking.'/accept', [], $driverToken, 'cancel-accept-'.$i), 'accept');
++        $before = (int) ok(api('GET', 'wallet', [], $riderToken), 'wallet before')['available_minor'];
++        ok(api('POST', 'wallet/top-up', ['amount_minor' => 50000], $riderToken, 'cancel-topup-'.$i), 'topup');
++        ok(api('POST', 'bookings/'.$booking.'/pay', [], $riderToken, 'cancel-pay-'.$i), 'pay');
++        $responses = concurrentCancel($booking, $riderToken, (string) $i);
++        $validStatuses = array_reduce($responses, static fn (bool $ok, array $response): bool => $ok && ($response['status'] === 200 || ($response['status'] === 409 && $response['code'] === 'COMMUTE_BUSY_RETRY')), true);
++        $overlap = max(array_column($responses, 'started')) < min(array_column($responses, 'finished'));
++        if (!$validStatuses || !$overlap) throw new RuntimeException('cancellation requests were not a valid overlapping race');
++        $retries = [];
++        foreach ($responses as $n => $response) if ($response['status'] === 409 && $response['code'] === 'COMMUTE_BUSY_RETRY') $retries[] = api('POST', 'bookings/'.$booking.'/cancel', [], $riderToken, 'cancel-retry-'.$i.'-'.$n);
++        $row = DB::table('trip_passengers')->where('id', $booking)->first();
++        $hold = DB::table('mobility_commute_demo_holds')->where('booking_id', $booking)->first();
++        $refunds = DB::table('mobility_commute_demo_entries')->where('booking_id', $booking)->where('kind', 'refund')->count();
++        $after = (int) ok(api('GET', 'wallet', [], $riderToken), 'wallet after')['available_minor'];
++        $available = ok(api('GET', $url, [], $riderToken), 'search after cancel')['data'];
++        $pass = (int) ($row->request_state ?? -1) === Passenger::STATE_CANCELED && (int) ($row->canceled_state ?? -1) === Passenger::CANCELED_PASSENGER && ($hold->state ?? null) === 'refunded' && $refunds === 1 && $after === $before + 50000 && count($available) >= 1 && !array_filter($retries, static fn (array $retry): bool => $retry['status'] !== 200);
++        $report['trials'][] = ['trial' => $i + 1, 'booking_id' => $booking, 'responses' => $responses, 'retry_statuses' => array_column($retries, 'status'), 'refund_entries' => $refunds, 'overlapping_http_calls' => $overlap, 'passed' => $pass];
++        if (!$pass) throw new RuntimeException('cancellation invariant failed on trial '.($i + 1));
++    }
++    $report['completed'] = true;
++} catch (Throwable $e) {
++    $report['failure'] = $e->getMessage();
++}
++$report['all_checks_passed'] = $report['completed'] && !in_array(false, array_column($report['trials'], 'passed'), true);
++echo json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n";
++exit($report['all_checks_passed'] ? 0 : 1);
+diff --git a/prototype/tests/extension/MobilityCommuteCancellationTest.php b/prototype/tests/extension/MobilityCommuteCancellationTest.php
+new file mode 100644
+index 0000000..9cde3dd
+--- /dev/null
++++ b/prototype/tests/extension/MobilityCommuteCancellationTest.php
+@@ -0,0 +1,76 @@
++<?php
++
++namespace Tests\Feature\Mobility;
++
++use Illuminate\Support\Facades\DB;
++use STS\Models\Passenger;
++use STS\Models\User;
++use STS\Mobility\Pickup\PathProvider;
++use Tests\TestCase;
++
++final class MobilityCommuteCancellationTest extends TestCase
++{
++    protected function setUp(): void
++    {
++        parent::setUp();
++        putenv('MOBILITY_PILOT_UI_ENABLED=true');
++        putenv('MOBILITY_COLLEGE_CODE=CAMPUS-BLR');
++        foreach (['car', 'bike', 'foot'] as $mode) {
++            config(['mobility_routing.'.$mode.'_expected_data_version' => $mode.'|crop_sha256='.str_repeat('a', 64).'|profile_sha256='.str_repeat('b', 64)]);
++        }
++        app()->bind(PathProvider::class, fn () => new class implements PathProvider {
++            public function path(array $points, string $mode, float $timeoutSeconds = 5): array
++            {
++                $legs = [];
++                for ($i = 1; $i < count($points); $i++) {
++                    $distance = (int) round(hypot(($points[$i]['lat'] - $points[$i - 1]['lat']) * 111000, ($points[$i]['lng'] - $points[$i - 1]['lng']) * 100000));
++                    $legs[] = ['distance_meters' => $distance, 'duration_seconds' => $distance ? (int) ceil($distance / ($mode === 'foot' ? 1.3 : 8)) : 0];
++                }
++                return ['provider' => 'osrm', 'profile' => 'fixture', 'data_version' => $mode.'|crop_sha256='.str_repeat('a', 64).'|profile_sha256='.str_repeat('b', 64), 'geometry' => array_map(fn ($p) => [$p['lng'], $p['lat']], $points), 'waypoints' => array_map(fn ($p) => ['location' => [$p['lng'], $p['lat']], 'distance_meters' => 0], $points), 'legs' => $legs, 'distance_meters' => array_sum(array_column($legs, 'distance_meters')), 'duration_seconds' => array_sum(array_column($legs, 'duration_seconds'))];
++            }
++        });
++    }
++
++    public function test_driver_cancels_whole_ride_atomically_and_replays_safely(): void
++    {
++        $driver = $this->demoSession('driver');
++        $rider = $this->demoSession('rider');
++        $pendingRider = $this->demoSession('rider', 'campus-route');
++        $this->profile($driver, 'driver');
++        $this->profile($rider, 'rider');
++        $this->profile($pendingRider, 'rider');
++        $date = now('Asia/Kolkata')->addDay()->toDateString();
++        $this->actingAsApiUser($driver)->postJson('/api/mobility/commute/offers', ['date' => $date, 'direction' => 'outbound', 'vehicle_type' => 'car', 'choice' => 'DIRECT_RIDER_PICKUP'], ['Idempotency-Key' => 'trip-cancel-publish'])->assertOk();
++        $card = $this->actingAsApiUser($rider)->getJson('/api/mobility/commute/rides?date='.$date.'&start_time=08:00&end_time=10:00&direction=outbound&vehicle_type=car')->assertOk()->json('data.0');
++        $booking = $this->actingAsApiUser($rider)->postJson('/api/mobility/commute/rides/'.$card['trip_id'].'/request', ['quote_token' => $card['quote_token']], ['Idempotency-Key' => 'trip-cancel-request'])->assertOk()->json('data.booking_id');
++        $pendingCard = $this->actingAsApiUser($pendingRider)->getJson('/api/mobility/commute/rides?date='.$date.'&start_time=08:00&end_time=10:00&direction=outbound&vehicle_type=car')->assertOk()->json('data.0');
++        $pendingBooking = $this->actingAsApiUser($pendingRider)->postJson('/api/mobility/commute/rides/'.$card['trip_id'].'/request', ['quote_token' => $pendingCard['quote_token']], ['Idempotency-Key' => 'trip-cancel-pending-request'])->assertOk()->json('data.booking_id');
++        $this->actingAsApiUser($driver)->postJson('/api/mobility/commute/bookings/'.$booking.'/accept', [], ['Idempotency-Key' => 'trip-cancel-accept'])->assertOk();
++        $this->actingAsApiUser($rider)->postJson('/api/mobility/commute/wallet/top-up', ['amount_minor' => 50000], ['Idempotency-Key' => 'trip-cancel-topup'])->assertOk();
++        $this->actingAsApiUser($rider)->postJson('/api/mobility/commute/bookings/'.$booking.'/pay', [], ['Idempotency-Key' => 'trip-cancel-pay'])->assertOk();
++        $path = '/api/mobility/commute/trips/'.$card['trip_id'].'/transition';
++        $this->actingAsApiUser($rider)->postJson($path, ['action' => 'cancel'], ['Idempotency-Key' => 'trip-cancel-outsider'])->assertForbidden();
++        $this->actingAsApiUser($driver)->postJson($path, ['action' => 'cancel'], ['Idempotency-Key' => 'trip-cancel-driver'])->assertOk()->assertJsonPath('state', 'cancelled');
++        $this->assertDatabaseHas('trips', ['id' => $card['trip_id'], 'state' => \STS\Models\Trip::STATE_CANCELED]);
++        $this->assertDatabaseHas('mobility_trip_lifecycles', ['trip_id' => $card['trip_id'], 'state' => 'cancelled', 'version' => 1]);
++        $this->assertDatabaseHas('mobility_trip_events', ['trip_id' => $card['trip_id'], 'action' => 'cancel', 'idempotency_key' => 'trip-cancel-driver']);
++        $this->assertDatabaseHas('trip_passengers', ['id' => $booking, 'request_state' => Passenger::STATE_CANCELED, 'canceled_state' => Passenger::CANCELED_DRIVER]);
++        $this->assertDatabaseHas('trip_passengers', ['id' => $pendingBooking, 'request_state' => Passenger::STATE_CANCELED, 'canceled_state' => Passenger::CANCELED_DRIVER]);
++        $this->assertDatabaseHas('mobility_commute_demo_holds', ['booking_id' => $booking, 'state' => 'refunded']);
++        $this->assertSame(1, DB::table('mobility_commute_demo_entries')->where('booking_id', $booking)->where('kind', 'refund')->count());
++        $this->actingAsApiUser($driver)->postJson($path, ['action' => 'cancel'], ['Idempotency-Key' => 'trip-cancel-driver'])->assertOk()->assertJsonPath('state', 'cancelled');
++        $this->assertSame(1, DB::table('mobility_trip_events')->where('trip_id', $card['trip_id'])->where('action', 'cancel')->count());
++    }
++
++    private function demoSession(string $role, ?string $scenario = null): User
++    {
++        $body = ['role' => $role];
++        if ($scenario !== null) $body['scenario'] = $scenario;
++        return User::findOrFail($this->postJson('/api/mobility/commute/demo-session', $body)->assertOk()->json('user.id'));
++    }
++
++    private function profile(User $user, string $role): void
++    {
++        $this->actingAsApiUser($user)->putJson('/api/mobility/commute/profile', ['role' => $role, 'vehicle_preference' => 'both', 'schedule_mode' => 'fixed', 'home' => ['lat' => 12.9716, 'lng' => 77.5946, 'label' => 'Demo home'], 'campus' => ['lat' => 12.9352, 'lng' => 77.62, 'label' => 'Demo campus'], 'outbound_time' => '08:30', 'return_time' => '17:30', 'weekdays' => [1, 2, 3, 4, 5, 6, 7]])->assertOk();
++    }
++}
+diff --git a/prototype/tests/extension/MobilityCommuteProductTest.php b/prototype/tests/extension/MobilityCommuteProductTest.php
+index 6b5312f..c5ab46b 100644
+--- a/prototype/tests/extension/MobilityCommuteProductTest.php
++++ b/prototype/tests/extension/MobilityCommuteProductTest.php
+@@ -4,7 +4,7 @@
+ use STS\Mobility\Pickup\PathProvider;
+ use Illuminate\Support\Facades\DB;
+ use Illuminate\Support\Str;
+-use STS\Models\{User,Car};
++use STS\Models\{User,Car,Passenger};
+ final class MobilityCommuteProductTest extends TestCase {
+  // PHPUnit XML can differ from Laravel's inherited Docker environment.
+  // Check Laravel's actual connection before RefreshDatabase can migrate:fresh.
+@@ -183,4 +183,23 @@ public function test_driver_overlap_is_fenced_and_cancel_refunds_matched_hold_on
+   $this->actingAsApiUser($d)->postJson('/api/mobility/commute/bookings/'.$otherId.'/accept',[],['Idempotency-Key'=>'accept-after-cancel'])->assertOk();
+  }
+ 
++ public function test_cancellation_retains_history_restores_capacity_and_records_actor_once():void{
++  $r=$this->demo('rider');$d=$this->demo('driver');$date=now('Asia/Kolkata')->addDay()->toDateString();
++  foreach([[$r,'rider'],[$d,'driver']]as[$u,$role])$this->actingAsApiUser($u)->putJson('/api/mobility/commute/profile',$this->prefs($role))->assertOk();
++  $this->actingAsApiUser($d)->postJson('/api/mobility/commute/offers',['date'=>$date,'direction'=>'outbound','vehicle_type'=>'car','choice'=>'DIRECT_RIDER_PICKUP'],['Idempotency-Key'=>'cancel-capacity-publish'])->assertOk();
++  $url='/api/mobility/commute/rides?date='.$date.'&start_time=08:00&end_time=09:00&direction=outbound&vehicle_type=car';
++  $card=$this->actingAsApiUser($r)->getJson($url)->assertOk()->json('data.0');
++  $id=$this->actingAsApiUser($r)->postJson('/api/mobility/commute/rides/'.$card['trip_id'].'/request',['quote_token'=>$card['quote_token']],['Idempotency-Key'=>'cancel-capacity-request'])->assertOk()->json('data.booking_id');
++  $this->actingAsApiUser($d)->postJson('/api/mobility/commute/bookings/'.$id.'/accept',[],['Idempotency-Key'=>'cancel-capacity-accept'])->assertOk();
++  $this->actingAsApiUser($r)->postJson('/api/mobility/commute/wallet/top-up',['amount_minor'=>50000],['Idempotency-Key'=>'cancel-capacity-topup'])->assertOk();
++  $this->actingAsApiUser($r)->postJson('/api/mobility/commute/bookings/'.$id.'/pay',[],['Idempotency-Key'=>'cancel-capacity-pay'])->assertOk();
++  $this->actingAsApiUser($r)->postJson('/api/mobility/commute/bookings/'.$id.'/cancel',[],['Idempotency-Key'=>'cancel-capacity-cancel'])->assertOk()->assertJsonPath('data.request_state',3);
++  $this->assertDatabaseHas('trip_passengers',['id'=>$id,'request_state'=>3,'canceled_state'=>Passenger::CANCELED_PASSENGER]);
++  $this->assertSame(1,DB::table('mobility_commute_demo_entries')->where('booking_id',$id)->where('kind','refund')->count());
++  $this->actingAsApiUser($d)->postJson('/api/mobility/commute/bookings/'.$id.'/cancel',[],['Idempotency-Key'=>'cancel-capacity-repeat'])->assertOk()->assertJsonPath('data.request_state',3);
++  $this->assertSame(1,DB::table('mobility_commute_demo_entries')->where('booking_id',$id)->where('kind','refund')->count());
++  $replacement=$this->actingAsApiUser($r)->getJson($url)->assertOk()->json('data');
++  $this->assertCount(1,$replacement,'the cancelled booking no longer consumes the only seat');
++ }
++
+ }

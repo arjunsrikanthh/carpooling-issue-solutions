@@ -1,8 +1,9 @@
 [
-  "prototype/campuspool-extension/Mobility/Commute/CommuteController.php",
-  "prototype/campuspool-extension/Mobility/Commute/CommuteService.php",
-  "prototype/campuspool-extension/tests/MobilityCommuteProductTest.php",
-  "prototype/reproduction/cancellation-concurrency-probe.php",
-  "prototype/tests/extension/MobilityCommuteCancellationTest.php",
-  "prototype/tests/extension/MobilityCommuteProductTest.php"
+  "campuspool/src/app/api/bookings/[id]/cancel/route.ts",
+  "campuspool/src/app/api/cancellations/route.ts",
+  "campuspool/src/app/api/offers/[id]/cancel/route.ts",
+  "campuspool/src/app/cancellations/page.tsx",
+  "campuspool/src/features/enabled/24.json",
+  "campuspool/src/server/cancellations.ts",
+  "campuspool/tests/issue-24.test.ts"
 ]

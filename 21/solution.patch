@@ -1,138 +1,155 @@
-diff --git a/prototype/campuspool-extension/Mobility/Commute/CommuteController.php b/prototype/campuspool-extension/Mobility/Commute/CommuteController.php
-index 887af6b..ce65cc5 100644
---- a/prototype/campuspool-extension/Mobility/Commute/CommuteController.php
-+++ b/prototype/campuspool-extension/Mobility/Commute/CommuteController.php
-@@ -11,7 +11,7 @@ public function me(Request$r,CommuteService$s){return$this->response($s->me($r->
-  public function profile(Request$r,CommuteService$s){$v=$r->validate(['max_walk_meters'=>'sometimes|integer|between:0,999','role'=>'required|in:rider,driver','vehicle_preference'=>'required|in:car,bike,both','schedule_mode'=>'required|in:fixed,custom,timetable','home'=>'required|array:lat,lng,label','home.lat'=>'required|numeric|between:12.65,13.35','home.lng'=>'required|numeric|between:77.2,77.95','home.label'=>'required|string|max:160','campus'=>'required|array:lat,lng,label','campus.lat'=>'required|numeric|between:12.65,13.35','campus.lng'=>'required|numeric|between:77.2,77.95','campus.label'=>'required|string|max:160','outbound_time'=>'required|date_format:H:i','return_time'=>'required|date_format:H:i','weekdays'=>'required|array|min:1|max:7','weekdays.*'=>'integer|between:1,7|distinct','name'=>'sometimes|string|min:1|max:100']);return$this->response($s->saveProfile($r->user(),$v));}
-  public function rides(Request$r,CommuteService$s){$v=$r->validate(['direction'=>'required|in:outbound,return','date'=>'required|date_format:Y-m-d','start_time'=>'required|date_format:H:i','end_time'=>'required|date_format:H:i','vehicle_type'=>'required|in:car,bike,both','pickup_choice'=>'sometimes|in:both,DIRECT_RIDER_PICKUP,ON_ROUTE_MEETING_POINT']);return$this->response($s->rides($r->user(),$v['direction'],$v['date'],$v['vehicle_type'],$v['pickup_choice']??'both',$v['start_time'],$v['end_time']));}
-  public function offers(Request$r,CommuteMatchingService$s){return$this->response($s->offers($r->user()));}
-- public function publish(Request$r,CommuteMatchingService$s,CommuteService$c){$v=$r->validate(['direction'=>'required|in:outbound,return','date'=>'required|date_format:Y-m-d','vehicle_type'=>'required|in:car,bike','choice'=>'required|in:DIRECT_RIDER_PICKUP,ON_ROUTE_MEETING_POINT','max_detour_meters'=>'sometimes|integer|between:0,10000','max_detour_seconds'=>'sometimes|integer|between:0,1800']);$v=array_replace(['max_detour_meters'=>3000,'max_detour_seconds'=>600],$v);return$this->response($c->receipt($r->user(),$r->header('Idempotency-Key',''),['publish',$v,$c->profile($r->user())],fn()=>$s->publish($r->user(),$v)));}
-+ public function publish(Request$r,CommuteMatchingService$s,CommuteService$c){$v=$r->validate(['direction'=>'required|in:outbound,return','date'=>'required|date_format:Y-m-d','vehicle_type'=>'required|in:car,bike','choice'=>'required|in:DIRECT_RIDER_PICKUP,ON_ROUTE_MEETING_POINT','seats'=>'sometimes|integer|in:1','max_detour_meters'=>'sometimes|integer|between:0,10000','max_detour_seconds'=>'sometimes|integer|between:0,1800']);$v=array_replace(['seats'=>1,'max_detour_meters'=>3000,'max_detour_seconds'=>600],$v);return$this->response($c->receipt($r->user(),$r->header('Idempotency-Key',''),['publish',$v,$c->profile($r->user())],fn()=>$s->publish($r->user(),$v)));}
-  public function request(Request$r,int$trip,CommuteService$s){$v=$r->validate(['quote_token'=>'required|string|size:64']);return$this->response($s->receipt($r->user(),$r->header('Idempotency-Key',''),['request',$trip,$v],fn()=>$s->request($r->user(),$trip,$v['quote_token'])));}
-  public function bookings(Request$r,CommuteService$s){return$this->response($s->bookings($r->user()));}
-  public function action(Request$r,int$booking,string$action,CommuteService$s){return$this->response($s->receipt($r->user(),$r->header('Idempotency-Key',''),[$action,$booking],fn()=>$s->action($r->user(),$booking,$action)));}
-diff --git a/prototype/campuspool-extension/Mobility/Commute/CommuteMatchingService.php b/prototype/campuspool-extension/Mobility/Commute/CommuteMatchingService.php
-index 37c475d..26f81a9 100644
---- a/prototype/campuspool-extension/Mobility/Commute/CommuteMatchingService.php
-+++ b/prototype/campuspool-extension/Mobility/Commute/CommuteMatchingService.php
-@@ -42,6 +42,7 @@ private function departure(string$date,string$time):CarbonImmutable {
-  }
-  private function profileHash(array$p):string{if(!isset($p['home'],$p['campus'],$p['outbound_time'],$p['return_time']))return '';return hash('sha256',json_encode([$p['home'],$p['campus'],$p['outbound_time'],$p['return_time'],$p['max_walk_meters']??999],JSON_THROW_ON_ERROR));}
-  public function publish(User$driver,array$v):array {
-+  $seats=(int)($v['seats']??1);if($seats!==1)throw new SegmentException('COMMUTE_SEAT_LIMIT',422);
-   $this->service()->requireDemo($driver);
-   if(!$this->service()->driverApproved($driver))throw new SegmentException('HOST_APPROVAL_REQUIRED',403);
-   $p=$this->service()->profile($driver);if(!$p)throw new SegmentException('COMMUTE_PROFILE_REQUIRED',422);
-@@ -49,11 +50,11 @@ public function publish(User$driver,array$v):array {
-   $key=hash('sha256',json_encode(['published',$driver->id,$v,$from,$to,$at->toISOString()],JSON_THROW_ON_ERROR));
-   $existing=DB::table('mobility_commute_demo_trips')->where('fixture_key',$key)->first();if($existing)return['data'=>$this->offerDto($existing)];
-   $path=app(PathProvider::class)->path([$from,$to],$v['vehicle_type']);$path['points']=[$from,$to];
--  return DB::transaction(function()use($driver,$v,$from,$to,$at,$key,$path){
-+  return DB::transaction(function()use($driver,$v,$from,$to,$at,$key,$path,$seats){
-    DriverReservationPolicy::fence($driver->id);$current=User::whereKey($driver->id)->lock('for update nowait')->firstOrFail();$member=DB::table('mobility_memberships')->where('user_id',$driver->id)->lock('for share nowait')->first();if(!$member||$member->status!=='approved'||$member->college_code!==\STS\Mobility\Trust\CohortPolicy::college()||!$this->service()->driverApproved($current))throw new SegmentException('HOST_APPROVAL_REQUIRED',403);
-    $existing=DB::table('mobility_commute_demo_trips')->where('fixture_key',$key)->lockForUpdate()->first();if($existing)return['data'=>$this->offerDto($existing)];
-    // One rider party per publication bounds direct detours; no accepted route is overwritten by another rider.
--   $trip=Trip::factory()->create(['user_id'=>$driver->id,'trip_date'=>$at->format('Y-m-d H:i:s'),'total_seats'=>1,'state'=>Trip::STATE_READY,'from_town'=>$from['label'],'to_town'=>$to['label'],'description'=>'Driver-published local demo commute; nonredeemable credits only','distance'=>$path['distance_meters']/1000,'estimated_time'=>gmdate('H:i:s',$path['duration_seconds'])]);
-+   $trip=Trip::factory()->create(['user_id'=>$driver->id,'trip_date'=>$at->format('Y-m-d H:i:s'),'total_seats'=>$seats,'state'=>Trip::STATE_READY,'from_town'=>$from['label'],'to_town'=>$to['label'],'description'=>'Driver-published local demo commute; nonredeemable credits only','distance'=>$path['distance_meters']/1000,'estimated_time'=>gmdate('H:i:s',$path['duration_seconds'])]);
-    DB::table('mobility_trip_lifecycles')->insert(['trip_id'=>$trip->id,'state'=>'planned','version'=>0,'created_at'=>now(),'updated_at'=>now()]);
-    $snapshot=['driver_origin'=>$from,'driver_destination'=>$to,'driver_path'=>$path,'choice'=>$v['choice'],'max_walk_meters'=>999,'max_detour_meters'=>$v['max_detour_meters']??3000,'max_detour_seconds'=>$v['max_detour_seconds']??600];
-    DB::table('mobility_commute_demo_trips')->insert(['trip_id'=>$trip->id,'audience_id'=>null,'fixture_key'=>$key,'vehicle_type'=>$v['vehicle_type'],'is_publication'=>true,'direction'=>$v['direction'],'fare_minor'=>0,'base_fare_minor'=>0,'surcharge_minor'=>0,'journey'=>json_encode($snapshot,JSON_THROW_ON_ERROR),'created_at'=>now(),'updated_at'=>now()]);
-diff --git a/prototype/campuspool-extension/tests/MobilityCommuteProductTest.php b/prototype/campuspool-extension/tests/MobilityCommuteProductTest.php
-index eb3d7d8..8027aad 100644
---- a/prototype/campuspool-extension/tests/MobilityCommuteProductTest.php
-+++ b/prototype/campuspool-extension/tests/MobilityCommuteProductTest.php
-@@ -50,6 +50,12 @@ public function test_demo_cannot_be_entered_outside_testing_and_role_change_does
-   $u=User::factory()->create();$this->actingAsApiUser($u)->putJson('/api/mobility/commute/profile',$this->prefs('driver'))->assertOk()->assertJsonPath('driver_approved',false);
-   $this->actingAsApiUser($u)->getJson('/api/mobility/commute/wallet')->assertForbidden();putenv('MOBILITY_PILOT_UI_ENABLED=false');$this->postJson('/api/mobility/commute/demo-session',['role'=>'driver'])->assertNotFound();putenv('MOBILITY_PILOT_UI_ENABLED=true');
-  }
-+ public function test_offer_seat_contract_rejects_invalid_values_and_keeps_one_passenger_idempotent():void{
-+  $d=$this->demo('driver');$this->actingAsApiUser($d)->putJson('/api/mobility/commute/profile',$this->prefs('driver'))->assertOk();$payload=['date'=>now('Asia/Kolkata')->addDay()->toDateString(),'direction'=>'outbound','vehicle_type'=>'car','choice'=>'DIRECT_RIDER_PICKUP'];
-+  foreach([0,2,'many']as$seats)$this->actingAsApiUser($d)->postJson('/api/mobility/commute/offers',$payload+['seats'=>$seats],['Idempotency-Key'=>'invalid-seats-'.(string)$seats])->assertStatus(422);
-+  $first=$this->actingAsApiUser($d)->postJson('/api/mobility/commute/offers',$payload+['seats'=>1],['Idempotency-Key'=>'single-seat-offer'])->assertOk()->assertJsonPath('data.total_seats',1)->json('data.trip_id');
-+  $this->actingAsApiUser($d)->postJson('/api/mobility/commute/offers',$payload+['seats'=>1],['Idempotency-Key'=>'single-seat-offer'])->assertOk()->assertJsonPath('data.trip_id',$first);$this->assertDatabaseCount('trips',1);
-+ }
-  public function test_vehicle_summary_uses_current_approved_application_and_capacity():void{
-   $driver=$this->demo('driver');$car=Car::factory()->withCatalog()->create(['user_id'=>$driver->id,'patente'=>'KA01AB1234']);$application=DB::table('mobility_host_applications')->insertGetId(['user_id'=>$driver->id,'car_id'=>$car->id,'vehicle_type'=>'car','vehicle_fingerprint'=>\STS\Mobility\Trust\CohortPolicy::vehicleFingerprint($car),'status'=>'approved','version'=>1,'created_at'=>now(),'updated_at'=>now()]);$onboarding=DB::table('mobility_driver_onboardings')->insertGetId(['user_id'=>$driver->id,'host_application_id'=>$application,'car_id'=>$car->id,'vehicle_type'=>'car','passenger_capacity'=>4,'vehicle_fingerprint'=>\STS\Mobility\Trust\CohortPolicy::vehicleFingerprint($car),'profile_display_name'=>'Approved synthetic driver','status'=>'approved','version'=>1,'created_at'=>now(),'updated_at'=>now()]);
-   foreach(['driver_license','profile_photo','rc','insurance'] as$type)DB::table('mobility_driver_documents')->insert(['onboarding_id'=>$onboarding,'document_type'=>$type,'version'=>1,'storage_path'=>'synthetic/'.$type.'.pdf','mime_type'=>'application/pdf','byte_size'=>16,'expires_at'=>now()->addYear()->toDateString(),'status'=>'accepted','submitted_by'=>$driver->id,'created_at'=>now(),'updated_at'=>now()]);
-diff --git a/prototype/campuspool-extension/web/commute.mjs b/prototype/campuspool-extension/web/commute.mjs
-index e33e817..845c3d6 100644
---- a/prototype/campuspool-extension/web/commute.mjs
-+++ b/prototype/campuspool-extension/web/commute.mjs
-@@ -371,7 +371,9 @@ function openRide(direction = state.direction, date = state.selectedDate) {
-     ? `<label class="floating-field"><span>Departure time · IST</span><input name="start_time" type="time" value="${value}" required></label>`
-     : `<label class="floating-field"><span>Earliest pickup · IST</span><input name="start_time" type="time" value="${value}" required></label><label class="floating-field"><span>Latest pickup · IST</span><input name="end_time" type="time" value="${endValue}" required></label>`;
-   const dialog = openSheet(publishing ? 'Offer a ride' : 'Create new ride', `<form id="search-form"><div class="direction-switch"><label><input name="direction" type="radio" value="outbound" ${direction === 'outbound' ? 'checked' : ''}><span>To campus</span></label><label><input name="direction" type="radio" value="return" ${direction === 'return' ? 'checked' : ''}><span>Back home</span></label></div><div class="location-fields">${locationFields({ origin: profile[direction === 'return' ? 'campus' : 'home'], destination: profile[direction === 'return' ? 'home' : 'campus'] }, ['origin', 'destination'], ['Start point', 'End point'])}<button class="route-swap" type="button" data-swap-search aria-label="Swap journey direction">${icon('swap')}</button></div>${mapPanel('search-location-map', 'Your selected locations')}<div class="search-date-time"><label class="floating-field"><span>Ride date</span><input name="date" type="date" value="${date}" min="${today()}" max="${addDays(today(), 30)}" required></label>${timeFields}</div><p class="field-title">Your ride preference</p>${vehicleChoices(context?.vehicle || (publishing && profile.vehicle_preference === 'both' ? 'car' : profile.vehicle_preference), 'vehicle_type', publishing ? ['car', 'bike'] : undefined)}${publishing ? '<fieldset class="pickup-options"><legend>How should you meet?</legend><label><input type="radio" name="choice" value="ON_ROUTE_MEETING_POINT" checked><span><strong>Meet on my route</strong><small>Rider walks to a meeting point. I keep my road route.</small></span></label><label><input type="radio" name="choice" value="DIRECT_RIDER_PICKUP"><span><strong>Go to the rider</strong><small>I take a bounded detour. Rider agrees to the pickup extra.</small></span></label></fieldset><div class="time-fields"><label class="floating-field"><span>Maximum extra distance · km</span><input name="max_detour_km" type="number" min="0" max="10" step="0.5" value="3" required></label><label class="floating-field"><span>Maximum extra time · min</span><input name="max_detour_min" type="number" min="0" max="30" value="10" required></label></div><p class="fine-print">One demo rider per offer. Meeting mode keeps your route unchanged; these detour limits apply to direct pickup. Total rider walking stays under 1 km.</p>' : ''}${!publishing ? `<label class="floating-field"><span>Pickup option</span><select name="pickup_choice"><option value="both" ${(context?.pickupChoice || 'both') === 'both' ? 'selected' : ''}>Either option</option><option value="ON_ROUTE_MEETING_POINT" ${context?.pickupChoice === 'ON_ROUTE_MEETING_POINT' ? 'selected' : ''}>Walk to a meeting point</option><option value="DIRECT_RIDER_PICKUP" ${context?.pickupChoice === 'DIRECT_RIDER_PICKUP' ? 'selected' : ''}>Driver comes to me · pickup extra</option></select></label><label class="floating-field"><span>Maximum total walking · metres</span><input type="number" name="max_walk_meters" min="0" max="999" value="${profile.max_walk_meters ?? 999}" required></label><p class="fine-print">Includes the walk to pickup, from drop-off, and access gaps. Meeting mode has no direct-pickup extra.</p>` : ''}<div class="planned-hint">${icon('calendar')}<span>Want the same times every week?</span><button class="text-action" type="button" data-edit-profile>Edit planned rides</button></div><p class="status" id="ride-status" role="status"></p><button class="button primary full-width" type="submit">${publishing ? 'Publish ride' : 'Find rides'} ${icon('arrow')}</button></form>`, 'search');
--  const form = dialog.querySelector('#search-form'); form.addEventListener('submit', search);
-+  const form = dialog.querySelector('#search-form');
-+  if (publishing && !form.elements.seats) { const seats = document.createElement('input'); seats.name = 'seats'; seats.setAttribute('name', 'seats'); seats.type = 'number'; seats.min = '1'; seats.max = '1'; seats.value = '1'; seats.readOnly = true; seats.required = true; const label = document.createElement('label'); label.className = 'floating-field'; const caption = document.createElement('span'); caption.textContent = 'Passenger seats (Sprint 1 limit)'; label.append(caption, seats); form.append(label); }
-+  form.addEventListener('submit', search);
-   mountFormMap(form, ['origin', 'destination'], '#search-location-map');
-   const version = state.sheetVersion, generation = state.generation;
-   locationUI = mountLocationFields(form, { names: ['origin', 'destination'], onSelect: () => form.dispatchEvent?.(new Event('input', {bubbles:true})), isCurrent: () => version === state.sheetVersion && generation === state.generation });
-@@ -401,12 +403,13 @@ async function search(event) {
-     const point = name => ({ label: data.get(`${name}_label`).trim(), lat: Number(data.get(`${name}_lat`)), lng: Number(data.get(`${name}_lng`)) });
-     const body = { ...state.profile, [context.direction === 'return' ? 'return_time' : 'outbound_time']: context.startTime, [context.direction === 'return' ? 'campus' : 'home']: point('origin'), [context.direction === 'return' ? 'home' : 'campus']: point('destination') };
-     if (!publishing) body.max_walk_meters = Number(data.get('max_walk_meters') ?? state.profile.max_walk_meters ?? 999);
-+    if (publishing && !state.driverApproved) throw new Error('Driver approval is required before offering a ride.');
-     if (publishing && context.vehicle === 'both') throw new Error('Choose car or bike for the ride you are offering.');
-     const saved = await api('commute/profile', { method: 'PUT', body });
-     if (generation !== state.generation || version !== state.searchVersion) return;
-     applyMe(saved);
-     if (publishing) {
--      await mutate('commute/offers', { date: context.date, direction: context.direction, vehicle_type: context.vehicle, choice: data.get('choice'), max_detour_meters: Math.round(Number(data.get('max_detour_km')) * 1000), max_detour_seconds: Math.round(Number(data.get('max_detour_min')) * 60), commute: body });
-+      await mutate('commute/offers', { date: context.date, direction: context.direction, vehicle_type: context.vehicle, choice: data.get('choice'), seats: Number(data.get('seats') || 1), max_detour_meters: Math.round(Number(data.get('max_detour_km')) * 1000), max_detour_seconds: Math.round(Number(data.get('max_detour_min')) * 60), commute: body });
-       if (generation !== state.generation || sheetVersion !== state.sheetVersion) return;
-       state.selectedDate = context.date; closeSheet(); state.view = 'home'; await render(); toast('Your ride is published. Matching riders can request it.'); return;
-     }
-diff --git a/prototype/campuspool-extension/web/driver-onboarding-ui.test.mjs b/prototype/campuspool-extension/web/driver-onboarding-ui.test.mjs
-index 204cc5e..72c2954 100644
---- a/prototype/campuspool-extension/web/driver-onboarding-ui.test.mjs
-+++ b/prototype/campuspool-extension/web/driver-onboarding-ui.test.mjs
-@@ -48,7 +48,10 @@ test('offer form keeps the start/end time API contract and validates publishing
-   assert.match(commute, /name="start_time"/);
-   assert.match(commute, /name="choice"/);
-   assert.match(commute, /Choose car or bike for the ride you are offering/);
-+  assert.match(commute, /Driver approval is required before offering a ride/);
-   assert.match(commute, /max_detour_meters/);
-   assert.match(commute, /max_detour_seconds/);
-+  assert.match(commute, /Passenger seats \(Sprint 1 limit\)/);
-+  assert.match(commute, /seats: Number\(data\.get\('seats'\) \|\| 1\)/);
-   assert.match(commute, /Your ride is published/);
- });
-diff --git a/prototype/tests/extension/MobilityCommuteProductTest.php b/prototype/tests/extension/MobilityCommuteProductTest.php
-index 0f4049d..6b5312f 100644
---- a/prototype/tests/extension/MobilityCommuteProductTest.php
-+++ b/prototype/tests/extension/MobilityCommuteProductTest.php
-@@ -50,6 +50,12 @@ public function test_demo_cannot_be_entered_outside_testing_and_role_change_does
-   $u=User::factory()->create();$this->actingAsApiUser($u)->putJson('/api/mobility/commute/profile',$this->prefs('driver'))->assertOk()->assertJsonPath('driver_approved',false);
-   $this->actingAsApiUser($u)->getJson('/api/mobility/commute/wallet')->assertForbidden();putenv('MOBILITY_PILOT_UI_ENABLED=false');$this->postJson('/api/mobility/commute/demo-session',['role'=>'driver'])->assertNotFound();putenv('MOBILITY_PILOT_UI_ENABLED=true');
-  }
-+ public function test_offer_seat_contract_rejects_invalid_values_and_keeps_one_passenger_idempotent():void{
-+  $d=$this->demo('driver');$this->actingAsApiUser($d)->putJson('/api/mobility/commute/profile',$this->prefs('driver'))->assertOk();$payload=['date'=>now('Asia/Kolkata')->addDay()->toDateString(),'direction'=>'outbound','vehicle_type'=>'car','choice'=>'DIRECT_RIDER_PICKUP'];
-+  foreach([0,2,'many']as$seats)$this->actingAsApiUser($d)->postJson('/api/mobility/commute/offers',$payload+['seats'=>$seats],['Idempotency-Key'=>'invalid-seats-'.(string)$seats])->assertStatus(422);
-+  $first=$this->actingAsApiUser($d)->postJson('/api/mobility/commute/offers',$payload+['seats'=>1],['Idempotency-Key'=>'single-seat-offer'])->assertOk()->assertJsonPath('data.total_seats',1)->json('data.trip_id');
-+  $this->actingAsApiUser($d)->postJson('/api/mobility/commute/offers',$payload+['seats'=>1],['Idempotency-Key'=>'single-seat-offer'])->assertOk()->assertJsonPath('data.trip_id',$first);$this->assertDatabaseCount('trips',1);
-+ }
-  public function test_vehicle_summary_uses_current_approved_application_and_capacity():void{
-   $driver=$this->demo('driver');$car=Car::factory()->withCatalog()->create(['user_id'=>$driver->id,'patente'=>'KA01AB1234']);$application=DB::table('mobility_host_applications')->insertGetId(['user_id'=>$driver->id,'car_id'=>$car->id,'vehicle_type'=>'car','vehicle_fingerprint'=>\STS\Mobility\Trust\CohortPolicy::vehicleFingerprint($car),'status'=>'approved','version'=>1,'created_at'=>now(),'updated_at'=>now()]);$onboarding=DB::table('mobility_driver_onboardings')->insertGetId(['user_id'=>$driver->id,'host_application_id'=>$application,'car_id'=>$car->id,'vehicle_type'=>'car','passenger_capacity'=>4,'vehicle_fingerprint'=>\STS\Mobility\Trust\CohortPolicy::vehicleFingerprint($car),'profile_display_name'=>'Approved synthetic driver','status'=>'approved','version'=>1,'created_at'=>now(),'updated_at'=>now()]);
-   foreach(['driver_license','profile_photo','rc','insurance']as$type)DB::table('mobility_driver_documents')->insert(['onboarding_id'=>$onboarding,'document_type'=>$type,'version'=>1,'storage_path'=>'synthetic/'.$type.'.pdf','mime_type'=>'application/pdf','byte_size'=>16,'expires_at'=>now()->addYear()->toDateString(),'status'=>'accepted','submitted_by'=>$driver->id,'created_at'=>now(),'updated_at'=>now()]);
-diff --git a/prototype/tests/frontend/test-commute-ui.mjs b/prototype/tests/frontend/test-commute-ui.mjs
-index f728da3..98ccd93 100644
---- a/prototype/tests/frontend/test-commute-ui.mjs
-+++ b/prototype/tests/frontend/test-commute-ui.mjs
-@@ -120,6 +120,7 @@ test('driver publication submits the dated saved route and explicit detour limit
-   await module.render(); module.openRide();
-   const form=elements.get('sheet-root').querySelector('#search-form');
-   assert.match(elements.get('sheet-root').innerHTML,/Publish ride/);
-+  assert.equal(form.elements.seats.value,'1','publication mounts the one-passenger Sprint 1 limit'); assert.equal(form.elements.seats.readOnly,true,'seat limit cannot be raised in the one-rider flow');
-   form.elements.date.value='2026-10-23'; form.elements.start_time.value='08:30';
-   form.elements.choice.value='DIRECT_RIDER_PICKUP'; form.elements.max_detour_km.value='5'; form.elements.max_detour_min.value='10';
-   form.dispatch('submit'); await new Promise(resolve=>setImmediate(resolve));
-@@ -127,6 +128,7 @@ test('driver publication submits the dated saved route and explicit detour limit
-   assert.ok(publish,'driver publication reached the backend');
-   const body=JSON.parse(publish.options.body);
-   assert.equal(body.date,'2026-10-23'); assert.equal(body.direction,'outbound'); assert.equal(body.vehicle_type,'car');
-+  assert.equal(body.seats,1,'publication sends the explicit one-passenger contract');
-   assert.equal(body.max_detour_meters,5000); assert.equal(body.max_detour_seconds,600);
-   assert.equal(body.commute.home.lat,profile.home.lat); assert.equal(body.commute.campus.lng,profile.campus.lng);
-   assert.ok(publish.options.headers['Idempotency-Key']);
+diff --git a/campuspool/src/app/api/offers/route.ts b/campuspool/src/app/api/offers/route.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..1289d8bc6dddf9930aa04fef43025456d39d2ae3
+--- /dev/null
++++ b/campuspool/src/app/api/offers/route.ts
+@@ -0,0 +1,10 @@
++import { api, body, json, key, requireUser } from "@/server/core";
++import { listOffers, offerInput, publishOffer } from "@/server/offers";
++
++export const runtime = "nodejs";
++export async function GET(request: Request) {
++  return api(request, async () => json(await listOffers(await requireUser(request, true))));
++}
++export async function POST(request: Request) {
++  return api(request, async () => json(await publishOffer(await requireUser(request, true), await body(request, offerInput), key(request)), 201));
++}
+diff --git a/campuspool/src/app/offers/page.tsx b/campuspool/src/app/offers/page.tsx
+new file mode 100644
+index 0000000000000000000000000000000000000000..5f538570c627f46a257aa1a50467f5b81d9435d8
+--- /dev/null
++++ b/campuspool/src/app/offers/page.tsx
+@@ -0,0 +1,6 @@
++"use client";
++import { useEffect,useState } from "react"; import { apiFetch } from "@/lib/client"; import { Empty,ErrorState,FormButton,Loading,useSubmit } from "@/components/ui";
++type Stop={id:number;name:string};type Vehicle={id:number;kind:string;model:string;passengerCapacity:number};type Offer={id:number;originName?:string;destinationName?:string;departureAt:string;creditPrice:number;seatsAvailable:number;status:string;vehicle?:{kind?:string}};
++type Form={vehicleId:string;originStopId:string;destinationStopId:string;departureAt:string;totalSeats:string;creditPrice:string};
++function toCampusOffset(local:string){return `${local}:00+05:30`}
++export default function Offers(){const [catalog,setCatalog]=useState<{stops:Stop[];vehicles:Vehicle[]}>({stops:[],vehicles:[]}),[offers,setOffers]=useState<Offer[]>([]),[error,setError]=useState(""),[loading,setLoading]=useState(true);const [form,setForm]=useState<Form>({vehicleId:"",originStopId:"",destinationStopId:"",departureAt:"",totalSeats:"1",creditPrice:"1"});const {submit,saving,error:saveError}=useSubmit("/api/offers");useEffect(()=>{void Promise.all([apiFetch<typeof catalog>("/api/catalog"),apiFetch<Offer[]>("/api/offers")]).then(([c,o])=>{setCatalog(c);setOffers(o)}).catch((e:unknown)=>setError(e instanceof Error?e.message:"Unable to load offers.")).finally(()=>setLoading(false))},[]);async function add(e:React.FormEvent){e.preventDefault();try{await submit({vehicleId:Number(form.vehicleId),originStopId:Number(form.originStopId),destinationStopId:Number(form.destinationStopId),departureAt:toCampusOffset(form.departureAt),totalSeats:Number(form.totalSeats),creditPrice:Number(form.creditPrice)});const refreshed=await apiFetch<Offer[]>("/api/offers");setOffers(refreshed);setForm({...form,departureAt:""})}catch{}}return <><div className="section-head"><div><div className="eyebrow">OFFERS</div><h1 className="page-title">Publish a ride</h1><p className="lede">Choose an approved vehicle and two different campus stops. Times are interpreted in Asia/Kolkata.</p></div></div>{error&&<ErrorState message={error}/>}<div className="split"><section>{loading?<Loading/>:offers.length===0?<Empty>Your published rides will appear here.</Empty>:<div className="list">{offers.map(o=><div className="list-row" key={o.id}><div><strong>{o.originName??"Origin"} → {o.destinationName??"Destination"}</strong><div className="muted">{new Date(o.departureAt).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})} · {o.creditPrice} credits · {o.seatsAvailable} seats left</div></div><span className={`status ${o.status}`}>{o.status}</span></div>)}</div>}</section><form className="card" onSubmit={add}><h2>Ride details</h2>{saveError&&<p className="form-error" role="alert">{saveError}</p>}<div className="field"><label htmlFor="vehicle">Approved vehicle</label><select id="vehicle" required value={form.vehicleId} onChange={e=>setForm({...form,vehicleId:e.target.value})}><option value="">Select vehicle</option>{catalog.vehicles.map(v=><option key={v.id} value={v.id}>{v.model} · {v.kind}</option>)}</select></div><div className="field"><label htmlFor="origin">From</label><select id="origin" required value={form.originStopId} onChange={e=>setForm({...form,originStopId:e.target.value})}><option value="">Select stop</option>{catalog.stops.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></div><div className="field"><label htmlFor="destination">To</label><select id="destination" required value={form.destinationStopId} onChange={e=>setForm({...form,destinationStopId:e.target.value})}><option value="">Select stop</option>{catalog.stops.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></div><div className="field"><label htmlFor="departure">Departure · Asia/Kolkata</label><input id="departure" type="datetime-local" required value={form.departureAt} onChange={e=>setForm({...form,departureAt:e.target.value})}/></div><div className="field"><label htmlFor="seats">Passenger seats</label><input id="seats" type="number" min="1" max="5" required value={form.totalSeats} onChange={e=>setForm({...form,totalSeats:e.target.value})}/></div><div className="field"><label htmlFor="price">Credit price</label><input id="price" type="number" min="1" max="1000" required value={form.creditPrice} onChange={e=>setForm({...form,creditPrice:e.target.value})}/></div><FormButton disabled={saving}>Publish offer</FormButton></form></div></>}
+diff --git a/campuspool/src/features/enabled/21.json b/campuspool/src/features/enabled/21.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..9e51c4d2256fe58b31daaf4e7b00906303dda4ea
+--- /dev/null
++++ b/campuspool/src/features/enabled/21.json
+@@ -0,0 +1 @@
++{"issue":21,"enabled":true,"key":"offers"}
+diff --git a/campuspool/src/server/offers.ts b/campuspool/src/server/offers.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..ca47da1ab0826a82e71d4264c003041710890c5f
+--- /dev/null
++++ b/campuspool/src/server/offers.ts
+@@ -0,0 +1,63 @@
++import { z } from "zod";
++import { emit, HttpError, idempotent } from "@/server/core";
++import { exec, pool, rows } from "@/server/db";
++import { issueQuote, publicRide } from "@/server/quote";
++import type { RideRow, User } from "@/server/types";
++
++export const offerInput = z.object({
++  vehicleId: z.number().int().positive(), originStopId: z.number().int().positive(),
++  destinationStopId: z.number().int().positive(),
++  departureAt: z.string().datetime({ offset: true }),
++  totalSeats: z.number().int().min(1).max(5), creditPrice: z.number().int().min(1).max(1000),
++}).strict().superRefine((v, ctx) => {
++  if (v.originStopId === v.destinationStopId) ctx.addIssue({ code: "custom", path: ["destinationStopId"], message: "Stops must differ" });
++});
++
++function sqlTime(value: Date) { return value.toISOString().slice(0, 19).replace("T", " "); }
++function validWindow(value: string) {
++  const when = new Date(value); const now = Date.now();
++  if (Number.isNaN(when.valueOf())) throw new HttpError(400, "INVALID_DEPARTURE");
++  if (when.valueOf() < now + 15 * 60_000 || when.valueOf() > now + 30 * 86_400_000) throw new HttpError(422, "DEPARTURE_WINDOW");
++  return when;
++}
++
++export async function listOffers(user: User) {
++  if (user.role !== "DRIVER") throw new HttpError(403, "DRIVER_REQUIRED");
++  const rides = await rows<RideRow>(pool(), `SELECT r.*,u.name AS driver_name,u.status AS driver_status,
++    v.kind AS vehicle_kind,v.status AS vehicle_status,
++    v.registration AS vehicle_registration, v.model AS vehicle_model, v.passenger_capacity AS vehicle_capacity,
++    o.name AS origin_name, d.name AS destination_name FROM rides r JOIN users u ON u.id=r.driver_id
++    JOIN vehicles v ON v.id=r.vehicle_id
++    JOIN stops o ON o.id=r.origin_stop_id JOIN stops d ON d.id=r.destination_stop_id
++    WHERE r.driver_id=? ORDER BY r.departure_at DESC`, [user.id]);
++  return rides.map((ride) => publicRide(ride));
++}
++
++export async function publishOffer(user: User, input: z.infer<typeof offerInput>, key: string) {
++  if (user.role !== "DRIVER" || user.status !== "APPROVED") throw new HttpError(403, "APPROVED_DRIVER_REQUIRED");
++  const departure = validWindow(input.departureAt);
++  return idempotent(user.id, key, "offer.publish", input, async (cx) => {
++    const driver = await rows<{ id: number; role: string; status: string }>(cx, "SELECT id,role,status FROM users WHERE id=? FOR UPDATE", [user.id]);
++    if (!driver[0] || driver[0].role !== "DRIVER" || driver[0].status !== "APPROVED") throw new HttpError(403, "APPROVED_DRIVER_REQUIRED");
++    const vehicle = await rows<{ id: number; owner_id: number; kind: "CAR"|"BIKE"; passenger_capacity: number; status: string }>(cx,
++      "SELECT id,owner_id,kind,passenger_capacity,status FROM vehicles WHERE id=? FOR UPDATE", [input.vehicleId]);
++    if (!vehicle[0]) throw new HttpError(404, "VEHICLE_NOT_FOUND");
++    if (vehicle[0].owner_id !== user.id || vehicle[0].status !== "APPROVED") throw new HttpError(403, "VEHICLE_NOT_APPROVED");
++    if (input.totalSeats > vehicle[0].passenger_capacity) throw new HttpError(422, "SEAT_CAPACITY_EXCEEDED");
++    const overlap = await rows<{ id: number }>(cx, `SELECT id FROM rides WHERE driver_id=? AND status='PUBLISHED'
++      AND departure_at BETWEEN DATE_SUB(?, INTERVAL 60 MINUTE) AND DATE_ADD(?, INTERVAL 60 MINUTE) FOR UPDATE`,
++      [user.id, sqlTime(departure), sqlTime(departure)]);
++    if (overlap.length) throw new HttpError(409, "DRIVER_TIME_CONFLICT");
++    const result = await exec(cx, `INSERT INTO rides
++      (driver_id,vehicle_id,origin_stop_id,destination_stop_id,departure_at,total_seats,seats_available,credit_price,status)
++      VALUES (?,?,?,?,?,?,?,?,'PUBLISHED')`, [user.id, input.vehicleId, input.originStopId, input.destinationStopId,
++      sqlTime(departure), input.totalSeats, input.totalSeats, input.creditPrice]);
++    const ride = (await rows<RideRow>(cx, `SELECT r.*,u.name AS driver_name,u.status AS driver_status,
++      v.kind AS vehicle_kind,v.status AS vehicle_status,v.registration AS vehicle_registration,
++      v.model AS vehicle_model,v.passenger_capacity AS vehicle_capacity,o.name AS origin_name,d.name AS destination_name
++      FROM rides r JOIN users u ON u.id=r.driver_id JOIN vehicles v ON v.id=r.vehicle_id
++      JOIN stops o ON o.id=r.origin_stop_id JOIN stops d ON d.id=r.destination_stop_id WHERE r.id=?`, [result.insertId]))[0];
++    await emit(cx, { type: "ride.published", actorId: user.id, audienceIds: [], rideId: ride.id, data: { vehicleId: input.vehicleId } });
++    return { ...publicRide(ride), quoteToken: issueQuote(user.id, ride) };
++  });
++}
+diff --git a/campuspool/tests/issue-21.test.ts b/campuspool/tests/issue-21.test.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..64c70a82e6ddc1208bbfb54c067ca8f727ef0460
+--- /dev/null
++++ b/campuspool/tests/issue-21.test.ts
+@@ -0,0 +1,45 @@
++import { afterAll, describe, expect, it } from "vitest";
++import { POST as publishOffer } from "@/app/api/offers/route";
++import { offerInput } from "@/server/offers";
++import { exec, pool, rows } from "@/server/db";
++import { fixtureUser } from "./support";
++
++const enabled = process.env.RUN_CAMPUSPOOL_INTEGRATION === "1";
++
++describe("issue 21 validation", () => {
++  it("requires integer synthetic credits from 1 through 1000", () => {
++    const base = { vehicleId: 1, originStopId: 1, destinationStopId: 2, departureAt: "2030-01-01T10:00:00+05:30", totalSeats: 1 };
++    expect(offerInput.safeParse({ ...base, creditPrice: 0 }).success).toBe(false);
++    expect(offerInput.safeParse({ ...base, creditPrice: 10 }).success).toBe(true);
++  });
++});
++
++describe.skipIf(!enabled)("issue 21 offers against real MySQL", () => {
++  const rideIds: number[] = [];
++  const vehicleIds: number[] = [];
++  afterAll(async () => {
++    if (rideIds.length) await exec(pool(), `DELETE FROM rides WHERE id IN (${rideIds.map(() => "?").join(",")})`, rideIds);
++    if (vehicleIds.length) await exec(pool(), `DELETE FROM vehicles WHERE id IN (${vehicleIds.map(() => "?").join(",")})`, vehicleIds);
++  });
++
++  it("publishes an approved-driver offer and rejects a 60-minute overlap", async () => {
++    const driver = await fixtureUser("DRIVER");
++    const stops = await rows<{ id: number }>(pool(), "SELECT id FROM stops ORDER BY id LIMIT 2");
++    expect(stops).toHaveLength(2);
++    const registration = `I21-${Date.now()}`;
++    const vehicle = await exec(pool(), `INSERT INTO vehicles(owner_id,kind,registration,model,passenger_capacity,status)
++      VALUES(?,?,?,?,?,'APPROVED')`, [driver.user.id, "CAR", registration, "Integration Car", 2]);
++    vehicleIds.push(vehicle.insertId);
++    const departure = new Date(Date.now() + 2 * 60 * 60_000).toISOString();
++    const payload = { vehicleId: vehicle.insertId, originStopId: stops[0].id, destinationStopId: stops[1].id,
++      departureAt: departure, totalSeats: 2, creditPrice: 10 };
++    const first = await publishOffer(driver.request("POST", payload, `i21-first-${Date.now()}`));
++    expect(first.status).toBe(201);
++    const firstBody = await first.json() as { data: { id: number; seatsAvailable: number } };
++    rideIds.push(firstBody.data.id);
++    expect(firstBody.data.seatsAvailable).toBe(2);
++    const overlap = await publishOffer(driver.request("POST", { ...payload,
++      departureAt: new Date(Date.now() + 2 * 60 * 60_000 + 30 * 60_000).toISOString() }, `i21-overlap-${Date.now()}`));
++    expect(overlap.status).toBe(409);
++  });
++});

@@ -1,42 +1,20 @@
-# Issue #39 — GitHub Actions and PR workflow
+# Issue #39 — Bootstrap Next.js TypeScript foundation and CI
 
-## Requirement and existing implementation
+Assigned owner: `@arjunsrikanthh`.
 
-Official main already has green documentation/application CI; rewriting it wholesale is unnecessary.
+Original Next.js/TypeScript stack migration foundation: shared auth/roles/approval, MySQL schema, fixed-stop search, API contracts, setup and CI. This deliberately includes shared bootstrap work beyond the CI-only issue title; review the migration before integration.
 
-Live upstream acceptance criteria were captured on 26 October 2026. See [AUDIT.md](../AUDIT.md) for the criterion-by-criterion gap analysis and [BASELINE.md](../BASELINE.md) for exact source revisions.
-
-## Proposed change
-
-Adds JS/Python/PHP syntax checks without generated-file contamination, full Sprint 1 regressions, synthetic stateful smoke checks and sampled HTTP races. Private-repository CI reconstructs the pinned baseline.
-
-Official files changed:
-
-- `.github/workflows/application.yml`
-- `prototype/reproduction/smoke-booking.py`
-- `prototype/reproduction/verify-package.sh`
-
-## Apply and verify
-
-Use a new disposable clone at the pinned official SHA. From this solutions repository:
+From a clone of the solutions repository:
 
 ```sh
-sh scripts/apply-issue.sh 39 /absolute/path/to/new-official-clone
-sh scripts/verify-issue.sh 39 /absolute/path/to/new-verification-directory
+python3 scripts/prepare-pr.py 39 --output work/issue39
+python3 scripts/verify-prepared.py 39 work/issue39
+# Read/edit the staged diff and PR body, then publish with your assigned account:
+python3 scripts/submit-pr.py 39 --path work/issue39 --publish
 ```
 
-Direct prerequisite issue packages: 43. The application script resolves prerequisites recursively. Patch: `solution.patch`. Source map and manifest regeneration is centralized in the application script.
+The helper creates a separate official-repository checkout. Do not push the solutions repository to the official repo. This patch contains only the paths listed in `files.json`; it adds no legacy application source. Required tools: Node.js 24, Python 3, Git, GitHub CLI and Docker.
 
-Tests/evidence: Private actual Actions run; per-issue and integrated fresh-clone scripts; package/source-map integrity; runtime smoke and migrations.
+Prepare #39 first. Other teammates can prepare after its official branch exists.
 
-Actual execution results are recorded in [verification.md](verification.md). Worker static inspection alone does not satisfy the runtime gate.
-
-## Limitations
-
-Synthetic routing/authentication/demo-credit evidence only; production identity, road routing, GPS and real payments are not verified. Human review and academic acceptance are not claimed.
-
-## Demonstration to the teacher
-
-Open the private Actions run and its real artifacts; explain the pinned baseline, patch order and source checks. Teammates still need their own genuine contribution branches/PRs and human review.
-
-Attribution is documented in [CONTRIBUTIONS.md](../CONTRIBUTIONS.md). This is an AI-assisted proposal for teammate review, not a claim that the assigned student authored this patch.
+Draft PRs and `Refs #N` preserve review and existing issue status. Teammates must explain their own changes and resolve review comments. The approved Test Plan, faculty acceptance and working-product video are separate outstanding deliverables.

@@ -1,6 +1,8 @@
 [
-  "prototype/campuspool-extension/tests/MobilityBookingCorrectnessTest.php",
-  "prototype/reproduction/booking-concurrency-probe.php",
-  "prototype/reproduction/compose.booking.yml",
-  "prototype/tests/extension/MobilityBookingCorrectnessTest.php"
+  "campuspool/src/app/api/bookings/[id]/decision/route.ts",
+  "campuspool/src/app/api/bookings/route.ts",
+  "campuspool/src/app/bookings/page.tsx",
+  "campuspool/src/features/enabled/23.json",
+  "campuspool/src/server/bookings.ts",
+  "campuspool/tests/issue-23.test.ts"
 ]

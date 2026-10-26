@@ -1,381 +1,408 @@
-diff --git a/prototype/app/Repository/PassengersRepository.php b/prototype/app/Repository/PassengersRepository.php
-index 367b642..de2bbcd 100755
---- a/prototype/app/Repository/PassengersRepository.php
-+++ b/prototype/app/Repository/PassengersRepository.php
-@@ -92,6 +92,9 @@ public function getPendingPaymentRequests($tripId, $user, $data)
- 
-     public function newRequest($tripId, $user, $data = [])
-     {
-+        if (\STS\Mobility\Segments\SegmentBookingService::managed((int) $tripId)) {
-+            return app(\STS\Mobility\Segments\SegmentBookingService::class)->newRequest((int) $tripId, $user, $data);
-+        }
-         $newRequestData = [
-             'trip_id' => $tripId,
-             'user_id' => $user->id,
-@@ -106,6 +109,9 @@ public function newRequest($tripId, $user, $data = [])
- 
-     private function changeRequestState($tripId, $userId, $newState, $criterias, $canceledState = null)
-     {
-+        if (\STS\Mobility\Segments\SegmentBookingService::managed((int) $tripId)) {
-+            return app(\STS\Mobility\Segments\SegmentBookingService::class)->changeState((int) $tripId, (int) $userId, (int) $newState, $criterias, $canceledState === null ? null : (int) $canceledState);
-+        }
-         $updateData = [
-             'request_state' => $newState,
-             'canceled_state' => $canceledState,
-@@ -184,6 +190,9 @@ public function payRequest($tripId, $aprovalUserId, $user, $data)
- 
-     public function acceptRequest($tripId, $acceptedUserId, $user, $data)
-     {
-+        if (\STS\Mobility\Segments\SegmentBookingService::managed((int) $tripId)) {
-+            return app(\STS\Mobility\Segments\SegmentBookingService::class)->acceptRequest((int) $tripId, (int) $acceptedUserId);
-+        }
-         $criteria = [
-             'request_state' => Passenger::STATE_PENDING,
-         ];
-diff --git a/prototype/app/Repository/TripRepository.php b/prototype/app/Repository/TripRepository.php
-index e93d741..b4e2589 100755
---- a/prototype/app/Repository/TripRepository.php
-+++ b/prototype/app/Repository/TripRepository.php
-@@ -101,7 +101,9 @@ public function create(array $data)
-         // Get trip info for price calculations and route data
-         $tripInfo = $this->getTripInfo($points);
- 
--        $data = $this->capSeatPriceAtMaximum($data, $tripInfo, $data['rear_max_two_passengers'] ?? false);
-+        if (! \STS\Mobility\Routing\TrustedRouteContext::active()) {
-+            $data = $this->capSeatPriceAtMaximum($data, $tripInfo, $data['rear_max_two_passengers'] ?? false);
-+        }
- 
-         $trip = Trip::create($data);
- 
-@@ -147,7 +149,11 @@ public function create(array $data)
-         $this->generateTripFriendVisibility($trip);
- 
-         if (trim((string) $trip->description) !== '') {
--            $this->dispatchContributionCheck($trip);
-+            if (\STS\Mobility\Routing\TrustedRouteContext::active()) {
-+                DB::afterCommit(fn () => $this->dispatchContributionCheck($trip));
-+            } else {
-+                $this->dispatchContributionCheck($trip);
-+            }
-         }
- 
-         // TODO: check if trip.needs_payment (temp flag), and if total_trips_created > 2, we need to pay
-@@ -788,6 +794,10 @@ public function simplePrice($distance)
- 
-     public function getTripInfo($points)
-     {
-+        if (\STS\Mobility\Routing\TrustedRouteContext::active()) {
-+            return \STS\Mobility\Routing\TrustedRouteContext::tripInfoFor($points);
-+        }
-+
-         $hashedPoints = hash('sha256', json_encode($points));
-         $cacheBypass = (bool) config('carpoolear.trip_route_cache_bypass', false);
- 
-diff --git a/prototype/app/Services/Logic/PassengersManager.php b/prototype/app/Services/Logic/PassengersManager.php
-index c37cf07..51f8118 100755
---- a/prototype/app/Services/Logic/PassengersManager.php
-+++ b/prototype/app/Services/Logic/PassengersManager.php
-@@ -108,7 +108,8 @@ public function newRequest($tripId, $user, $data = [])
-         if (! $this->isInputValid($input)) {
-             return;
-         }
--        if ($this->passengerRepository->userHasActiveRequest($tripId, $userId)) {
-+        if (! \STS\Mobility\Segments\SegmentBookingService::managed((int) $tripId)
-+            && $this->passengerRepository->userHasActiveRequest($tripId, $userId)) {
-             return;
-         }
- 
-@@ -238,7 +239,7 @@ public function acceptRequest($tripId, $acceptedUserId, $user, $data = [])
-         $acceptedUser = $this->uRepo->show($acceptedUserId);
-         $trip = $this->tripLogic->show($user, $tripId);
-         if ($this->isUserRequestPending($tripId, $acceptedUserId) && $this->tripLogic->tripOwner($user, $trip)) {
--            if ((int) $trip->seats_available === 0) {
-+            if (! app(\STS\Mobility\Segments\SegmentBookingService::class)->hasCapacity($trip, (int) $acceptedUserId)) {
-                 $this->setErrors(['error' => 'not_seat_available']);
- 
-                 return;
-diff --git a/prototype/app/Services/Logic/TripsManager.php b/prototype/app/Services/Logic/TripsManager.php
-index 0a58b77..38d4e00 100755
---- a/prototype/app/Services/Logic/TripsManager.php
-+++ b/prototype/app/Services/Logic/TripsManager.php
-@@ -98,7 +98,12 @@ public function create($user, array $data)
- 
-             return;
-         } else {
--            if (! $this->userHasRequiredProfileFields($user)) {
-+            // Approved CampusPool onboarding is the canonical profile for trusted
-+            // route offers. Keep the legacy profile gate for ordinary trips.
-+            $trustedDriverProfile = $this->isDriverTrip($data)
-+                && \STS\Mobility\Routing\TrustedRouteContext::active()
-+                && \STS\Mobility\Trust\DriverOnboardingPolicy::canonicalProfileComplete((int) $user->id, (int) ($data['car_id'] ?? 0));
-+            if (! $this->userHasRequiredProfileFields($user) && ! $trustedDriverProfile) {
-                 $messageBag = new MessageBag;
-                 $messageBag->add('profile_required', 'The user profile must be complete.');
-                 $this->setErrors($messageBag);
-@@ -131,7 +136,8 @@ public function create($user, array $data)
-             }
- 
-             // Check trip creation limits
--            if (! config('carpoolear.disable_trip_creation_limits', false)) {
-+            if (! config('carpoolear.disable_trip_creation_limits', false)
-+                && ! \STS\Mobility\Recurrence\RecurrenceCreationContext::active()) {
-                 $maxTrips = config('carpoolear.trip_creation_limits.max_trips', 5);
-                 $timeWindow = config('carpoolear.trip_creation_limits.time_window_hours', 24);
- 
-@@ -220,11 +226,17 @@ public function create($user, array $data)
-                     $parentTrip = $this->tripRepo->update($parentTrip, $parentData);
-                 }
-             }
--            event(new CreateEvent($trip));
--
--            $friendTripAlertService = app(FriendTripAlertService::class);
--            if ($friendTripAlertService->isImmediatelyVisible($trip)) {
--                $friendTripAlertService->notifyIfVisible($trip);
-+            $notifyCreated = static function () use ($trip): void {
-+                event(new CreateEvent($trip));
-+                $friendTripAlertService = app(FriendTripAlertService::class);
-+                if ($friendTripAlertService->isImmediatelyVisible($trip)) {
-+                    $friendTripAlertService->notifyIfVisible($trip);
-+                }
-+            };
-+            if (\STS\Mobility\Routing\TrustedRouteContext::active()) {
-+                \Illuminate\Support\Facades\DB::afterCommit($notifyCreated);
-+            } else {
-+                $notifyCreated();
-             }
- 
-             return $trip;
-diff --git a/prototype/campuspool-extension/Mobility/Admission/DriverReservationPolicy.php b/prototype/campuspool-extension/Mobility/Admission/DriverReservationPolicy.php
-index a3b9d19..8629cde 100644
---- a/prototype/campuspool-extension/Mobility/Admission/DriverReservationPolicy.php
-+++ b/prototype/campuspool-extension/Mobility/Admission/DriverReservationPolicy.php
-@@ -22,7 +22,7 @@ public static function fence(int $driverId): void
- 
-     public static function scheduled(Trip $trip, array $terms): void
-     {
--        $start = CarbonImmutable::parse($trip->trip_date, 'Asia/Kolkata')->utc();
-+        $start = CarbonImmutable::createFromFormat('Y-m-d H:i:s', (string) $trip->getRawOriginal('trip_date'), 'Asia/Kolkata')->utc();
-         self::check((int) $trip->user_id, (int) $trip->id, $start, self::duration($terms['snapshot']['duration_seconds'] ?? null));
-     }
- 
-@@ -62,7 +62,7 @@ private static function check(int $driverId, ?int $ignoreTrip, CarbonImmutable $
-             $assignment = self::current(fn () => DB::table('mobility_dispatch_assignments')->where('trip_id', $id)->lock('for share nowait')->first());
-             // A running/overdue accepted obligation must be explicitly resolved;
-             // its estimated end is not evidence that the driver became free.
--            $otherStart = CarbonImmutable::parse($row->trip_date, 'Asia/Kolkata')->utc();
-+            $otherStart = CarbonImmutable::createFromFormat('Y-m-d H:i:s', (string) $row->trip_date, 'Asia/Kolkata')->utc();
-             if ($assignment || $row->lifecycle_state === 'in_progress' || $otherStart->lte(CarbonImmutable::now('UTC'))) throw new SegmentException('DRIVER_ACTIVE_TRIP');
-             $private = self::current(fn () => DB::table('mobility_private_scheduled_publications')->where('trip_id', $id)->lock('for share nowait')->first());
-             $commute = self::current(fn () => DB::table('mobility_commute_demo_trips')->where('trip_id', $id)->lock('for share nowait')->first());
-diff --git a/prototype/campuspool-extension/Mobility/Recurrence/ProgramService.php b/prototype/campuspool-extension/Mobility/Recurrence/ProgramService.php
-index 5dde930..a40f82c 100644
---- a/prototype/campuspool-extension/Mobility/Recurrence/ProgramService.php
-+++ b/prototype/campuspool-extension/Mobility/Recurrence/ProgramService.php
-@@ -233,7 +233,7 @@ private function eligibleDates(object $p, string $target): array
- 
-     private function publish(User $owner, object $p, string $date, CarbonImmutable $departure, string $quoteId, int $fare): void
-     {
--        $published = $this->offers->publish($owner, ['quote_id' => $quoteId, 'car_id' => (int) $p->car_id, 'total_seats' => (int) $p->total_seats, 'description' => $p->description], 'recurring-'.$p->id.'-'.$date, $departure);
-+        $published = RecurrenceCreationContext::run(fn () => $this->offers->publish($owner, ['quote_id' => $quoteId, 'car_id' => (int) $p->car_id, 'total_seats' => (int) $p->total_seats, 'description' => $p->description], 'recurring-'.$p->id.'-'.$date, $departure));
-         // Link immediately: the next date must not count this dated inventory against the legacy single-offer abuse limit.
-         DB::table('mobility_recurring_occurrences')->insert(['program_id' => $p->id, 'service_date' => $date, 'trip_id' => (int) $published['data']['id'], 'quote_id' => $quoteId, 'program_version' => (int) $p->version,
-             'config_snapshot' => json_encode(['weekly_schedule' => (int) $p->weekly_schedule, 'departure_time' => $p->departure_time, 'total_seats' => (int) $p->total_seats, 'seat_price_minor' => $fare, 'max_fare_minor' => (int) $p->max_fare_minor, 'pricing_version' => $p->pricing_version], JSON_THROW_ON_ERROR), 'created_at' => now(), 'updated_at' => now()]);
-diff --git a/prototype/campuspool-extension/Mobility/Recurrence/RecurrenceCreationContext.php b/prototype/campuspool-extension/Mobility/Recurrence/RecurrenceCreationContext.php
+diff --git a/campuspool/docs/TEST_TRACEABILITY.md b/campuspool/docs/TEST_TRACEABILITY.md
 new file mode 100644
-index 0000000..6fad77c
+index 0000000000000000000000000000000000000000..1fcaa18112e3009c5f1e6ada052eac2ce843460b
 --- /dev/null
-+++ b/prototype/campuspool-extension/Mobility/Recurrence/RecurrenceCreationContext.php
-@@ -0,0 +1,24 @@
-+<?php
++++ b/campuspool/docs/TEST_TRACEABILITY.md
+@@ -0,0 +1,16 @@
++# Sprint 1 executable test mapping
 +
-+namespace STS\Mobility\Recurrence;
++This is a proposed mapping to the new application contract; no instructor-approved Test Plan was located. Approval and video evidence remain pending.
 +
-+/** Server-only scope for the bounded batch of dated program occurrences. */
-+final class RecurrenceCreationContext
-+{
-+    private static int $depth = 0;
++| Requirement | Executable evidence |
++| --- | --- |
++| Authentication, opaque sessions, pending approval, cross-origin protection | `tests/issue-39.test.ts` |
++| Car/bike capacity, registration, administrator review | `tests/issue-12.test.ts` |
++| Eligible host, future departure, vehicle capacity and time conflict | `tests/issue-21.test.ts` |
++| Private vehicle details, explicit Kolkata search window, signed quote | `tests/issue-43.test.ts` |
++| Self/duplicate/foreign decision, stale quote, insufficient credit, final-seat race | `tests/issue-23.test.ts` |
++| Cancellation, exact-once refund, rider/host/whole-ride races, history | `tests/issue-24.test.ts` |
++| Real SQL constraints, view/procedure/triggers/index and Mongo failure/recovery | `tests/issue-37.test.ts` and its helper suites |
++| Full production HTTP journey, role boundaries, 12 final-seat and 6 cancellation races | `tests/http.e2e.test.ts` |
 +
-+    public static function run(callable $work): mixed
-+    {
-+        self::$depth++;
-+        try {
-+            return $work();
-+        } finally {
-+            self::$depth--;
-+        }
-+    }
-+
-+    public static function active(): bool
-+    {
-+        return self::$depth > 0;
-+    }
-+}
-diff --git a/prototype/campuspool-extension/Mobility/Segments/MatchController.php b/prototype/campuspool-extension/Mobility/Segments/MatchController.php
-index 4e3a5a6..0acb5fb 100644
---- a/prototype/campuspool-extension/Mobility/Segments/MatchController.php
-+++ b/prototype/campuspool-extension/Mobility/Segments/MatchController.php
-@@ -60,7 +60,13 @@ public function search(Request $request): JsonResponse
-                         continue;
-                     }
-                     $fingerprint = RouteTerms::current($trip, $terms);
--                    $arrival = [CarbonImmutable::parse($trip->trip_date, 'Asia/Kolkata')->timestamp];
-+                    // Trip's Eloquent cast may carry the application's default timezone;
-+                    // the persisted schedule is a campus-local wall clock value.
-+                    $departure = CarbonImmutable::createFromFormat('Y-m-d H:i:s', (string) $trip->getRawOriginal('trip_date'), 'Asia/Kolkata');
-+                    if (! $departure) {
-+                        throw new SegmentException('MATCH_ROUTE_CHANGED');
-+                    }
-+                    $arrival = [$departure->timestamp];
-                     foreach ($terms['legs'] as $leg) {
-                         $arrival[] = $arrival[count($arrival) - 1] + $leg['duration_seconds'];
-                     }
-diff --git a/prototype/campuspool-extension/Mobility/Segments/SegmentBookingService.php b/prototype/campuspool-extension/Mobility/Segments/SegmentBookingService.php
-index 794a3f0..b653b2c 100644
---- a/prototype/campuspool-extension/Mobility/Segments/SegmentBookingService.php
-+++ b/prototype/campuspool-extension/Mobility/Segments/SegmentBookingService.php
-@@ -160,7 +160,8 @@ public function activity(Trip $trip, int $riderId, array $terms): string
-         if ($riderId === (int) $trip->user_id || ! CohortPolicy::approved($riderId)) {
-             throw new SegmentException('MEMBERSHIP_REQUIRED', 403);
-         }
--        if ($trip->state !== Trip::STATE_READY || $trip->trashed() || (int) $trip->friendship_type_id !== Trip::PRIVACY_PUBLIC || $trip->is_passenger || CarbonImmutable::parse($trip->trip_date, 'Asia/Kolkata')->lte(CarbonImmutable::now('Asia/Kolkata'))) {
-+        $departure = CarbonImmutable::createFromFormat('Y-m-d H:i:s', (string) $trip->getRawOriginal('trip_date'), 'Asia/Kolkata');
-+        if ($trip->state !== Trip::STATE_READY || $trip->trashed() || (int) $trip->friendship_type_id !== Trip::PRIVACY_PUBLIC || $trip->is_passenger || ! $departure || $departure->lte(CarbonImmutable::now('Asia/Kolkata'))) {
-             throw new SegmentException('MATCH_TRIP_NOT_PLANNED');
-         }
-         $occ = DB::table('mobility_recurring_occurrences')->where('trip_id', $trip->id)->first();
-diff --git a/prototype/tests/extension/MobilitySearchRegressionTest.php b/prototype/tests/extension/MobilitySearchRegressionTest.php
++Every feature carries its own tests. #43 owns this cross-feature mapping and the full HTTP suite. A partial feature checkout can run its available SQL tests; the complete HTTP journey requires the remaining feature PRs. A skipped test is not a passing integration test.
+diff --git a/campuspool/tests/http.e2e.test.ts b/campuspool/tests/http.e2e.test.ts
 new file mode 100644
-index 0000000..c3942e8
+index 0000000000000000000000000000000000000000..710c4c431dbf19e084c198a383e042f73650480b
 --- /dev/null
-+++ b/prototype/tests/extension/MobilitySearchRegressionTest.php
-@@ -0,0 +1,120 @@
-+<?php
++++ b/campuspool/tests/http.e2e.test.ts
+@@ -0,0 +1,242 @@
++import { afterAll, beforeAll, describe, expect, it } from 'vitest';
++import { api, dayAndWindow, DEMO_PASSWORD, expectError, futureIso, json, login, BASE_URL } from './http';
 +
-+namespace Tests\Feature\Mobility;
++const enabled = process.env.RUN_CAMPUSPOOL_E2E === '1';
++const runRaces = enabled && process.env.RUN_CAMPUSPOOL_RACES !== '0';
++const password = DEMO_PASSWORD;
++const adminEmail = 'admin@campuspool.test';
++const suffix=crypto.randomUUID();
++const driverEmail = `driver-${suffix}@campuspool.test`;
++const riderEmail = `rider-${suffix}@campuspool.test`;
++const rider2Email = `rider2-${suffix}@campuspool.test`;
 +
-+use Illuminate\Support\Facades\DB;
-+use STS\Mobility\Pickup\PathProvider;
-+use STS\Models\User;
-+use STS\Models\Passenger;
-+use Tests\TestCase;
++describe.skipIf(!enabled)('CampusPool HTTP E2E (real MySQL + Mongo)', () => {
++  let admin = '';
++  let driver = '';
++  let rider = '';
++  let rider2 = '';
++  let catalog: { stops: Array<{ id: number; name: string }> };
++  let vehicleId = 0;
++  let offerId = 0;
++  let rideId = 0;
++  let quoteToken = '';
 +
-+/**
-+ * Issue #43 regression coverage for search filters and input boundaries.
-+ *
-+ * The broader product suite covers the happy path. These tests deliberately
-+ * mutate publication/lifecycle state so search cannot accidentally expose a
-+ * cancelled, unpublished, or exhausted offer.
-+ */
-+final class MobilitySearchRegressionTest extends TestCase
-+{
-+    protected function beforeRefreshingDatabase(): void
-+    {
-+        $name = DB::connection()->getDatabaseName();
-+        if (! preg_match('/^testing[a-zA-Z0-9_-]*$/', $name)) {
-+            throw new \RuntimeException('Refusing to refresh non-test database: '.$name);
-+        }
++  beforeAll(async () => {
++    const health = await api('/api/auth/me');
++    expect(health.response.status, `CampusPool is not reachable at ${BASE_URL}`).toBeLessThan(500);
++    admin = await login(adminEmail);
++    for(const [email,role] of [[driverEmail,'DRIVER'],[riderEmail,'RIDER'],[rider2Email,'RIDER']]) {
++      const registered=await api<{id:number}>('/api/auth/register',json('POST',{name:'HTTP Test Member',email,password,role},`register-${email}`));
++      expect(registered.response.status,JSON.stringify(registered.body)).toBe(201);
++      const approved=await api(`/api/admin/members/${registered.body.data!.id}/approve`,json('POST',{status:'APPROVED'},`approve-${email}`),admin);
++      expect(approved.response.status,JSON.stringify(approved.body)).toBe(200);
 +    }
++    driver = await login(driverEmail);
++    rider = await login(riderEmail);
++    rider2 = await login(rider2Email);
++    const catalogResult = await api<typeof catalog>('/api/catalog', {}, rider);
++    expect(catalogResult.response.status, JSON.stringify(catalogResult.body)).toBe(200);
++    catalog = catalogResult.body.data!;
++    expect(catalog.stops.length).toBeGreaterThanOrEqual(2);
++  });
 +
-+    protected function setUp(): void
-+    {
-+        parent::setUp();
-+        putenv('MOBILITY_PILOT_UI_ENABLED=true');
-+        putenv('MOBILITY_COLLEGE_CODE=CAMPUS-BLR');
-+        foreach (['car', 'bike', 'foot'] as $mode) {
-+            config(['mobility_routing.'.$mode.'_expected_data_version' => $mode.'|crop_sha256='.str_repeat('a', 64).'|profile_sha256='.str_repeat('b', 64)]);
-+        }
-+        app()->bind(PathProvider::class, fn () => new class implements PathProvider {
-+            public function path(array $points, string $mode, float $timeoutSeconds = 5): array
-+            {
-+                $legs = [];
-+                for ($i = 1; $i < count($points); $i++) {
-+                    $distance = (int) round(hypot(($points[$i]['lat'] - $points[$i - 1]['lat']) * 111000, ($points[$i]['lng'] - $points[$i - 1]['lng']) * 100000));
-+                    $legs[] = ['distance_meters' => $distance, 'duration_seconds' => $distance ? (int) ceil($distance / 8) : 0];
-+                }
-+                return ['provider' => 'osrm', 'profile' => $mode, 'data_version' => $mode.'|crop_sha256='.str_repeat('a', 64).'|profile_sha256='.str_repeat('b', 64), 'geometry' => array_map(fn ($point) => [$point['lng'], $point['lat']], $points), 'waypoints' => array_map(fn ($point) => ['location' => [$point['lng'], $point['lat']], 'distance_meters' => 0], $points), 'legs' => $legs, 'distance_meters' => array_sum(array_column($legs, 'distance_meters')), 'duration_seconds' => array_sum(array_column($legs, 'duration_seconds'))];
-+            }
-+        });
++  afterAll(async () => {
++    // Fixtures are deliberately not deleted: the seed owns their database and
++    // the API's cancellation/history paths are part of the acceptance evidence.
++    if (driver && offerId) {
++      await api(`/api/offers/${offerId}/cancel`, json('POST', { reason: 'e2e cleanup' }, `cleanup-${offerId}`), driver);
 +    }
++  });
 +
-+    private function demo(string $role): User
-+    {
-+        return User::findOrFail($this->postJson('/api/mobility/commute/demo-session', ['role' => $role])->assertOk()->json('user.id'));
++  it('exposes authenticated roles and protects all four role boundaries', async () => {
++    for (const [cookie, role] of [[admin, 'ADMIN'], [driver, 'DRIVER'], [rider, 'RIDER'], [rider2, 'RIDER']] as const) {
++      const me = await api<{ id: number; role: string; status: string }>('/api/auth/me', {}, cookie);
++      expect(me.response.status).toBe(200);
++      expect(me.body.data?.role).toBe(role);
++      expect(me.body.data?.status).toBe('APPROVED');
 +    }
++    const riderAdmin = await api('/api/admin/members', {}, rider);
++    await expectError(riderAdmin, [403]);
++    const riderEvidence = await api('/api/admin/database-evidence', {}, rider);
++    await expectError(riderEvidence, [403]);
++    const driverApprove = await api('/api/admin/members/1/approve', json('POST', { status: 'APPROVED' }, `bad-approve-${Date.now()}`), driver);
++    await expectError(driverApprove, [403]);
++    const riderSync = await api('/api/activity/sync', json('POST', {}, `bad-sync-${Date.now()}`), rider);
++    await expectError(riderSync, [403]);
++  });
 +
-+    private function profile(string $role): array
-+    {
-+        return ['role' => $role, 'vehicle_preference' => 'both', 'schedule_mode' => 'fixed', 'home' => ['lat' => 12.9716, 'lng' => 77.5946, 'label' => 'Home'], 'campus' => ['lat' => 12.9352, 'lng' => 77.62, 'label' => 'Campus'], 'outbound_time' => '08:30', 'return_time' => '17:30', 'weekdays' => [1, 2, 3, 4, 5]];
-+    }
++  it('registers a pending student and lets only admin approve it', async () => {
++    const email = `e2e-${Date.now()}@campuspool.test`;
++    const registration = await api('/api/auth/register', json('POST', {
++      name: 'E2E Pending Student', email, password, role: 'RIDER',
++    }, `register-${email}`));
++    expect(registration.response.status).toBe(201);
++    const pendingLogin = await api('/api/auth/login', json('POST', { email, password }, `pending-login-${email}`));
++    expect(pendingLogin.response.status).toBe(200);
++    expect(pendingLogin.cookie).toBeTruthy();
++    const pendingVehicles = await api('/api/vehicles', {}, pendingLogin.cookie);
++    await expectError(pendingVehicles, [403]);
++    const members = await api<Array<{ id: number; email: string; status: string }>>('/api/admin/members', {}, admin);
++    expect(members.response.status).toBe(200);
++    const pending = members.body.data?.find((member) => member.email === email);
++    expect(pending?.status).toBe('PENDING');
++    const approve = await api(`/api/admin/members/${pending!.id}/approve`, json('POST',{status:'APPROVED'},`approve-${email}`), admin);
++    expect(approve.response.status, JSON.stringify(approve.body)).toBe(200);
++  });
 +
-+    public function test_search_rejects_missing_and_malformed_boundaries(): void
-+    {
-+        $rider = $this->demo('rider');
-+        $this->actingAsApiUser($rider)->getJson('/api/mobility/commute/rides')->assertStatus(422);
-+        $date = now('Asia/Kolkata')->addDay()->toDateString();
-+        $this->actingAsApiUser($rider)->getJson('/api/mobility/commute/rides?direction=sideways&date='.$date.'&start_time=08:00&end_time=09:00&vehicle_type=car')->assertStatus(422);
-+        $this->actingAsApiUser($rider)->getJson('/api/mobility/commute/rides?direction=outbound&date=2026-02-30&start_time=08:00&end_time=09:00&vehicle_type=car')->assertStatus(422);
-+    }
++  it('enforces vehicle kind/capacity validation and admin approval', async () => {
++    const invalidBike = await api('/api/vehicles', json('POST', {
++      kind: 'BIKE', registration: `E2E-BIKE-${Date.now()}`, model: 'Test Bike', passengerCapacity: 2,
++    }, `invalid-bike-${Date.now()}`), driver);
++    await expectError(invalidBike, [422, 400]);
++    const invalidCar = await api('/api/vehicles', json('POST', {
++      kind: 'CAR', registration: `E2E-CAR-${Date.now()}`, model: 'Test Car', passengerCapacity: 6,
++    }, `invalid-car-${Date.now()}`), driver);
++    await expectError(invalidCar, [422, 400]);
++    const vehicle = await api<{ id: number; status: string }>('/api/vehicles', json('POST', {
++      kind: 'CAR', registration: `E2E-${Date.now()}`, model: 'Test Car', passengerCapacity: 2,
++    }, `vehicle-${Date.now()}`), driver);
++    expect(vehicle.response.status).toBe(201);
++    vehicleId = vehicle.body.data!.id;
++    expect(vehicle.body.data!.status).toBe('PENDING');
++    const selfReview = await api(`/api/vehicles/${vehicleId}/review`, json('POST', { status: 'APPROVED' }, `self-review-${vehicleId}`), driver);
++    await expectError(selfReview, [403]);
++    const review = await api(`/api/vehicles/${vehicleId}/review`, json('POST', { status: 'APPROVED' }, `review-${vehicleId}`), admin);
++    expect(review.response.status).toBe(200);
++  });
 +
-+    public function test_search_excludes_cancelled_and_unpublished_offers(): void
-+    {
-+        $rider = $this->demo('rider');
-+        $driver = $this->demo('driver');
-+        foreach ([[$rider, 'rider'], [$driver, 'driver']] as [$user, $role]) {
-+            $this->actingAsApiUser($user)->putJson('/api/mobility/commute/profile', $this->profile($role))->assertOk();
-+        }
-+        $date = now('Asia/Kolkata')->addDay()->toDateString();
-+        $trip = $this->actingAsApiUser($driver)->postJson('/api/mobility/commute/offers', ['date' => $date, 'direction' => 'outbound', 'vehicle_type' => 'car', 'choice' => 'DIRECT_RIDER_PICKUP'], ['Idempotency-Key' => 'search-regression'])->assertOk()->json('data.trip_id');
-+        $query = '/api/mobility/commute/rides?direction=outbound&date='.$date.'&start_time=08:00&end_time=09:00&vehicle_type=car';
-+        $this->actingAsApiUser($rider)->getJson($query)->assertOk()->assertJsonCount(1, 'data');
-+        DB::table('mobility_trip_lifecycles')->where('trip_id', $trip)->update(['state' => 'cancelled']);
-+        $this->actingAsApiUser($rider)->getJson($query)->assertOk()->assertJsonCount(0, 'data');
-+        DB::table('mobility_trip_lifecycles')->where('trip_id', $trip)->update(['state' => 'planned']);
-+        DB::table('mobility_commute_demo_trips')->where('trip_id', $trip)->update(['is_publication' => false]);
-+        $this->actingAsApiUser($rider)->getJson($query)->assertOk()->assertJsonCount(0, 'data');
-+    }
++  it('publishes an offer, rejects invalid data, and enforces idempotency', async () => {
++    const [origin, destination] = catalog.stops;
++    const departureAt = futureIso(180);
++    const payload = { vehicleId, originStopId: origin.id, destinationStopId: destination.id, departureAt, totalSeats: 2, creditPrice: 25 };
++    const invalid = await api('/api/offers', json('POST', { ...payload, totalSeats: 3 }, `invalid-offer-${Date.now()}`), driver);
++    await expectError(invalid, [422, 400]);
++    const key = `offer-${Date.now()}`;
++    const created = await api<{ id: number; seatsAvailable: number }>('/api/offers', json('POST', payload, key), driver);
++    expect(created.response.status,JSON.stringify(created.body)).toBe(201);
++    offerId = created.body.data!.id;
++    rideId = offerId;
++    expect(created.body.data!.seatsAvailable).toBe(2);
++    const replay = await api<{ id: number }>('/api/offers', json('POST', payload, key), driver);
++    expect(replay.response.status).toBe(201);
++    expect(replay.body.data?.id).toBe(offerId);
++    const conflict = await api('/api/offers', json('POST', { ...payload, creditPrice: 26 }, key), driver);
++    await expectError(conflict, [409]);
++  });
 +
-+    public function test_search_window_is_inclusive_and_full_rides_are_hidden(): void
-+    {
-+        $rider = $this->demo('rider');
-+        $driver = $this->demo('driver');
-+        foreach ([[$rider, 'rider'], [$driver, 'driver']] as [$user, $role]) {
-+            $this->actingAsApiUser($user)->putJson('/api/mobility/commute/profile', $this->profile($role))->assertOk();
-+        }
-+        $date = now('Asia/Kolkata')->addDay()->toDateString();
-+        $trip = $this->actingAsApiUser($driver)->postJson('/api/mobility/commute/offers', ['date' => $date, 'direction' => 'outbound', 'vehicle_type' => 'car', 'choice' => 'DIRECT_RIDER_PICKUP'], ['Idempotency-Key' => 'inclusive-window'])->assertOk()->json('data.trip_id');
-+        $query = '/api/mobility/commute/rides?direction=outbound&date='.$date.'&start_time=08:30&end_time=08:30&vehicle_type=car';
-+        $this->actingAsApiUser($rider)->getJson($query)->assertOk()->assertJsonCount(1, 'data');
-+        $seatHolder = $this->demo('rider');
-+        Passenger::factory()->aceptado()->create(['trip_id' => $trip, 'user_id' => $seatHolder->id]);
-+        $this->actingAsApiUser($rider)->getJson($query)->assertOk()->assertJsonCount(0, 'data');
-+    }
++  it('searches by bounded campus-time windows and issues a quote', async () => {
++    const window = dayAndWindow(180);
++    const query = new URLSearchParams({ originStopId: String(catalog.stops[0].id), destinationStopId: String(catalog.stops[1].id), ...window });
++    const result = await api<Array<{ id: number; quoteToken: string; seatsAvailable: number }>>(`/api/rides?${query}`, {}, rider);
++    expect(result.response.status).toBe(200);
++    const match = result.body.data?.find((ride) => ride.id === rideId);
++    expect(match).toBeTruthy();
++    quoteToken = match!.quoteToken;
++    expect(quoteToken).toEqual(expect.any(String));
++    const malformed = await api('/api/rides?date=not-a-date&startTime=99:99', {}, rider);
++    await expectError(malformed, [400, 422]);
++    const detail = await api<{ id: number; quoteToken: string }>(`/api/rides/${rideId}`, {}, rider);
++    expect(detail.response.status).toBe(200);
++    expect(detail.body.data?.quoteToken).toEqual(expect.any(String));
++  });
 +
-+    public function test_provider_failure_fails_closed_and_reports_exclusion(): void
-+    {
-+        $rider = $this->demo('rider');
-+        $driver = $this->demo('driver');
-+        foreach ([[$rider, 'rider'], [$driver, 'driver']] as [$user, $role]) {
-+            $this->actingAsApiUser($user)->putJson('/api/mobility/commute/profile', $this->profile($role))->assertOk();
-+        }
-+        $date = now('Asia/Kolkata')->addDay()->toDateString();
-+        $this->actingAsApiUser($driver)->postJson('/api/mobility/commute/offers', ['date' => $date, 'direction' => 'outbound', 'vehicle_type' => 'car', 'choice' => 'DIRECT_RIDER_PICKUP'], ['Idempotency-Key' => 'provider-failure'])->assertOk();
-+        app()->bind(PathProvider::class, fn () => new class implements PathProvider {
-+            public function path(array $points, string $mode, float $timeoutSeconds = 5): array
-+            {
-+                throw new \STS\Mobility\Routing\RoutingException('ROUTE_PROVIDER_UNAVAILABLE');
-+            }
-+        });
-+        $query = '/api/mobility/commute/rides?direction=outbound&date='.$date.'&start_time=08:00&end_time=09:00&vehicle_type=car';
-+        $this->actingAsApiUser($rider)->getJson($query)->assertOk()->assertJsonCount(0, 'data')->assertJsonPath('excluded.0.reason', 'ROUTE_PROVIDER_UNAVAILABLE');
++  it('prevents self/duplicate requests, accepts by owner, and rejects foreign decisions', async () => {
++    const self = await api('/api/bookings', json('POST', { rideId, quoteToken }, `self-${Date.now()}`), driver);
++    await expectError(self, [403, 409]);
++    const request = await api<{ id: number; status: string }>('/api/bookings', json('POST', { rideId, quoteToken }, `request-${Date.now()}`), rider);
++    expect(request.response.status,JSON.stringify(request.body)).toBe(201);
++    const bookingId = request.body.data!.id;
++    const duplicate = await api('/api/bookings', json('POST', { rideId, quoteToken }, `duplicate-${Date.now()}`), rider);
++    await expectError(duplicate, [409]);
++    const foreign = await api(`/api/bookings/${bookingId}/decision`, json('POST', { decision: 'ACCEPT' }, `foreign-${bookingId}`), rider2);
++    await expectError(foreign, [403]);
++    const accepted = await api<{ status: string }>(`/api/bookings/${bookingId}/decision`, json('POST', { decision: 'ACCEPT' }, `accept-${bookingId}`), driver);
++    expect(accepted.response.status,JSON.stringify(accepted.body)).toBe(200);
++    expect(accepted.body.data?.status).toBe('ACCEPTED');
++    const stale = await api('/api/bookings', json('POST', { rideId, quoteToken: `${quoteToken}.tampered` }, `stale-${Date.now()}`), rider2);
++    await expectError(stale, [409, 422]);
++  });
++
++  it.skipIf(!runRaces)('runs twelve parallel one-seat acceptance races with no overbooking', async () => {
++    for (let trial = 0; trial < Number(process.env.RACE_TRIALS ?? 12); trial += 1) {
++      const [origin, destination] = catalog.stops;
++      const created = await api<{ id: number }>('/api/offers', json('POST', {
++        vehicleId, originStopId: origin.id, destinationStopId: destination.id,
++        // Keep each driver's fixture outside the contract's 60-minute overlap guard.
++        departureAt: futureIso(360 + trial * 90), totalSeats: 1, creditPrice: 10,
++      }, `race-offer-${Date.now()}-${trial}`), driver);
++      expect(created.response.status,JSON.stringify(created.body)).toBe(201);
++      const raceRide = created.body.data!.id;
++      const found = await api<{ id: number; quoteToken: string }>(`/api/rides/${raceRide}`, {}, rider);
++      const found2 = await api<{ quoteToken: string }>(`/api/rides/${raceRide}`, {}, rider2);
++      const [one, two] = await Promise.all([
++        api<{ id: number }>('/api/bookings', json('POST', { rideId: raceRide, quoteToken: found.body.data!.quoteToken }, `race-r1-${raceRide}`), rider),
++        api<{ id: number }>('/api/bookings', json('POST', { rideId: raceRide, quoteToken: found2.body.data!.quoteToken }, `race-r2-${raceRide}`), rider2),
++      ]);
++      const accepted = await Promise.all([one, two].filter((r) => r.response.status === 201).map((r) => api(`/api/bookings/${r.body.data!.id}/decision`, json('POST', { decision: 'ACCEPT' }, `race-accept-${r.body.data!.id}`), driver)));
++      expect(accepted.filter((r) => r.response.status === 200)).toHaveLength(1);
++      expect(accepted.filter((r) => r.response.status !== 200)).toHaveLength(1);
 +    }
++  });
++
++  it.skipIf(!runRaces)('runs configurable parallel cancellation races with one refund path per booking', async () => {
++    const trials = Number(process.env.CANCEL_RACE_TRIALS ?? 6);
++    for (let trial = 0; trial < trials; trial += 1) {
++      const [origin, destination] = catalog.stops;
++      const created = await api<{ id: number }>('/api/offers', json('POST', {
++        vehicleId, originStopId: origin.id, destinationStopId: destination.id,
++        departureAt: futureIso(1800 + trial * 90), totalSeats: 1, creditPrice: 11,
++      }, `cancel-race-offer-${Date.now()}-${trial}`), driver);
++      expect(created.response.status,JSON.stringify(created.body)).toBe(201);
++      const cancelRide = created.body.data!.id;
++      const detail = await api<{ quoteToken: string }>(`/api/rides/${cancelRide}`, {}, rider);
++      expect(detail.response.status).toBe(200);
++      const requested = await api<{ id: number }>('/api/bookings', json('POST', {
++        rideId: cancelRide, quoteToken: detail.body.data!.quoteToken,
++      }, `cancel-race-request-${cancelRide}`), rider);
++      expect(requested.response.status).toBe(201);
++      const bookingId = requested.body.data!.id;
++      const accepted = await api(`/api/bookings/${bookingId}/decision`, json('POST', { decision: 'ACCEPT' }, `cancel-race-accept-${bookingId}`), driver);
++      expect(accepted.response.status,JSON.stringify(accepted.body)).toBe(200);
++      const [first, second] = await Promise.all([
++        api(`/api/bookings/${bookingId}/cancel`, json('POST', { reason: 'parallel cancellation' }, `cancel-race-a-${bookingId}`), rider),
++        api(`/api/bookings/${bookingId}/cancel`, json('POST', { reason: 'parallel cancellation' }, `cancel-race-b-${bookingId}`), rider),
++      ]);
++      expect([first.response.status, second.response.status].filter((status) => status === 200)).toHaveLength(1);
++      expect([first.response.status, second.response.status].filter((status) => status !== 200)).toHaveLength(1);
++      const history = await api<Array<{ id: number; status: string }>>('/api/bookings', {}, rider);
++      expect(history.body.data?.find((booking) => booking.id === bookingId)?.status).toBe('CANCELLED');
++    }
++  });
++
++  it('cancels accepted history idempotently and exposes activity/database evidence', async () => {
++    const bookings = await api<Array<{ id: number; status: string }>>('/api/bookings', {}, rider);
++    const accepted = bookings.body.data?.find((booking) => booking.status === 'ACCEPTED');
++    expect(accepted).toBeTruthy();
++    const first = await api(`/api/bookings/${accepted!.id}/cancel`, json('POST', { reason: 'e2e cancellation' }, `cancel-${accepted!.id}`), rider);
++    expect(first.response.status).toBe(200);
++    const replay = await api(`/api/bookings/${accepted!.id}/cancel`, json('POST', { reason: 'e2e cancellation' }, `cancel-${accepted!.id}`), rider);
++    expect(replay.response.status).toBe(200);
++    expect(replay.body).toEqual(first.body);
++    const conflictReplay = await api(`/api/bookings/${accepted!.id}/cancel`, json('POST', { reason: 'different reason' }, `cancel-conflict-${accepted!.id}`), rider);
++    await expectError(conflictReplay, [409]);
++    const activity = await api<{ events: unknown[]; summary: unknown; pendingCount: number }>('/api/activity', {}, rider);
++    expect(activity.response.status).toBe(200);
++    expect(activity.body.data?.events).toEqual(expect.any(Array));
++    const sync = await api('/api/activity/sync', json('POST', {}, `sync-${Date.now()}`), admin);
++    expect(sync.response.status).toBe(200);
++    const evidence = await api<{ sql: { views: unknown[]; routines: unknown[]; triggers: unknown[]; indexes: unknown[] }; mongo: { indexes: unknown[] } }>('/api/admin/database-evidence', {}, admin);
++    expect(evidence.response.status).toBe(200);
++    expect(evidence.body.data?.sql).toBeTruthy();
++    expect(evidence.body.data?.sql.views).toEqual(expect.arrayContaining([expect.objectContaining({ table_name: 'driver_ride_summary' })]));
++    expect(evidence.body.data?.sql.routines).toEqual(expect.arrayContaining([expect.objectContaining({ routine_name: 'ride_capacity_report' })]));
++    expect(evidence.body.data?.sql.triggers).toEqual(expect.any(Array));
++    expect(evidence.body.data?.sql.indexes).toEqual(expect.any(Array));
++    expect(evidence.body.data?.mongo).toBeTruthy();
++    expect(evidence.body.data?.mongo.indexes).toEqual(expect.arrayContaining([
++      expect.objectContaining({ name: 'activity_event_id_unique', unique: true }),
++      expect.objectContaining({ name: 'activity_audience_created' }),
++    ]));
++  });
++});
++
+diff --git a/campuspool/tests/http.ts b/campuspool/tests/http.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..ede9b5c69a1006c4141d36802e8d4a47173e9c6a
+--- /dev/null
++++ b/campuspool/tests/http.ts
+@@ -0,0 +1,85 @@
++import { expect } from 'vitest';
++import {createHash} from 'node:crypto';
++import {existsSync} from 'node:fs';
++if(existsSync('.env'))process.loadEnvFile('.env');
++
++try { process.loadEnvFile?.('.env'); } catch { /* caller-provided environment remains authoritative */ }
++
++const configuredBaseUrl = process.env.BASE_URL?.trim();
++export const BASE_URL = (configuredBaseUrl && /^https?:\/\//i.test(configuredBaseUrl)
++  ? configuredBaseUrl : 'http://127.0.0.1:3000').replace(/\/$/, '');
++export const DEMO_PASSWORD = process.env.DEMO_PASSWORD ?? 'ChangeMe-Local-Only-123!';
++export const ORIGIN = process.env.CP_ORIGIN ?? new URL(BASE_URL).origin;
++
++export type ApiResult<T = unknown> = {
++  response: Response;
++  body: { data?: T; error?: { code?: string; message?: string; fields?: unknown } };
++  cookie?: string;
++};
++
++export function setCookie(response: Response): string | undefined {
++  // Node's undici exposes one combined header on some versions. The first
++  // cookie pair is all the API needs; attributes must not be sent back.
++  const raw = response.headers.get('set-cookie');
++  if (!raw) return undefined;
++  const first = raw.split(/,(?=[^;,]+=)/)[0];
++  return first.split(';', 1)[0];
 +}
-diff --git a/prototype/config/.env.example b/prototype/config/.env.example
-index a2280b4..f3910f0 100644
---- a/prototype/config/.env.example
-+++ b/prototype/config/.env.example
-@@ -1,4 +1,5 @@
- APP_NAME=CampusPool
-+APP_TIMEZONE=Asia/Kolkata
- APP_ENV=testing
- APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
- APP_DEBUG=false
++
++export async function api<T = unknown>(path: string, init: RequestInit = {}, cookie?: string): Promise<ApiResult<T>> {
++  const headers = new Headers(init.headers);
++  headers.set('Accept', 'application/json');
++  if (init.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
++  if (init.method && init.method.toUpperCase() !== 'GET') headers.set('Origin', ORIGIN);
++  if (cookie) headers.set('Cookie', cookie);
++  const response = await fetch(`${BASE_URL}${path}`, { ...init, headers });
++  let body: ApiResult<T>['body'] = {};
++  const text = await response.text();
++  if (text) {
++    try { body = JSON.parse(text) as ApiResult<T>['body']; } catch { body = { error: { message: text } }; }
++  }
++  return { response, body, cookie: setCookie(response) };
++}
++
++export async function login(email: string): Promise<string> {
++  const result = await api<{ user: unknown }>('/api/auth/login', {
++    method: 'POST',
++    headers: { 'Idempotency-Key': `login-${email}-${Date.now()}-${Math.random()}` },
++    body: JSON.stringify({ email, password: DEMO_PASSWORD }),
++  });
++  expect(result.response.status, JSON.stringify(result.body)).toBe(200);
++  expect(result.cookie).toBeTruthy();
++  return result.cookie!;
++}
++
++export async function expectError<T>(result: ApiResult<T>, statuses: number[] = [400, 401, 403, 409, 422]): Promise<void> {
++  expect(statuses, `${result.response.status}: ${JSON.stringify(result.body)}`).toContain(result.response.status);
++  expect(result.body.error).toBeTruthy();
++}
++
++export function json(method: string, payload: unknown, key: string): RequestInit {
++  return { method, headers: { 'Idempotency-Key': createHash('sha256').update(key).digest('hex') }, body: JSON.stringify(payload) };
++}
++
++export function futureIso(minutes = 120): string {
++  return new Date(Date.now() + minutes * 60_000).toISOString();
++}
++
++export function dayAndWindow(minutes = 120): { date: string; startTime: string; endTime: string } {
++  const date = new Date(Date.now() + minutes * 60_000);
++  const parts = new Intl.DateTimeFormat('en-CA', {
++    timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit',
++  }).formatToParts(date);
++  const value = (type: string) => parts.find((part) => part.type === type)?.value ?? '';
++  const time = new Intl.DateTimeFormat('en-GB', {
++    timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false,
++  }).format(date);
++  const [hour, minute] = time.split(':').map(Number);
++  const start = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
++  const endDate = new Date(date.getTime() + 30 * 60_000);
++  const end = new Intl.DateTimeFormat('en-GB', {
++    timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false,
++  }).format(endDate);
++  return { date: `${value('year')}-${value('month')}-${value('day')}`, startTime: start, endTime: end };
++}
++
+diff --git a/campuspool/tests/issue-43.test.ts b/campuspool/tests/issue-43.test.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..e77bae1163284904718bc3f08b1340a7096c4566
+--- /dev/null
++++ b/campuspool/tests/issue-43.test.ts
+@@ -0,0 +1,41 @@
++import { describe, expect, it } from "vitest";
++import { GET as searchRides } from "@/app/api/rides/route";
++import { GET as rideDetail } from "@/app/api/rides/[id]/route";
++import { searchQuery } from "@/server/search";
++import { utcDate } from "@/server/quote";
++import { fixtureRide, fixtureUser } from "./support";
++
++const enabled = process.env.RUN_CAMPUSPOOL_INTEGRATION === "1";
++
++describe("issue 43 validation", () => {
++  it("rejects an impossible calendar date while requiring explicit window fields", () => {
++    const base = { originStopId: "1", destinationStopId: "2", startTime: "09:00", endTime: "10:00", vehicleKind: "ALL" };
++    expect(searchQuery.safeParse({ ...base, date: "2030-02-30" }).success).toBe(false);
++    expect(searchQuery.safeParse({ ...base, date: "2030-02-28" }).success).toBe(true);
++  });
++});
++
++function localWindow(departure: string) {
++  const date = utcDate(departure);
++  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(date);
++  const value = (type: string) => parts.find((part) => part.type === type)?.value ?? "";
++  return { date: `${value("year")}-${value("month")}-${value("day")}`, startTime: "00:00", endTime: "23:59" };
++}
++
++describe.skipIf(!enabled)("issue 43 ride search against real MySQL", () => {
++  it("returns a public ride with a quote and excludes the driver from results", async () => {
++    const driver = await fixtureUser("DRIVER");
++    const rider = await fixtureUser("RIDER");
++    const ride = await fixtureRide(driver.user, 1);
++    const query = new URLSearchParams({ originStopId: String(ride.origin_stop_id), destinationStopId: String(ride.destination_stop_id), ...localWindow(ride.departure_at), vehicleKind: "ALL" });
++    const response = await searchRides(new Request(`http://localhost/api/rides?${query}`, { headers: rider.request("GET").headers }));
++    expect(response.status, await response.clone().text()).toBe(200);
++    const body = await response.json() as { data: Array<{ id: number; quoteToken: string; vehicle: { registration: string | null } }> };
++    const found = body.data.find((item) => item.id === ride.id);
++    expect(found).toBeDefined();
++    expect(found?.quoteToken).toEqual(expect.any(String));
++    expect(found?.vehicle.registration).not.toBe(ride.vehicle_registration);
++    const detail = await rideDetail(rider.request("GET", undefined), { params: Promise.resolve({ id: String(ride.id) }) });
++    expect(detail.status).toBe(200);
++  });
++});
