@@ -270,7 +270,7 @@ index 0000000000000000000000000000000000000000..710c4c431dbf19e084c198a383e042f7
 +
 diff --git a/campuspool/tests/http.ts b/campuspool/tests/http.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..ede9b5c69a1006c4141d36802e8d4a47173e9c6a
+index 0000000000000000000000000000000000000000..1abe4d08cdf846ec71eb0c9b9e62728791ff84b6
 --- /dev/null
 +++ b/campuspool/tests/http.ts
 @@ -0,0 +1,85 @@
@@ -281,7 +281,7 @@ index 0000000000000000000000000000000000000000..ede9b5c69a1006c4141d36802e8d4a47
 +
 +try { process.loadEnvFile?.('.env'); } catch { /* caller-provided environment remains authoritative */ }
 +
-+const configuredBaseUrl = process.env.BASE_URL?.trim();
++const configuredBaseUrl = process.env.CP_BASE_URL?.trim() ?? process.env.BASE_URL?.trim();
 +export const BASE_URL = (configuredBaseUrl && /^https?:\/\//i.test(configuredBaseUrl)
 +  ? configuredBaseUrl : 'http://127.0.0.1:3000').replace(/\/$/, '');
 +export const DEMO_PASSWORD = process.env.DEMO_PASSWORD ?? 'ChangeMe-Local-Only-123!';

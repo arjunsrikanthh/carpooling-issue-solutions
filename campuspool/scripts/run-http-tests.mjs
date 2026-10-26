@@ -99,6 +99,7 @@ async function main() {
     ...process.env,
     APP_ORIGIN: origin,
     BASE_URL: origin,
+    CP_BASE_URL: origin,
     RUN_CAMPUSPOOL_E2E: '1',
     RUN_CAMPUSPOOL_RACES: '1',
     RACE_TRIALS: raceTrials,

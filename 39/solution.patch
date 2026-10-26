@@ -8551,10 +8551,10 @@ index 0000000000000000000000000000000000000000..6e8ffeb00d5345b7a1d7e6b2da1eae65
 +});
 diff --git a/campuspool/scripts/run-http-tests.mjs b/campuspool/scripts/run-http-tests.mjs
 new file mode 100644
-index 0000000000000000000000000000000000000000..60d9b4f03a626e0a53b291a63462c4357e7f5ea8
+index 0000000000000000000000000000000000000000..b79cb511c393b4ffac7c2faf63607af5572f356a
 --- /dev/null
 +++ b/campuspool/scripts/run-http-tests.mjs
-@@ -0,0 +1,143 @@
+@@ -0,0 +1,144 @@
 +#!/usr/bin/env node
 +
 +import net from 'node:net';
@@ -8656,6 +8656,7 @@ index 0000000000000000000000000000000000000000..60d9b4f03a626e0a53b291a63462c435
 +    ...process.env,
 +    APP_ORIGIN: origin,
 +    BASE_URL: origin,
++    CP_BASE_URL: origin,
 +    RUN_CAMPUSPOOL_E2E: '1',
 +    RUN_CAMPUSPOOL_RACES: '1',
 +    RACE_TRIALS: raceTrials,

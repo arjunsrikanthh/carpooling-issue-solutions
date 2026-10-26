@@ -5,7 +5,7 @@ if(existsSync('.env'))process.loadEnvFile('.env');
 
 try { process.loadEnvFile?.('.env'); } catch { /* caller-provided environment remains authoritative */ }
 
-const configuredBaseUrl = process.env.BASE_URL?.trim();
+const configuredBaseUrl = process.env.CP_BASE_URL?.trim() ?? process.env.BASE_URL?.trim();
 export const BASE_URL = (configuredBaseUrl && /^https?:\/\//i.test(configuredBaseUrl)
   ? configuredBaseUrl : 'http://127.0.0.1:3000').replace(/\/$/, '');
 export const DEMO_PASSWORD = process.env.DEMO_PASSWORD ?? 'ChangeMe-Local-Only-123!';

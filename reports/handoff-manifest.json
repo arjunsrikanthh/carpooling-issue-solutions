@@ -77,18 +77,18 @@
     "43": {
       "owner": "NikhilJoshi441",
       "files": 4,
-      "patch_sha256": "a08fcbb38d31d43096c7832761621b29fa07c11095ee64f947eed809a4d5d3a3",
+      "patch_sha256": "cb55fae1f668db6cc68e346ad26ebfdbdd5fb8baba15030ca4ab553fabc50e5d",
       "source_sha256": {
         "campuspool/docs/TEST_TRACEABILITY.md": "8ce458fdd31939befae767f2f7ba330ef57a242dded029eca9feb8fb920c9957",
         "campuspool/tests/http.e2e.test.ts": "39c0d4e0669afa2b7c4fab1cc443fbb543d6b75dfdd779c51c2c1d4d6e37394d",
-        "campuspool/tests/http.ts": "7ec80b16ae061688d1f1b726946af81d3d8179b3b35d4c54d5b191c33c2a6037",
+        "campuspool/tests/http.ts": "735f351ebed1a13bf8ad4b23582e710836de57afa7cca732b9f73d0daef1fc65",
         "campuspool/tests/issue-43.test.ts": "63b4bb5972c17773db3c7be1f8015a7e9958644e030b7e8f655b3948d717c3fe"
       }
     },
     "39": {
       "owner": "arjunsrikanthh",
       "files": 52,
-      "patch_sha256": "a7b069390fc31beba6e378dc7f8a106c314da8637e4765d0e9f9ad9d458a35cd",
+      "patch_sha256": "c08f9bc0f3587b70cd669876b56a0f8407cdf8d18c76fb8a8c389f12f75eef02",
       "source_sha256": {
         "campuspool/.env.example": "8e9281aede099f428fad8c3f32310b4381607bb517c56c6c79c91c94b15ea97f",
         "campuspool/.foundation-version": "ebafa9dbe639e89a0c4e14cba9731e8e98796c1cc5616425cc85c0d76bf8bd99",
@@ -103,7 +103,7 @@
         "campuspool/package-lock.json": "ecee6682c37319b2e6ab49d6e576caa6e523961e3382af05eba43b038ac05695",
         "campuspool/package.json": "e05fa722fac34eea5ecfe774b5b9b934c1d868e6c98a4c0f80e9796e1cee01a9",
         "campuspool/scripts/migrate.ts": "a274c6d744c5dd9c2e5669f3e57cef26a065a5587ebb136fde94567d1142ac85",
-        "campuspool/scripts/run-http-tests.mjs": "1d81dbff7c342fd31937b2aa102bafa78c403b1b4c7569e156f30d12f9e1d9d8",
+        "campuspool/scripts/run-http-tests.mjs": "7cfa1454076ba83c5e650bdac7c229df5fa858441957bba5c11bdca6b405e57e",
         "campuspool/scripts/seed.ts": "bd4add206d1f41b3e00cb3e7542e9b71740971d43a8e4d2df59f8948087d2c17",
         "campuspool/sql/migrations/001_schema.sql": "c3f77ae998efcc82c332af41b5393e5a3849c03e7d2d74d5e46ed8f9a8c48979",
         "campuspool/src/app/admin/members/page.tsx": "ab9be9391ecd6cb6ffebb626f53e4b5b0a792452cfb939281c4b4c9434774c9a",
